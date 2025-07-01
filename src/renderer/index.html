@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+    <title>Multi Grep Replacer</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- ヘッダー -->
+        <header class="app-header">
+            <h1 class="app-title">Multi Grep Replacer</h1>
+            <div class="header-controls">
+                <button class="theme-toggle" id="themeToggle" title="テーマ切り替え">🌙</button>
+                <button class="settings-btn" id="settingsBtn" title="設定">⚙️</button>
+            </div>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <main class="app-main">
+            <!-- ターゲットフォルダ選択 -->
+            <section class="folder-section">
+                <h2>📁 Target Folder</h2>
+                <div class="folder-input-group">
+                    <input type="text" id="folderPath" class="folder-input" placeholder="/path/to/project/folder" readonly>
+                    <button class="browse-btn" id="browseBtn">📂 Browse...</button>
+                </div>
+            </section>
+
+            <!-- ファイル拡張子フィルタ -->
+            <section class="extensions-section">
+                <h2>🔍 File Extensions <small>(comma-separated, blank = all files)</small></h2>
+                <input type="text" id="fileExtensions" class="extensions-input" 
+                       placeholder=".html,.css,.js,.php,.md,.json" 
+                       value=".html,.css,.js,.php,.md,.json">
+            </section>
+
+            <!-- 置換ルール -->
+            <section class="rules-section">
+                <div class="rules-header">
+                    <h2>⚙️ Replacement Rules</h2>
+                    <select class="template-select" id="templateSelect">
+                        <option value="">📋 Templates ▼</option>
+                        <option value="web-development">Web Development</option>
+                        <option value="css-modernization">CSS Modernization</option>
+                        <option value="variable-rename">Variable Rename</option>
+                    </select>
+                </div>
+                <div class="rules-container" id="rulesContainer">
+                    <!-- 置換ルールはJavaScriptで動的に追加 -->
+                </div>
+                <button class="add-rule-btn" id="addRuleBtn">➕ Add new rule</button>
+            </section>
+
+            <!-- プレビュー -->
+            <section class="preview-section">
+                <p class="preview-text" id="previewText">📊 Preview: Ready to scan files...</p>
+            </section>
+        </main>
+
+        <!-- フッター（アクションボタン） -->
+        <footer class="app-footer">
+            <button class="action-btn" id="loadConfigBtn">💾 Load Config</button>
+            <button class="action-btn" id="saveConfigBtn">💾 Save Config</button>
+            <button class="action-btn primary" id="executeBtn">🚀 Execute Replacement</button>
+        </footer>
+
+        <!-- 進捗モーダル（初期状態では非表示） -->
+        <div class="modal" id="progressModal" style="display: none;">
+            <div class="modal-content">
+                <h2>🚀 Executing Replacements...</h2>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <p class="progress-text" id="progressText">0% (0/0 files)</p>
+                <p class="current-file" id="currentFile">Preparing...</p>
+                <div class="modal-actions">
+                    <button class="action-btn" id="pauseBtn">⏸️ Pause</button>
+                    <button class="action-btn" id="stopBtn">⏹️ Stop</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 結果モーダル（初期状態では非表示） -->
+        <div class="modal" id="resultModal" style="display: none;">
+            <div class="modal-content">
+                <h2>✅ Replacement Completed!</h2>
+                <div class="result-summary" id="resultSummary">
+                    <!-- 結果はJavaScriptで動的に表示 -->
+                </div>
+                <div class="result-details" id="resultDetails">
+                    <!-- 詳細な結果はJavaScriptで動的に表示 -->
+                </div>
+                <div class="modal-actions">
+                    <button class="action-btn" id="exportResultsBtn">📤 Export Results</button>
+                    <button class="action-btn" id="copySummaryBtn">📋 Copy Summary</button>
+                    <button class="action-btn primary" id="closeResultBtn">✅ Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>

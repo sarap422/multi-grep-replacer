@@ -1,0 +1,354 @@
+/* リセットとベーススタイル */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* ライトテーマの色定義 */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --border-color: #e0e0e0;
+    --accent-color: #007bff;
+    --accent-hover: #0056b3;
+    --success-color: #28a745;
+    --error-color: #dc3545;
+    --warning-color: #ffc107;
+    
+    /* 共通の値 */
+    --border-radius: 6px;
+    --transition-speed: 0.2s;
+    --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ダークテーマ */
+body.dark-theme {
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #2d2d30;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --border-color: #3e3e42;
+    --accent-color: #3794ff;
+    --accent-hover: #2b7cd6;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+/* アプリケーションコンテナ */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ヘッダー */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.app-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.header-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.theme-toggle,
+.settings-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    transition: background-color var(--transition-speed);
+}
+
+.theme-toggle:hover,
+.settings-btn:hover {
+    background-color: var(--border-color);
+}
+
+/* メインコンテンツ */
+.app-main {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+section {
+    margin-bottom: 24px;
+}
+
+h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+h2 small {
+    font-size: 12px;
+    font-weight: normal;
+    color: var(--text-secondary);
+}
+
+/* 入力フィールド共通 */
+input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color var(--transition-speed);
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+/* フォルダ選択セクション */
+.folder-input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.folder-input {
+    flex: 1;
+}
+
+.browse-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.browse-btn:hover {
+    background-color: var(--bg-secondary);
+    border-color: var(--accent-color);
+}
+
+/* 置換ルールセクション */
+.rules-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.template-select {
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.rules-container {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 12px;
+    min-height: 120px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.add-rule-btn {
+    width: 100%;
+    padding: 8px;
+    margin-top: 8px;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.add-rule-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background-color: var(--bg-secondary);
+}
+
+/* プレビューセクション */
+.preview-text {
+    padding: 12px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    color: var(--text-secondary);
+}
+
+/* フッター（アクションボタン） */
+.app-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+}
+
+.action-btn {
+    padding: 10px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all var(--transition-speed);
+}
+
+.action-btn:hover {
+    background-color: var(--bg-secondary);
+    border-color: var(--accent-color);
+}
+
+.action-btn.primary {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.action-btn.primary:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+/* モーダル */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* プログレスバー */
+.progress-bar-container {
+    width: 100%;
+    height: 20px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin: 16px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--accent-color);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.progress-text,
+.current-file {
+    text-align: center;
+    margin: 8px 0;
+    color: var(--text-secondary);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+/* スクロールバーのスタイル */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-content {
+    animation: fadeIn 0.3s ease;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 600px) {
+    .app-main {
+        padding: 12px;
+    }
+    
+    .app-footer {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .action-btn {
+        width: 100%;
+    }
+}

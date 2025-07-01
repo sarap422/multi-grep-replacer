@@ -1,0 +1,34 @@
+{
+  "name": "multi-grep-replacer",
+  "version": "1.0.0",
+  "description": "Multi Grep Replacer (Electron Edition) - クロスプラットフォーム対応の高速一括置換ツール",
+  "main": "src/main/main.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dev": "nodemon --exec electron . --watch src",
+    "test": "jest",
+    "lint": "eslint src/",
+    "format": "prettier --write \"src/**/*.{js,html,css}\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "electron": "^37.1.0",
+    "electron-log": "^5.4.1",
+    "electron-store": "^10.1.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.1",
+    "@types/jest": "^30.0.0",
+    "electron-builder": "^26.0.12",
+    "eslint": "^9.30.0",
+    "eslint-config-prettier": "^10.1.5",
+    "jest": "^30.0.3",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2"
+  }
+}
