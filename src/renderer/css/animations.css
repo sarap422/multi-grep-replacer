@@ -1,0 +1,679 @@
+/**
+ * CSS3 アニメーション・トランジション
+ * UI応答性向上・マイクロインタラクション・視覚的フィードバック
+ */
+
+/* ==========================================================================
+   アニメーション設定変数
+   ========================================================================== */
+
+:root {
+  /* アニメーション継続時間 */
+  --anim-duration-fast: 0.15s;
+  --anim-duration-normal: 0.3s;
+  --anim-duration-slow: 0.5s;
+  --anim-duration-extra-slow: 1s;
+  
+  /* イージング関数 */
+  --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-in-cubic: cubic-bezier(0.32, 0, 0.67, 0);
+  --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out-back: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* スプリングアニメーション */
+  --spring-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --spring-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ==========================================================================
+   基本アニメーションクラス
+   ========================================================================== */
+
+/* フェードイン・アウト */
+.fade-in {
+  animation: fadeIn var(--anim-duration-normal) var(--ease-out-cubic) forwards;
+}
+
+.fade-out {
+  animation: fadeOut var(--anim-duration-normal) var(--ease-in-cubic) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* スライドアニメーション */
+.slide-in-up {
+  animation: slideInUp var(--anim-duration-normal) var(--ease-out-cubic) forwards;
+}
+
+.slide-in-down {
+  animation: slideInDown var(--anim-duration-normal) var(--ease-out-cubic) forwards;
+}
+
+.slide-in-left {
+  animation: slideInLeft var(--anim-duration-normal) var(--ease-out-cubic) forwards;
+}
+
+.slide-in-right {
+  animation: slideInRight var(--anim-duration-normal) var(--ease-out-cubic) forwards;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* スケールアニメーション */
+.scale-in {
+  animation: scaleIn var(--anim-duration-normal) var(--ease-out-back) forwards;
+}
+
+.scale-out {
+  animation: scaleOut var(--anim-duration-fast) var(--ease-in-cubic) forwards;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   ボタンインタラクションアニメーション
+   ========================================================================== */
+
+/* ボタンホバーエフェクト */
+.btn-hover-lift {
+  transition: transform var(--anim-duration-fast) var(--ease-out-cubic),
+              box-shadow var(--anim-duration-fast) var(--ease-out-cubic);
+}
+
+.btn-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-hover-lift:active {
+  transform: translateY(0);
+  transition-duration: var(--anim-duration-fast);
+}
+
+/* ボタンリップルエフェクト */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width var(--anim-duration-slow) var(--ease-out-cubic),
+              height var(--anim-duration-slow) var(--ease-out-cubic);
+}
+
+.btn-ripple:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* ボタンバウンスエフェクト */
+.btn-bounce {
+  animation: buttonBounce var(--anim-duration-normal) var(--spring-bounce);
+}
+
+@keyframes buttonBounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ==========================================================================
+   入力フィールドアニメーション
+   ========================================================================== */
+
+/* フォーカスアニメーション */
+.form-input-animated {
+  position: relative;
+  transition: border-color var(--anim-duration-fast) var(--ease-out-cubic),
+              box-shadow var(--anim-duration-fast) var(--ease-out-cubic);
+}
+
+.form-input-animated:focus {
+  transform: none;
+  animation: inputFocus var(--anim-duration-fast) var(--ease-out-cubic);
+}
+
+@keyframes inputFocus {
+  0% {
+    box-shadow: 0 0 0 0 var(--color-primary);
+  }
+  100% {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  }
+}
+
+/* フローティングラベル */
+.floating-label {
+  position: relative;
+}
+
+.floating-label input {
+  padding-top: 20px;
+}
+
+.floating-label label {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: var(--font-size-base);
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: all var(--anim-duration-normal) var(--ease-out-cubic);
+}
+
+.floating-label input:focus + label,
+.floating-label input:not(:placeholder-shown) + label {
+  top: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+}
+
+/* ==========================================================================
+   ローディングアニメーション
+   ========================================================================== */
+
+/* スピナー */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-top: 2px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin var(--anim-duration-extra-slow) linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ドットローディング */
+.dots-loading {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.dots-loading::before,
+.dots-loading::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  animation: dotsLoading 1.5s ease-in-out infinite;
+}
+
+.dots-loading::before {
+  animation-delay: 0s;
+}
+
+.dots-loading::after {
+  animation-delay: 0.5s;
+}
+
+@keyframes dotsLoading {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* プログレスバーアニメーション */
+.progress-animated .progress-bar {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 1rem 1rem;
+  animation: progressStripes 1s linear infinite;
+}
+
+@keyframes progressStripes {
+  0% {
+    background-position: 1rem 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* ==========================================================================
+   モーダル・ポップアップアニメーション
+   ========================================================================== */
+
+/* モーダル登場アニメーション */
+.modal-enter {
+  animation: modalEnter var(--anim-duration-normal) var(--ease-out-cubic);
+}
+
+.modal-exit {
+  animation: modalExit var(--anim-duration-fast) var(--ease-in-cubic);
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalExit {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+}
+
+/* トーストアニメーション */
+.toast-enter {
+  animation: toastEnter var(--anim-duration-normal) var(--ease-out-cubic);
+}
+
+.toast-exit {
+  animation: toastExit var(--anim-duration-normal) var(--ease-in-cubic);
+}
+
+@keyframes toastEnter {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toastExit {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   ドラッグ&ドロップアニメーション
+   ========================================================================== */
+
+/* ドラッグ開始 */
+.drag-start {
+  animation: dragStart var(--anim-duration-fast) var(--ease-out-cubic);
+}
+
+@keyframes dragStart {
+  from {
+    transform: scale(1);
+    box-shadow: var(--shadow-small);
+  }
+  to {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-large);
+  }
+}
+
+/* ドロップゾーンハイライト */
+.drop-zone-active {
+  animation: dropZoneActive var(--anim-duration-normal) var(--ease-out-cubic);
+}
+
+@keyframes dropZoneActive {
+  0% {
+    border-color: var(--border-color);
+    background-color: var(--bg-secondary);
+    transform: scale(1);
+  }
+  100% {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-light);
+    transform: scale(1.02);
+  }
+}
+
+/* ドロップ成功 */
+.drop-success {
+  animation: dropSuccess var(--anim-duration-slow) var(--spring-bounce);
+}
+
+@keyframes dropSuccess {
+  0% {
+    transform: scale(1.02);
+    background-color: var(--color-primary-light);
+  }
+  50% {
+    transform: scale(1.1);
+    background-color: var(--color-success);
+  }
+  100% {
+    transform: scale(1);
+    background-color: var(--bg-secondary);
+  }
+}
+
+/* ==========================================================================
+   状態変化アニメーション
+   ========================================================================== */
+
+/* 成功状態 */
+.success-pulse {
+  animation: successPulse var(--anim-duration-normal) var(--ease-out-cubic);
+}
+
+@keyframes successPulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--color-success);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+  }
+}
+
+/* エラー状態 */
+.error-shake {
+  animation: errorShake var(--anim-duration-normal) var(--ease-out-cubic);
+}
+
+@keyframes errorShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* 警告状態 */
+.warning-glow {
+  animation: warningGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes warningGlow {
+  from {
+    box-shadow: 0 0 5px var(--color-warning);
+  }
+  to {
+    box-shadow: 0 0 20px var(--color-warning);
+  }
+}
+
+/* ==========================================================================
+   ページ遷移アニメーション
+   ========================================================================== */
+
+/* ページフェード */
+.page-enter {
+  animation: pageEnter var(--anim-duration-normal) var(--ease-out-cubic);
+}
+
+.page-exit {
+  animation: pageExit var(--anim-duration-fast) var(--ease-in-cubic);
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageExit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* ==========================================================================
+   パフォーマンス最適化
+   ========================================================================== */
+
+/* GPUアクセラレーション対象 */
+.gpu-accelerated {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* アニメーション停止（ユーザー設定対応） */
+@media (prefers-reduced-motion: reduce) {
+  .respect-motion-preference,
+  .respect-motion-preference *,
+  .respect-motion-preference::before,
+  .respect-motion-preference::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* アニメーション一時停止 */
+.animations-paused,
+.animations-paused * {
+  animation-play-state: paused !important;
+}
+
+/* アニメーション無効化 */
+.no-animations,
+.no-animations * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* ==========================================================================
+   カスタムアニメーション
+   ========================================================================== */
+
+/* タイピング効果 */
+.typing-effect {
+  overflow: hidden;
+  border-right: 2px solid var(--color-primary);
+  white-space: nowrap;
+  animation: typing 3s steps(40) 1s 1 normal both,
+             blinkCursor 1s steps(2) infinite;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blinkCursor {
+  from {
+    border-right-color: var(--color-primary);
+  }
+  to {
+    border-right-color: transparent;
+  }
+}
+
+/* カウントアップ */
+.count-up {
+  animation: countUp var(--anim-duration-slow) var(--ease-out-cubic);
+}
+
+@keyframes countUp {
+  from {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* フローティング効果 */
+.floating {
+  animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ==========================================================================
+   デバッグ・開発用アニメーション
+   ========================================================================== */
+
+/* アニメーション境界表示 */
+.debug-animations * {
+  outline: 1px solid rgba(255, 0, 0, 0.3) !important;
+}
+
+.debug-animations *:hover {
+  outline: 2px solid rgba(255, 0, 0, 0.6) !important;
+}
+
+/* アニメーション時間表示 */
+.debug-timing::before {
+  content: attr(data-animation-duration);
+  position: absolute;
+  top: -20px;
+  left: 0;
+  font-size: 10px;
+  background: yellow;
+  color: black;
+  padding: 2px;
+  z-index: 9999;
+}
