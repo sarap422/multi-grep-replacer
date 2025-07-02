@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Display Test</title>
+    <link rel="stylesheet" href="src/renderer/css/components.css">
+    <link rel="stylesheet" href="src/renderer/css/themes.css">
+    <link rel="stylesheet" href="src/renderer/css/progress.css">
+    <link rel="stylesheet" href="src/renderer/css/results.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 20px;
+            background: var(--color-bg-primary, #fff);
+        }
+        .test-controls {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-controls button {
+            margin: 5px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            background: #007acc;
+            color: white;
+            cursor: pointer;
+        }
+        .test-controls button:hover {
+            background: #005a9e;
+        }
+    </style>
+</head>
+<body>
+    <h1>進捗表示・結果表示UIテスト</h1>
+    
+    <div class="test-controls">
+        <h2>テスト操作</h2>
+        <button onclick="testProgressStart()">📊 進捗表示テスト</button>
+        <button onclick="testProgressComplete()">✅ 完了表示テスト</button>
+        <button onclick="testProgressError()">❌ エラー表示テスト</button>
+        <button onclick="testResultsShow()">📋 結果表示テスト</button>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="src/renderer/js/utils.js"></script>
+    <script src="src/renderer/js/progress-display.js"></script>
+    <script src="src/renderer/js/results-display.js"></script>
+    
+    <script>
+        let progressDisplay;
+        let resultsDisplay;
+        
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            progressDisplay = new ProgressDisplay();
+            resultsDisplay = new ResultsDisplay();
+            console.log('テスト環境初期化完了');
+        });
+        
+        // 進捗表示テスト
+        function testProgressStart() {
+            progressDisplay.startProgress(100, { initialMessage: 'テスト開始...' });
+            
+            // シミュレーション
+            let current = 0;
+            const interval = setInterval(() => {
+                current += Math.random() * 5;
+                if (current >= 100) {
+                    current = 100;
+                    clearInterval(interval);
+                }
+                
+                progressDisplay.updateProgress(
+                    Math.floor(current), 
+                    100, 
+                    `/test/file${Math.floor(current)}.js`,
+                    { changesCount: Math.floor(current * 2.3) }
+                );
+                
+                if (current >= 100) {
+                    setTimeout(() => {
+                        testProgressComplete();
+                    }, 1000);
+                }
+            }, 200);
+        }
+        
+        // 完了表示テスト
+        function testProgressComplete() {
+            const results = {
+                modifiedFiles: 42,
+                totalChanges: 156,
+                executionTime: 23000
+            };
+            
+            progressDisplay.showComplete(results);
+        }
+        
+        // エラー表示テスト
+        function testProgressError() {
+            progressDisplay.startProgress(50);
+            
+            setTimeout(() => {
+                progressDisplay.showError('テスト用エラーメッセージです。ファイルアクセス権限がありません。');
+            }, 2000);
+        }
+        
+        // 結果表示テスト
+        function testResultsShow() {
+            const mockResults = {
+                modifiedFiles: 15,
+                totalFiles: 20,
+                totalChanges: 42,
+                executionTime: 12500,
+                fileResults: [
+                    {
+                        filePath: '/test/project/src/main.js',
+                        changes: [
+                            { from: 'oldFunction', to: 'newFunction', count: 3 },
+                            { from: 'oldClass', to: 'newClass', count: 1 }
+                        ],
+                        totalChanges: 4
+                    },
+                    {
+                        filePath: '/test/project/src/utils.js',
+                        changes: [
+                            { from: 'oldVariable', to: 'newVariable', count: 7 },
+                            { from: 'isEnabled', to: 'isActive', count: 2 }
+                        ],
+                        totalChanges: 9
+                    },
+                    {
+                        filePath: '/test/project/styles/main.css',
+                        changes: [
+                            { from: '.old-btn', to: '.btn-primary', count: 5 },
+                            { from: 'margin-left', to: 'margin-inline-start', count: 12 }
+                        ],
+                        totalChanges: 17
+                    }
+                ],
+                errors: []
+            };
+            
+            resultsDisplay.show(mockResults);
+        }
+    </script>
+</body>
+</html>

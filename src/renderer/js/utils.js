@@ -441,7 +441,27 @@ class StorageUtils {
     }
 }
 
+// 統一Utilsクラス作成
+class Utils {
+    // 各種ユーティリティクラスを統合
+    static DOM = DOMUtils;
+    static Performance = PerformanceUtils;
+    static Validation = ValidationUtils;
+    static Event = EventUtils;
+    static Animation = AnimationUtils;
+    static Storage = StorageUtils;
+    
+    // よく使用されるメソッドを直接公開
+    static debounce = PerformanceUtils.debounce;
+    static throttle = PerformanceUtils.throttle;
+    static escapeHtml = ValidationUtils.escapeHtml;
+    static formatFileSize = ValidationUtils.formatFileSize;
+    static addClass = DOMUtils.addClass;
+    static removeClass = DOMUtils.removeClass;
+}
+
 // グローバル公開
+window.Utils = Utils;
 window.DOMUtils = DOMUtils;
 window.PerformanceUtils = PerformanceUtils;
 window.ValidationUtils = ValidationUtils;

@@ -20,6 +20,11 @@ class UIController {
         // イベントリスナーのAbortController
         this.abortController = new AbortController();
         
+        // 実行制御関連のクラス
+        this.progressDisplay = null;
+        this.resultsDisplay = null;
+        this.executionController = null;
+        
         // 初期化
         this.initialize();
     }
@@ -32,6 +37,9 @@ class UIController {
         
         // DOM要素のキャッシュ
         this.cacheElements();
+        
+        // 実行制御クラスの初期化
+        this.initializeExecutionClasses();
         
         // イベントリスナーの設定
         this.setupEventListeners();
@@ -46,6 +54,32 @@ class UIController {
         this.setupKeyboardShortcuts();
         
         console.log('UIController: Initialization complete');
+    }
+    
+    /**
+     * 実行制御クラスの初期化
+     */
+    initializeExecutionClasses() {
+        try {
+            // ProgressDisplayの初期化
+            this.progressDisplay = new ProgressDisplay();
+            console.log('✅ ProgressDisplay初期化完了');
+            
+            // ResultsDisplayの初期化
+            this.resultsDisplay = new ResultsDisplay();
+            console.log('✅ ResultsDisplay初期化完了');
+            
+            // ExecutionControllerの初期化
+            this.executionController = new ExecutionController(
+                this,
+                this.progressDisplay,
+                this.resultsDisplay
+            );
+            console.log('✅ ExecutionController初期化完了');
+            
+        } catch (error) {
+            console.error('❌ 実行制御クラス初期化エラー:', error);
+        }
     }
     
     /**
@@ -914,11 +948,90 @@ class UIController {
      * プレースホルダーメソッド（段階的実装）
      */
     handleAddRule() { this.addReplacementRule(); }
-    handleExecute() { /* TODO: Task 3.3で実装予定 */ }
-    handlePause() { /* TODO: Task 3.3で実装予定 */ }
-    handleStop() { /* TODO: Task 3.3で実装予定 */ }
-    handleExportResults() { /* TODO: Task 3.3で実装予定 */ }
-    handleCopySummary() { /* TODO: Task 3.3で実装予定 */ }
+    /**
+     * 置換実行処理
+     */
+    async handleExecute() {
+        if (this.isProcessing) {
+            console.warn('⚠️ 処理中のため実行をスキップ');
+            return;
+        }
+        
+        try {
+            // 実行条件チェック
+            if (!this.validateExecutionConditions()) {
+                return;
+            }
+            
+            // 設定を準備
+            const config = this.buildExecutionConfig();
+            
+            // ExecutionControllerに実行を委譲
+            await this.executionController.executeReplacement(config);
+            
+        } catch (error) {
+            console.error('❌ 実行エラー:', error);
+            this.showError(`実行エラー: ${error.message}`);
+        }
+    }
+    
+    /**
+     * 実行条件をバリデーション
+     */
+    validateExecutionConditions() {
+        // フォルダ選択チェック
+        if (!this.elements.folderPath?.value?.trim()) {
+            this.showError('対象フォルダを選択してください');
+            this.elements.browseBtn?.focus();
+            return false;
+        }
+        
+        // アクティブなルールチェック
+        const activeRules = this.rules.filter(rule => rule.enabled);
+        if (activeRules.length === 0) {
+            this.showError('有効な置換ルールが設定されていません');
+            this.elements.addRuleBtn?.focus();
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * 実行設定を構築
+     */
+    buildExecutionConfig() {
+        return {
+            targetFolder: this.elements.folderPath?.value?.trim(),
+            fileExtensions: this.elements.fileExtensions?.value?.trim(),
+            rules: this.rules.map(rule => ({
+                id: rule.id,
+                from: rule.from,
+                to: rule.to,
+                enabled: rule.enabled,
+                description: rule.description || ''
+            }))
+        };
+    }
+    handlePause() { 
+        // 進捗表示から処理される
+        console.log('⏸️ 一時停止要求'); 
+    }
+    
+    handleStop() { 
+        // 進捗表示から処理される
+        console.log('⏹️ 停止要求'); 
+    }
+    
+    handleExportResults() { 
+        // 結果表示から処理される
+        console.log('📤 エクスポート要求'); 
+    }
+    
+    handleCopySummary() { 
+        // 結果表示から処理される
+        console.log('📋 コピー要求'); 
+    }
     handleCloseResult() { /* TODO: Task 3.3で実装予定 */ }
     handleKeydown(event) { /* TODO: 詳細実装予定 */ }
     handleResize() { /* TODO: 詳細実装予定 */ }
@@ -1619,6 +1732,23 @@ class UIController {
      */
     destroy() {
         this.abortController.abort();
+        
+        // 実行制御クラスのクリーンアップ
+        if (this.executionController) {
+            this.executionController.destroy();
+            this.executionController = null;
+        }
+        
+        if (this.progressDisplay) {
+            this.progressDisplay.destroy();
+            this.progressDisplay = null;
+        }
+        
+        if (this.resultsDisplay) {
+            this.resultsDisplay.destroy();
+            this.resultsDisplay = null;
+        }
+        
         this.rules = [];
         this.currentConfig = {};
         console.log('UIController: Destroyed');
