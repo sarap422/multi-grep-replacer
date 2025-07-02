@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/themes.css">
     <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/dialogs.css">
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body data-theme="auto" class="respect-motion-preference">
@@ -251,11 +252,163 @@
         </div>
     </div>
 
+    <!-- 設定管理ダイアログ群 -->
+    
+    <!-- 設定読み込みダイアログ -->
+    <div class="config-dialog" id="loadConfigDialog" style="display: none;"
+         role="dialog" aria-modal="true" aria-labelledby="loadConfigTitle">
+        <div class="config-dialog-content">
+            <div class="config-dialog-header">
+                <h2 id="loadConfigTitle" class="config-dialog-title">📂 設定ファイルを読み込み</h2>
+                <button class="config-dialog-close" type="button" 
+                        aria-label="ダイアログを閉じる" data-close-config-dialog>×</button>
+            </div>
+            <div class="config-dialog-body">
+                <!-- ドラッグ&ドロップゾーン -->
+                <div class="config-drop-zone" id="configDropZone">
+                    <div class="config-drop-zone-icon">📁</div>
+                    <p class="config-drop-zone-text">
+                        設定ファイルをここにドロップするか、下のボタンで選択してください
+                    </p>
+                </div>
+                
+                <!-- ファイル選択ボタン -->
+                <div style="text-align: center; margin-bottom: var(--spacing-lg);">
+                    <button class="btn btn-primary btn-hover-lift" id="selectConfigFileBtn" type="button">
+                        📂 設定ファイルを選択
+                    </button>
+                </div>
+                
+                <!-- 最近使用した設定 -->
+                <div class="form-group">
+                    <h3 style="margin: 0 0 var(--spacing-md) 0; font-size: var(--font-size-md);">
+                        📋 最近使用した設定
+                    </h3>
+                    <div class="config-history" id="configHistory">
+                        <!-- 履歴アイテムはJavaScriptで動的生成 -->
+                    </div>
+                </div>
+                
+                <!-- 設定プレビュー -->
+                <div class="config-preview" id="configPreview" style="display: none;">
+                    <!-- プレビュー内容はJavaScriptで動的生成 -->
+                </div>
+                
+                <!-- バリデーション結果 -->
+                <div class="config-validation-result" id="configValidationResult" style="display: none;">
+                    <!-- バリデーション結果はJavaScriptで動的生成 -->
+                </div>
+            </div>
+            <div class="config-dialog-footer">
+                <button class="btn btn-secondary" type="button" data-close-config-dialog>
+                    キャンセル
+                </button>
+                <button class="btn btn-primary" id="loadConfigConfirmBtn" type="button" disabled>
+                    📂 読み込み
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 設定保存ダイアログ -->
+    <div class="config-dialog" id="saveConfigDialog" style="display: none;"
+         role="dialog" aria-modal="true" aria-labelledby="saveConfigTitle">
+        <div class="config-dialog-content">
+            <div class="config-dialog-header">
+                <h2 id="saveConfigTitle" class="config-dialog-title">💾 設定ファイルを保存</h2>
+                <button class="config-dialog-close" type="button" 
+                        aria-label="ダイアログを閉じる" data-close-config-dialog>×</button>
+            </div>
+            <div class="config-dialog-body">
+                <!-- 現在の設定プレビュー -->
+                <div class="config-preview" id="saveConfigPreview">
+                    <!-- プレビュー内容はJavaScriptで動的生成 -->
+                </div>
+                
+                <!-- 保存設定 -->
+                <div class="form-group">
+                    <label for="configName" class="form-label">設定名</label>
+                    <input type="text" id="configName" class="form-input form-input-animated"
+                           placeholder="例: Web開発用設定" aria-describedby="configNameHelp">
+                    <div id="configNameHelp" class="form-help">
+                        分かりやすい設定名を入力してください
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="configDescription" class="form-label">説明（オプション）</label>
+                    <textarea id="configDescription" class="form-input form-input-animated"
+                              placeholder="この設定の用途や内容を説明してください" 
+                              rows="3" aria-describedby="configDescHelp"></textarea>
+                    <div id="configDescHelp" class="form-help">
+                        設定の用途や含まれるルールについて説明できます
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="addToTemplates" checked>
+                        <span class="checkbox-custom"></span>
+                        テンプレートとして保存
+                    </label>
+                    <div class="form-help">
+                        チェックすると、テンプレート一覧に表示されます
+                    </div>
+                </div>
+            </div>
+            <div class="config-dialog-footer">
+                <button class="btn btn-secondary" type="button" data-close-config-dialog>
+                    キャンセル
+                </button>
+                <button class="btn btn-primary" id="saveConfigConfirmBtn" type="button">
+                    💾 保存
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- テンプレート選択ダイアログ -->
+    <div class="config-dialog" id="templateDialog" style="display: none;"
+         role="dialog" aria-modal="true" aria-labelledby="templateTitle">
+        <div class="config-dialog-content">
+            <div class="config-dialog-header">
+                <h2 id="templateTitle" class="config-dialog-title">📋 テンプレートを選択</h2>
+                <button class="config-dialog-close" type="button" 
+                        aria-label="ダイアログを閉じる" data-close-config-dialog>×</button>
+            </div>
+            <div class="config-dialog-body">
+                <p style="margin: 0 0 var(--spacing-md) 0; color: var(--text-secondary);">
+                    よく使用される置換パターンのテンプレートを選択してください
+                </p>
+                
+                <!-- テンプレート一覧 -->
+                <div class="template-grid" id="templateGrid">
+                    <!-- テンプレートカードはJavaScriptで動的生成 -->
+                </div>
+                
+                <!-- 選択されたテンプレートのプレビュー -->
+                <div class="config-preview" id="templatePreview" style="display: none;">
+                    <!-- プレビュー内容はJavaScriptで動的生成 -->
+                </div>
+            </div>
+            <div class="config-dialog-footer">
+                <button class="btn btn-secondary" type="button" data-close-config-dialog>
+                    キャンセル
+                </button>
+                <button class="btn btn-primary" id="applyTemplateBtn" type="button" disabled>
+                    📋 適用
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
     <script src="js/utils.js"></script>
     <script src="js/error-handler.js"></script>
     <script src="js/api-client.js"></script>
     <script src="js/config-manager.js"></script>
+    <script src="js/replacement-ui.js"></script>
+    <script src="js/ui-controller.js"></script>
     <script src="js/app.js"></script>
 
     <!-- アクセシビリティ向上：スクリーンリーダー用追加情報 -->

@@ -84,11 +84,13 @@ class ReplacementUI {
      */
     async loadTemplates() {
         try {
-            // デフォルトテンプレートを定義
+            // デフォルトテンプレートを定義（アイコン追加）
             this.templates = {
                 'web-development': {
                     name: 'Web Development',
+                    icon: '🌐',
                     description: 'Web開発でよく使用される置換パターン',
+                    category: 'development',
                     rules: [
                         { from: 'var ', to: 'const ', description: 'JavaScript変数の近代化' },
                         { from: 'http://', to: 'https://', description: 'HTTPS強制' },
@@ -97,7 +99,9 @@ class ReplacementUI {
                 },
                 'css-modernization': {
                     name: 'CSS Modernization',
+                    icon: '🎨',
                     description: 'CSSプロパティと値の近代化',
+                    category: 'styling',
                     rules: [
                         { from: 'display: -webkit-box;', to: 'display: flex;', description: '古いFlexbox構文を置換' },
                         { from: 'float: left;', to: 'display: flex;', description: 'フロートをFlexboxに変換' },
@@ -107,10 +111,34 @@ class ReplacementUI {
                 },
                 'variable-rename': {
                     name: 'Variable Rename',
+                    icon: '🏷️',
                     description: '変数名の一括リネーム',
+                    category: 'refactoring',
                     rules: [
                         { from: 'oldVariableName', to: 'newVariableName', description: '変数名変更' },
                         { from: 'OLD_CONSTANT', to: 'NEW_CONSTANT', description: '定数名変更' }
+                    ]
+                },
+                'framework-migration': {
+                    name: 'Framework Migration',
+                    icon: '🚀',
+                    description: 'フレームワーク移行時の一括変更',
+                    category: 'migration',
+                    rules: [
+                        { from: 'React.Component', to: 'Component', description: 'React import 簡略化' },
+                        { from: 'class ', to: 'function ', description: '関数コンポーネント化' },
+                        { from: 'componentDidMount', to: 'useEffect', description: 'Hooks移行' }
+                    ]
+                },
+                'api-modernization': {
+                    name: 'API Modernization',
+                    icon: '🔗',
+                    description: 'API呼び出しの近代化',
+                    category: 'api',
+                    rules: [
+                        { from: 'XMLHttpRequest', to: 'fetch', description: 'Fetch API移行' },
+                        { from: '$.ajax', to: 'fetch', description: 'jQuery Ajax からFetch移行' },
+                        { from: 'async: false', to: '', description: '同期Ajax削除' }
                     ]
                 }
             };

@@ -1,0 +1,566 @@
+/**
+ * ダイアログ・モーダルスタイル - Multi Grep Replacer
+ * 設定管理ダイアログ・履歴・プレビュー機能
+ */
+
+/* ==========================================================================
+   設定ダイアログベース
+   ========================================================================== */
+
+.config-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+}
+
+.config-dialog.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.config-dialog.show .config-dialog-content {
+    transform: translateY(0) scale(1);
+}
+
+.config-dialog-content {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-large);
+    max-width: 700px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    transform: translateY(-20px) scale(0.95);
+    transition: all var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+}
+
+.config-dialog-header {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-secondary);
+}
+
+.config-dialog-title {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.config-dialog-close {
+    background: none;
+    border: none;
+    font-size: var(--font-size-xl);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.config-dialog-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.config-dialog-body {
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    flex: 1;
+}
+
+.config-dialog-footer {
+    padding: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: flex-end;
+    background: var(--bg-secondary);
+}
+
+/* ==========================================================================
+   設定履歴リスト
+   ========================================================================== */
+
+.config-history {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: var(--bg-primary);
+}
+
+.config-history-item {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.config-history-item:last-child {
+    border-bottom: none;
+}
+
+.config-history-item:hover {
+    background: var(--bg-hover);
+}
+
+.config-history-item.selected {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+}
+
+.config-history-info {
+    flex: 1;
+}
+
+.config-history-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs) 0;
+    font-size: var(--font-size-sm);
+}
+
+.config-history-meta {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.config-history-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.config-history-item:hover .config-history-actions {
+    opacity: 1;
+}
+
+.config-history-action {
+    background: none;
+    border: none;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--text-secondary);
+}
+
+.config-history-action:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   設定プレビュー
+   ========================================================================== */
+
+.config-preview {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.config-preview-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.config-preview-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+
+.config-preview-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.config-preview-stat {
+    text-align: center;
+    padding: var(--spacing-sm);
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.config-preview-stat-value {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.config-preview-stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin: var(--spacing-xs) 0 0 0;
+}
+
+.config-preview-rules {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.config-preview-rule {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-sm);
+}
+
+.config-preview-rule:last-child {
+    margin-bottom: 0;
+}
+
+.config-preview-rule-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--color-success);
+    flex-shrink: 0;
+}
+
+.config-preview-rule-status.disabled {
+    background: var(--color-muted);
+}
+
+.config-preview-rule-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.config-preview-rule-text {
+    font-size: var(--font-size-xs);
+    color: var(--text-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.config-preview-rule-arrow {
+    color: var(--text-secondary);
+    margin: 0 var(--spacing-xs);
+}
+
+/* ==========================================================================
+   テンプレート選択UI
+   ========================================================================== */
+
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.template-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.template-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-small);
+    transform: translateY(-2px);
+}
+
+.template-card.selected {
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
+}
+
+.template-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.template-card-icon {
+    font-size: var(--font-size-lg);
+}
+
+.template-card-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+
+.template-card-description {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin: 0 0 var(--spacing-sm) 0;
+    line-height: 1.4;
+}
+
+.template-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.template-card-rules-count {
+    background: var(--bg-secondary);
+    padding: 2px var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+}
+
+/* ==========================================================================
+   設定ファイル詳細
+   ========================================================================== */
+
+.config-file-info {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.config-file-path {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-sm);
+    word-break: break-all;
+}
+
+.config-file-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-xs);
+}
+
+.config-file-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.config-file-meta-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.config-file-meta-value {
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   エラー・警告表示
+   ========================================================================== */
+
+.config-validation-result {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    border: 1px solid;
+}
+
+.config-validation-result.success {
+    background: var(--color-success-light);
+    border-color: var(--color-success);
+    color: var(--color-success-dark);
+}
+
+.config-validation-result.warning {
+    background: var(--color-warning-light);
+    border-color: var(--color-warning);
+    color: var(--color-warning-dark);
+}
+
+.config-validation-result.error {
+    background: var(--color-error-light);
+    border-color: var(--color-error);
+    color: var(--color-error-dark);
+}
+
+.config-validation-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.config-validation-icon {
+    font-size: var(--font-size-lg);
+}
+
+.config-validation-title {
+    font-weight: 600;
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+
+.config-validation-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.config-validation-item {
+    padding: var(--spacing-xs) 0;
+    font-size: var(--font-size-xs);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.config-validation-item:last-child {
+    border-bottom: none;
+}
+
+/* ==========================================================================
+   ドラッグ&ドロップゾーン
+   ========================================================================== */
+
+.config-drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-xl);
+    text-align: center;
+    transition: all var(--transition-fast);
+    margin: var(--spacing-md) 0;
+}
+
+.config-drop-zone.drag-over {
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
+}
+
+.config-drop-zone-icon {
+    font-size: 2rem;
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-sm);
+}
+
+.config-drop-zone.drag-over .config-drop-zone-icon {
+    color: var(--color-primary);
+}
+
+.config-drop-zone-text {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+
+.config-drop-zone.drag-over .config-drop-zone-text {
+    color: var(--color-primary);
+}
+
+/* ==========================================================================
+   レスポンシブ対応
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .config-dialog-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .config-dialog-header,
+    .config-dialog-body,
+    .config-dialog-footer {
+        padding: var(--spacing-md);
+    }
+    
+    .template-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .config-preview-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .config-file-meta {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================================
+   アニメーション
+   ========================================================================== */
+
+@keyframes configSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.config-history-item,
+.template-card,
+.config-preview-rule {
+    animation: configSlideIn 0.3s ease-out;
+}
+
+.config-validation-result {
+    animation: configSlideIn 0.4s ease-out;
+}
+
+/* アクセシビリティ：減少モーション対応 */
+@media (prefers-reduced-motion: reduce) {
+    .config-dialog,
+    .config-dialog-content,
+    .config-history-item,
+    .template-card,
+    .config-drop-zone {
+        transition: none;
+        animation: none;
+    }
+}
