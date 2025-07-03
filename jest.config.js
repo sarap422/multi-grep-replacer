@@ -10,7 +10,8 @@ module.exports = {
   // テストファイルの検索パターン
   testMatch: [
     '**/tests/unit/**/*.test.js',
-    '**/tests/integration/**/*.test.js'
+    '**/tests/integration/**/*.test.js',
+    '**/tests/e2e/**/*.test.js'
   ],
   
   // テスト対象ファイルのパス（カバレッジ計算用）
@@ -37,10 +38,10 @@ module.exports = {
   // カバレッジの閾値（80%以上を目標）
   coverageThreshold: {
     global: {
-      branches: 75,
-      functions: 75,
-      lines: 75,
-      statements: 75
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80
     }
   },
   
