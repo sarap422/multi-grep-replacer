@@ -1,0 +1,68 @@
+{
+  "app_info": {
+    "name": "Basic Test Configuration",
+    "version": "1.0.0",
+    "created_at": "2024-01-01T00:00:00Z",
+    "description": "基本的なテスト用設定",
+    "author": "Test Suite",
+    "tags": ["test", "basic"]
+  },
+  "replacements": [
+    {
+      "id": "test_rule_001",
+      "from": "old-class",
+      "to": "new-class", 
+      "enabled": true,
+      "description": "CSSクラス名の基本置換",
+      "case_sensitive": true,
+      "whole_word": false
+    },
+    {
+      "id": "test_rule_002",
+      "from": "oldVariable",
+      "to": "newVariable",
+      "enabled": true,
+      "description": "JavaScript変数名の置換",
+      "case_sensitive": true,
+      "whole_word": true
+    }
+  ],
+  "target_settings": {
+    "file_extensions": [".html", ".css", ".js"],
+    "exclude_patterns": [
+      "node_modules/**",
+      ".git/**",
+      "*.min.js",
+      "*.min.css"
+    ],
+    "include_subdirectories": true,
+    "max_file_size": 104857600,
+    "encoding": "utf-8"
+  },
+  "replacement_settings": {
+    "case_sensitive": true,
+    "use_regex": false,
+    "backup_enabled": false,
+    "preserve_file_permissions": true,
+    "dry_run": false
+  },
+  "ui_settings": {
+    "theme": "light",
+    "window": {
+      "width": 800,
+      "height": 600,
+      "resizable": true,
+      "center": true
+    },
+    "remember_last_folder": true,
+    "auto_save_config": false,
+    "show_file_count_preview": true,
+    "confirm_before_execution": true
+  },
+  "advanced_settings": {
+    "max_concurrent_files": 5,
+    "progress_update_interval": 200,
+    "log_level": "info",
+    "enable_crash_reporting": false
+  }
+}

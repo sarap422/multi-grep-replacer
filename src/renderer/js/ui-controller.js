@@ -25,6 +25,13 @@ class UIController {
         this.resultsDisplay = null;
         this.executionController = null;
         
+        // Modern UI/UX機能のクラス
+        this.themeManager = null;
+        this.shortcutsManager = null;
+        this.tooltipManager = null;
+        this.dragDropHandler = null;
+        this.windowState = null;
+        
         // 初期化
         this.initialize();
     }
@@ -37,6 +44,9 @@ class UIController {
         
         // DOM要素のキャッシュ
         this.cacheElements();
+        
+        // Modern UI/UX機能の初期化
+        this.initializeModernFeatures();
         
         // 実行制御クラスの初期化
         this.initializeExecutionClasses();
@@ -153,6 +163,34 @@ class UIController {
             body: document.body,
             appContainer: document.querySelector('.app-container')
         };
+    }
+    
+    /**
+     * Modern UI/UX機能の初期化
+     */
+    initializeModernFeatures() {
+        console.log('[UIController] Modern UI/UX機能を初期化中...');
+        
+        try {
+            // テーママネージャー
+            this.themeManager = new ThemeManager();
+            
+            // ツールチップマネージャー
+            this.tooltipManager = new TooltipManager();
+            
+            // ウィンドウ状態管理
+            this.windowState = new WindowState();
+            
+            // ドラッグ&ドロップハンドラー
+            this.dragDropHandler = new DragDropHandler(this);
+            
+            // キーボードショートカット（最後に初期化）
+            this.shortcutsManager = new ShortcutsManager(this);
+            
+            console.log('[UIController] Modern UI/UX機能の初期化完了');
+        } catch (error) {
+            console.error('[UIController] Modern UI/UX機能の初期化エラー:', error);
+        }
     }
     
     /**
@@ -1747,6 +1785,32 @@ class UIController {
         if (this.resultsDisplay) {
             this.resultsDisplay.destroy();
             this.resultsDisplay = null;
+        }
+        
+        // Modern UI/UX機能のクリーンアップ
+        if (this.themeManager) {
+            this.themeManager.destroy();
+            this.themeManager = null;
+        }
+        
+        if (this.shortcutsManager) {
+            this.shortcutsManager.destroy();
+            this.shortcutsManager = null;
+        }
+        
+        if (this.tooltipManager) {
+            this.tooltipManager.destroy();
+            this.tooltipManager = null;
+        }
+        
+        if (this.dragDropHandler) {
+            this.dragDropHandler.destroy();
+            this.dragDropHandler = null;
+        }
+        
+        if (this.windowState) {
+            this.windowState.destroy();
+            this.windowState = null;
         }
         
         this.rules = [];

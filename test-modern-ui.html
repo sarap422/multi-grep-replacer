@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi Grep Replacer - Modern UI Test</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="src/renderer/css/components.css">
+    <link rel="stylesheet" href="src/renderer/css/themes.css">
+    <link rel="stylesheet" href="src/renderer/css/animations.css">
+    <link rel="stylesheet" href="src/renderer/css/main.css">
+    
+    <style>
+        /* テスト用スタイル */
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            background-color: var(--bg-secondary);
+        }
+        
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+        
+        .test-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .test-button {
+            padding: 8px 16px;
+            border: 1px solid var(--border-primary);
+            border-radius: 4px;
+            background-color: var(--button-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .test-button:hover {
+            background-color: var(--button-hover-bg);
+            transform: translateY(-1px);
+        }
+        
+        .test-output {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            min-height: 50px;
+            white-space: pre-wrap;
+            border: 1px solid var(--border-primary);
+        }
+        
+        .tooltip-test-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .tooltip-item {
+            padding: 10px;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .shortcut-test {
+            background-color: var(--info-light);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .drag-drop-zone {
+            border: 2px dashed var(--border-primary);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            background-color: var(--bg-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .drag-drop-zone.drag-over {
+            border-color: var(--accent-primary);
+            background-color: var(--accent-light);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header style="text-align: center; padding: 20px;">
+            <h1>Multi Grep Replacer - Modern UI/UX テスト</h1>
+            <p>Modern UI/UX機能のテストページです</p>
+        </header>
+
+        <!-- テーマテスト -->
+        <section class="test-section">
+            <h2 class="test-title">🌙 テーマ切り替えテスト</h2>
+            <div class="test-controls">
+                <button class="test-button" onclick="testThemeSwitch('light')">ライトモード</button>
+                <button class="test-button" onclick="testThemeSwitch('dark')">ダークモード</button>
+                <button class="test-button" onclick="testThemeSwitch('auto')">自動モード</button>
+            </div>
+            <div class="test-output" id="themeOutput">テーマ切り替えのテスト結果がここに表示されます</div>
+        </section>
+
+        <!-- アニメーションテスト -->
+        <section class="test-section">
+            <h2 class="test-title">✨ アニメーションテスト</h2>
+            <div class="test-controls">
+                <button class="test-button hover-lift" onclick="testAnimation('fade-in')">フェードイン</button>
+                <button class="test-button hover-scale" onclick="testAnimation('slide-in-up')">スライドアップ</button>
+                <button class="test-button hover-glow" onclick="testAnimation('scale-in')">スケールイン</button>
+                <button class="test-button ripple" onclick="testAnimation('pulse')">パルス</button>
+                <button class="test-button" onclick="testAnimation('shake')">シェイク</button>
+                <button class="test-button" onclick="testAnimation('bounce')">バウンス</button>
+            </div>
+            <div class="test-output" id="animationOutput">
+                <div id="animationTarget" style="width: 100px; height: 100px; background: var(--accent-primary); margin: 10px auto; border-radius: 8px;">
+                    テスト対象
+                </div>
+            </div>
+        </section>
+
+        <!-- ツールチップテスト -->
+        <section class="test-section">
+            <h2 class="test-title">💬 ツールチップテスト</h2>
+            <div class="tooltip-test-area">
+                <div class="tooltip-item" data-tooltip="これは基本的なツールチップです">基本ツールチップ</div>
+                <div class="tooltip-item" title="title属性によるツールチップ">title属性</div>
+                <button class="tooltip-item" aria-label="ボタンのARIAラベル">ARIAラベル</button>
+                <div class="tooltip-item" data-tooltip="長いテキストのツールチップです。複数行にわたって表示される場合のテストです。">長いツールチップ</div>
+            </div>
+            <div class="test-output" id="tooltipOutput">ツールチップをホバーして動作を確認してください</div>
+        </section>
+
+        <!-- キーボードショートカットテスト -->
+        <section class="test-section">
+            <h2 class="test-title">⌨️ キーボードショートカットテスト</h2>
+            <div class="shortcut-test">
+                <strong>利用可能なショートカット:</strong><br>
+                • Ctrl/Cmd + S: 設定保存（テスト）<br>
+                • Ctrl/Cmd + O: 設定読み込み（テスト）<br>
+                • Ctrl/Cmd + E: 実行（テスト）<br>
+                • F1: ヘルプ表示<br>
+                • ESC: モーダルを閉じる<br>
+            </div>
+            <div class="test-output" id="shortcutOutput">キーボードショートカットを試してください</div>
+        </section>
+
+        <!-- ドラッグ&ドロップテスト -->
+        <section class="test-section">
+            <h2 class="test-title">📁 ドラッグ&ドロップテスト</h2>
+            <div class="drag-drop-zone" id="testDropZone">
+                ファイルまたはフォルダをここにドロップしてください<br>
+                <small>（JSON設定ファイルまたは任意のフォルダ）</small>
+            </div>
+            <div class="test-output" id="dragDropOutput">ドラッグ&ドロップのテスト結果がここに表示されます</div>
+        </section>
+
+        <!-- ウィンドウ状態テスト -->
+        <section class="test-section">
+            <h2 class="test-title">🪟 ウィンドウ状態テスト</h2>
+            <div class="test-controls">
+                <button class="test-button" onclick="testWindowState('info')">ウィンドウ情報取得</button>
+                <button class="test-button" onclick="testWindowState('center')">ウィンドウ中央配置</button>
+                <button class="test-button" onclick="testWindowState('resize')">ウィンドウリサイズ</button>
+            </div>
+            <div class="test-output" id="windowOutput">ウィンドウ状態のテスト結果がここに表示されます</div>
+        </section>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="src/renderer/js/utils.js"></script>
+    <script src="src/renderer/js/theme-manager.js"></script>
+    <script src="src/renderer/js/shortcuts-manager.js"></script>
+    <script src="src/renderer/js/tooltip-manager.js"></script>
+    <script src="src/renderer/js/drag-drop-handler.js"></script>
+    <script src="src/renderer/js/window-state.js"></script>
+
+    <script>
+        // テスト用のグローバル変数
+        let themeManager, shortcutsManager, tooltipManager, dragDropHandler, windowState;
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeModernFeatures();
+        });
+
+        function initializeModernFeatures() {
+            try {
+                // Modern UI/UX機能を初期化
+                themeManager = new ThemeManager();
+                tooltipManager = new TooltipManager();
+                windowState = new WindowState();
+                
+                // 簡易UIコントローラーオブジェクト
+                const mockUIController = {
+                    handleSaveConfig: () => logShortcut('設定保存'),
+                    handleLoadConfig: () => logShortcut('設定読み込み'),
+                    handleExecute: () => logShortcut('実行')
+                };
+                
+                shortcutsManager = new ShortcutsManager(mockUIController);
+                dragDropHandler = new DragDropHandler(mockUIController);
+                
+                // ドロップゾーンを手動登録
+                const dropZone = document.getElementById('testDropZone');
+                dragDropHandler.registerDropZone(dropZone, 'test', {
+                    handler: (files) => {
+                        const output = document.getElementById('dragDropOutput');
+                        output.textContent = `ドロップされたファイル:\n${files.map(f => f.name).join('\n')}`;
+                    }
+                });
+
+                updateOutput('themeOutput', 'Modern UI/UX機能が初期化されました');
+                
+            } catch (error) {
+                console.error('初期化エラー:', error);
+                updateOutput('themeOutput', `初期化エラー: ${error.message}`);
+            }
+        }
+
+        // テーマ切り替えテスト
+        function testThemeSwitch(theme) {
+            if (themeManager) {
+                themeManager.switchTheme(theme);
+                updateOutput('themeOutput', 
+                    `テーマを ${theme} に切り替えました\n` +
+                    `現在のテーマ: ${themeManager.getCurrentTheme()}\n` +
+                    `適用テーマ: ${themeManager.getActiveTheme()}`
+                );
+            } else {
+                updateOutput('themeOutput', 'ThemeManager が初期化されていません');
+            }
+        }
+
+        // アニメーションテスト
+        function testAnimation(animationType) {
+            const target = document.getElementById('animationTarget');
+            if (!target) return;
+
+            // 既存のアニメーションクラスを削除
+            target.className = '';
+            
+            // 新しいアニメーションクラスを追加
+            requestAnimationFrame(() => {
+                target.classList.add(animationType);
+                updateOutput('animationOutput', `${animationType} アニメーションを実行しました`);
+                
+                // アニメーション終了後にクラスを削除
+                setTimeout(() => {
+                    target.classList.remove(animationType);
+                }, 2000);
+            });
+        }
+
+        // ショートカットログ
+        function logShortcut(action) {
+            updateOutput('shortcutOutput', 
+                `${new Date().toLocaleTimeString()}: ${action} ショートカットが実行されました`
+            );
+        }
+
+        // ウィンドウ状態テスト
+        function testWindowState(action) {
+            if (!windowState) {
+                updateOutput('windowOutput', 'WindowState が初期化されていません');
+                return;
+            }
+
+            try {
+                switch (action) {
+                    case 'info':
+                        const currentState = windowState.getCurrentState();
+                        const screenInfo = windowState.getScreenInfo();
+                        updateOutput('windowOutput', 
+                            `ウィンドウ状態:\n` +
+                            `サイズ: ${currentState.width}x${currentState.height}\n` +
+                            `位置: (${currentState.x}, ${currentState.y})\n` +
+                            `最大化: ${currentState.maximized}\n` +
+                            `フルスクリーン: ${currentState.fullscreen}\n\n` +
+                            `画面情報:\n` +
+                            `解像度: ${screenInfo.width}x${screenInfo.height}\n` +
+                            `利用可能サイズ: ${screenInfo.availWidth}x${screenInfo.availHeight}`
+                        );
+                        break;
+                        
+                    case 'center':
+                        windowState.centerWindow();
+                        updateOutput('windowOutput', 'ウィンドウを中央に配置しました');
+                        break;
+                        
+                    case 'resize':
+                        windowState.setSize(900, 800);
+                        updateOutput('windowOutput', 'ウィンドウサイズを 900x800 に変更しました');
+                        break;
+                }
+            } catch (error) {
+                updateOutput('windowOutput', `エラー: ${error.message}`);
+            }
+        }
+
+        // 出力更新ヘルパー
+        function updateOutput(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+            }
+        }
+
+        // ページアンロード時のクリーンアップ
+        window.addEventListener('beforeunload', () => {
+            if (themeManager) themeManager.destroy();
+            if (shortcutsManager) shortcutsManager.destroy();
+            if (tooltipManager) tooltipManager.destroy();
+            if (dragDropHandler) dragDropHandler.destroy();
+            if (windowState) windowState.destroy();
+        });
+    </script>
+</body>
+</html>

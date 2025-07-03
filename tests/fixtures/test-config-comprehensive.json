@@ -1,0 +1,149 @@
+{
+  "app_info": {
+    "name": "Comprehensive Test Configuration",
+    "version": "1.0.0",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T12:00:00Z",
+    "description": "包括的なテスト用設定 - 複雑な置換ルールを含む",
+    "author": "Test Suite",
+    "tags": ["test", "comprehensive", "complex-rules"]
+  },
+  "replacements": [
+    {
+      "id": "css_modernization_001",
+      "from": "old-container",
+      "to": "container-modern",
+      "enabled": true,
+      "description": "CSSコンテナクラスの現代化",
+      "case_sensitive": true,
+      "whole_word": false
+    },
+    {
+      "id": "css_modernization_002", 
+      "from": "old-header",
+      "to": "header-modern",
+      "enabled": true,
+      "description": "CSSヘッダークラスの現代化",
+      "case_sensitive": true,
+      "whole_word": false
+    },
+    {
+      "id": "js_variable_001",
+      "from": "oldVariable",
+      "to": "modernVariable",
+      "enabled": true,
+      "description": "JavaScript変数名の現代化",
+      "case_sensitive": true,
+      "whole_word": true
+    },
+    {
+      "id": "js_variable_002",
+      "from": "anotherOldVar",
+      "to": "anotherModernVar", 
+      "enabled": true,
+      "description": "別のJavaScript変数名の現代化",
+      "case_sensitive": true,
+      "whole_word": true
+    },
+    {
+      "id": "api_endpoint_001",
+      "from": "/api/v1/old-endpoint",
+      "to": "/api/v2/modern-endpoint",
+      "enabled": true,
+      "description": "APIエンドポイントのバージョンアップ",
+      "case_sensitive": true,
+      "whole_word": false
+    },
+    {
+      "id": "bootstrap_migration_001",
+      "from": "btn-default",
+      "to": "btn-secondary",
+      "enabled": true,
+      "description": "Bootstrap v3→v4 ボタンクラス移行",
+      "case_sensitive": true,
+      "whole_word": false
+    },
+    {
+      "id": "company_rebrand_001",
+      "from": "Old Company",
+      "to": "Modern Company",
+      "enabled": true,
+      "description": "会社名のリブランディング",
+      "case_sensitive": false,
+      "whole_word": true
+    },
+    {
+      "id": "disabled_rule_001",
+      "from": "should-not-replace",
+      "to": "replacement-text",
+      "enabled": false,
+      "description": "無効化されたルール（置換されない）",
+      "case_sensitive": true,
+      "whole_word": false
+    },
+    {
+      "id": "url_migration_001",
+      "from": "old-domain.com",
+      "to": "modern-domain.com",
+      "enabled": true,
+      "description": "ドメイン名の移行",
+      "case_sensitive": false,
+      "whole_word": false
+    },
+    {
+      "id": "css_flexbox_001",
+      "from": "display: -webkit-box;",
+      "to": "display: flex;",
+      "enabled": true,
+      "description": "古いフレックスボックス記法の現代化",
+      "case_sensitive": true,
+      "whole_word": false
+    }
+  ],
+  "target_settings": {
+    "file_extensions": [".html", ".css", ".js", ".md", ".json", ".php", ".tsx", ".jsx"],
+    "exclude_patterns": [
+      "node_modules/**",
+      ".git/**",
+      "dist/**",
+      "build/**",
+      "debug/**",
+      "*.min.js",
+      "*.min.css",
+      "*.bundle.js",
+      "vendor/**",
+      "third-party/**",
+      "*.backup",
+      "*.tmp"
+    ],
+    "include_subdirectories": true,
+    "max_file_size": 52428800,
+    "encoding": "utf-8"
+  },
+  "replacement_settings": {
+    "case_sensitive": true,
+    "use_regex": false,
+    "backup_enabled": true,
+    "preserve_file_permissions": true,
+    "dry_run": false
+  },
+  "ui_settings": {
+    "theme": "auto",
+    "window": {
+      "width": 1000,
+      "height": 800,
+      "resizable": true,
+      "center": true
+    },
+    "remember_last_folder": true,
+    "auto_save_config": true,
+    "show_file_count_preview": true,
+    "confirm_before_execution": true
+  },
+  "advanced_settings": {
+    "max_concurrent_files": 10,
+    "progress_update_interval": 100,
+    "log_level": "debug",
+    "enable_crash_reporting": true
+  }
+}

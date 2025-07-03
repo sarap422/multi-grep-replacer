@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const IPCHandlers = require('./ipc-handlers');
 
 // Electronのセキュリティ警告を有効化（開発時に重要）
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'false';
@@ -8,6 +9,7 @@ class MultiGrepReplacerApp {
     constructor() {
         this.mainWindow = null;
         this.config = null;
+        this.ipcHandlers = null;
     }
 
     initialize() {
@@ -28,6 +30,11 @@ class MultiGrepReplacerApp {
             if (BrowserWindow.getAllWindows().length === 0) {
                 this.createMainWindow();
             }
+        });
+
+        app.on('before-quit', () => {
+            // アプリケーション終了前のクリーンアップ
+            this.cleanup();
         });
     }
 
@@ -78,11 +85,21 @@ class MultiGrepReplacerApp {
         this.mainWindow.webContents.on('unresponsive', () => {
             console.error('Renderer process became unresponsive');
         });
+
+        // IPC通信ハンドラーの初期化
+        this.ipcHandlers = new IPCHandlers(this.mainWindow);
+        console.log('✅ IPC通信ハンドラー初期化完了');
     }
 
     cleanup() {
         // アプリケーション終了時のクリーンアップ処理
         console.log('Application is shutting down...');
+        
+        // IPC通信ハンドラーのクリーンアップ
+        if (this.ipcHandlers) {
+            this.ipcHandlers.cleanup();
+            this.ipcHandlers = null;
+        }
     }
 }
 

@@ -1,0 +1,58 @@
+{
+  "app_info": {
+    "name": "Invalid Test Configuration",
+    "version": "",
+    "description": "無効な設定のテストファイル"
+  },
+  "replacements": [
+    {
+      "id": "",
+      "from": "",
+      "to": "replacement-text",
+      "enabled": true,
+      "description": "空のfromフィールド（無効）",
+      "case_sensitive": true
+    },
+    {
+      "id": "invalid_rule_002",
+      "from": "search-text",
+      "to": "",
+      "enabled": true,
+      "description": "空のtoフィールド（無効）"
+    },
+    {
+      "id": "invalid_rule_003",
+      "from": "search-text-3",
+      "to": "replacement-text-3",
+      "enabled": "invalid-boolean",
+      "description": "無効なenabledフィールド"
+    }
+  ],
+  "target_settings": {
+    "file_extensions": ["html", ".css"],
+    "exclude_patterns": [],
+    "include_subdirectories": "invalid-boolean",
+    "max_file_size": "invalid-number",
+    "encoding": "invalid-encoding"
+  },
+  "replacement_settings": {
+    "case_sensitive": "invalid-boolean",
+    "use_regex": "invalid-boolean",
+    "backup_enabled": null,
+    "preserve_file_permissions": undefined
+  },
+  "ui_settings": {
+    "theme": "invalid-theme",
+    "window": {
+      "width": "invalid-number",
+      "height": -100,
+      "resizable": "invalid-boolean"
+    },
+    "remember_last_folder": null
+  },
+  "advanced_settings": {
+    "max_concurrent_files": 0,
+    "progress_update_interval": -50,
+    "log_level": "invalid-level"
+  }
+}
