@@ -1,4 +1,4 @@
-# 2_architecture.md（システム設計書）
+# 2_architecture.md（システム設計）
 
 ## ⚙️ 2.1 技術スタックの決定
 

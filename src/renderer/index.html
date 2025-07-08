@@ -1,427 +1,49 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
-    <title>Multi Grep Replacer</title>
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/themes.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/dialogs.css">
-    <link rel="stylesheet" href="css/progress.css">
-    <link rel="stylesheet" href="css/results.css">
-    <link rel="stylesheet" href="css/main.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+  <title>Multi Grep Replacer</title>
+  <link rel="stylesheet" href="css/main.css">
 </head>
-<body data-theme="auto" class="respect-motion-preference">
-    <div class="app-container" role="application" aria-label="Multi Grep Replacer Application">
-        <!-- ヘッダー -->
-        <header class="app-header" role="banner">
-            <h1 class="app-title">Multi Grep Replacer</h1>
-            <div class="header-controls" role="toolbar" aria-label="アプリケーション設定">
-                <button 
-                    class="theme-toggle btn-hover-lift" 
-                    id="themeToggle" 
-                    type="button"
-                    aria-label="テーマを切り替える"
-                    title="テーマ切り替え (ライト/ダーク/自動)"
-                    data-theme-toggle>🌙</button>
-                <button 
-                    class="settings-btn btn-hover-lift" 
-                    id="settingsBtn" 
-                    type="button"
-                    aria-label="設定を開く"
-                    title="設定">⚙️</button>
-            </div>
-        </header>
-
-        <!-- メインコンテンツ -->
-        <main class="app-main" role="main" aria-label="メインコンテンツ">
-            <!-- ターゲットフォルダ選択 -->
-            <section class="folder-section" aria-labelledby="folderSectionTitle">
-                <h2 id="folderSectionTitle" class="section-title">📁 Target Folder</h2>
-                <div class="folder-input-group input-group" role="group" aria-labelledby="folderSectionTitle">
-                    <label for="folderPath" class="sr-only">対象フォルダのパス</label>
-                    <input 
-                        type="text" 
-                        id="folderPath" 
-                        class="folder-input form-input form-input-animated" 
-                        placeholder="/path/to/project/folder" 
-                        readonly
-                        aria-describedby="folderPathHelp"
-                        data-folder-input>
-                    <button 
-                        class="browse-btn btn btn-hover-lift" 
-                        id="browseBtn"
-                        type="button"
-                        aria-label="フォルダを選択"
-                        data-browse-folder>📂 Browse...</button>
-                </div>
-                <div id="folderPathHelp" class="sr-only">ファイル検索対象のフォルダを選択してください</div>
-            </section>
-
-            <!-- ファイル拡張子フィルタ -->
-            <section class="extensions-section" aria-labelledby="extensionsSectionTitle">
-                <h2 id="extensionsSectionTitle" class="section-title">
-                    🔍 File Extensions 
-                    <small>(comma-separated, blank = all files)</small>
-                </h2>
-                <div class="form-group">
-                    <label for="fileExtensions" class="sr-only">対象ファイル拡張子</label>
-                    <input 
-                        type="text" 
-                        id="fileExtensions" 
-                        class="extensions-input form-input form-input-animated" 
-                        placeholder=".html,.css,.js,.php,.md,.json" 
-                        value=".html,.css,.js,.php,.md,.json"
-                        aria-describedby="extensionsHelp"
-                        data-extensions-input>
-                    <div id="extensionsHelp" class="sr-only">対象ファイル拡張子をカンマ区切りで入力してください。空欄の場合は全ファイルが対象です</div>
-                </div>
-            </section>
-
-            <!-- 置換ルール -->
-            <section class="rules-section" aria-labelledby="rulesSectionTitle">
-                <div class="rules-header">
-                    <h2 id="rulesSectionTitle" class="section-title">⚙️ Replacement Rules</h2>
-                    <div class="template-controls">
-                        <label for="templateSelect" class="sr-only">テンプレートを選択</label>
-                        <select 
-                            class="template-select form-select" 
-                            id="templateSelect"
-                            aria-label="置換ルールテンプレートを選択"
-                            data-template-select>
-                            <option value="">📋 Templates ▼</option>
-                            <option value="web-development">Web Development</option>
-                            <option value="css-modernization">CSS Modernization</option>
-                            <option value="variable-rename">Variable Rename</option>
-                        </select>
-                    </div>
-                </div>
-                <div 
-                    class="rules-container" 
-                    id="rulesContainer"
-                    role="list"
-                    aria-labelledby="rulesSectionTitle"
-                    aria-describedby="rulesHelp"
-                    data-rules-container>
-                    <!-- 置換ルールはJavaScriptで動的に追加 -->
-                </div>
-                <div id="rulesHelp" class="sr-only">置換ルールを追加・編集・削除できます。上から順番に実行されます</div>
-                <button 
-                    class="add-rule-btn btn btn-outline btn-hover-lift" 
-                    id="addRuleBtn"
-                    type="button"
-                    aria-label="新しい置換ルールを追加"
-                    data-add-rule>➕ Add new rule</button>
-            </section>
-
-            <!-- プレビュー -->
-            <section class="preview-section" aria-labelledby="previewSectionTitle">
-                <h2 id="previewSectionTitle" class="sr-only">実行プレビュー</h2>
-                <div 
-                    class="preview-text" 
-                    id="previewText"
-                    role="status"
-                    aria-live="polite"
-                    aria-labelledby="previewSectionTitle"
-                    data-preview-display>📊 Preview: Ready to scan files...</div>
-            </section>
-        </main>
-
-        <!-- フッター（アクションボタン） -->
-        <footer class="app-footer" role="contentinfo">
-            <div class="action-buttons-group" role="group" aria-label="操作ボタン">
-                <button 
-                    class="action-btn btn btn-secondary btn-hover-lift" 
-                    id="loadConfigBtn"
-                    type="button"
-                    aria-label="設定ファイルを読み込む"
-                    data-load-config>💾 Load Config</button>
-                <button 
-                    class="action-btn btn btn-secondary btn-hover-lift" 
-                    id="saveConfigBtn"
-                    type="button"
-                    aria-label="設定ファイルを保存する"
-                    data-save-config>💾 Save Config</button>
-                <button 
-                    class="action-btn primary btn btn-primary btn-hover-lift" 
-                    id="executeBtn"
-                    type="button"
-                    aria-label="置換を実行する"
-                    data-execute-replacement>🚀 Execute Replacement</button>
-            </div>
-        </footer>
-
-        <!-- 進捗モーダル（初期状態では非表示） -->
-        <div 
-            class="modal modal-enter" 
-            id="progressModal" 
-            style="display: none;"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="progressModalTitle"
-            aria-describedby="progressModalDescription"
-            data-progress-modal>
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 id="progressModalTitle" class="modal-title">🚀 Executing Replacements...</h2>
-                </div>
-                <div class="modal-body">
-                    <div id="progressModalDescription" class="sr-only">置換処理の進捗状況を表示しています</div>
-                    <div class="progress progress-animated" role="progressbar" aria-labelledby="progressText">
-                        <div class="progress-bar" id="progressBar" style="width: 0%"></div>
-                    </div>
-                    <p class="progress-text" id="progressText" aria-live="polite">0% (0/0 files)</p>
-                    <p class="current-file" id="currentFile" aria-live="polite">Preparing...</p>
-                </div>
-                <div class="modal-footer">
-                    <button 
-                        class="action-btn btn btn-secondary btn-hover-lift" 
-                        id="pauseBtn"
-                        type="button"
-                        aria-label="処理を一時停止"
-                        data-pause-processing>⏸️ Pause</button>
-                    <button 
-                        class="action-btn btn btn-outline btn-hover-lift" 
-                        id="stopBtn"
-                        type="button"
-                        aria-label="処理を停止"
-                        data-stop-processing>⏹️ Stop</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 結果モーダル（初期状態では非表示） -->
-        <div 
-            class="modal modal-enter" 
-            id="resultModal" 
-            style="display: none;"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="resultModalTitle"
-            aria-describedby="resultModalDescription"
-            data-result-modal>
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 id="resultModalTitle" class="modal-title">✅ Replacement Completed!</h2>
-                    <button 
-                        class="modal-close" 
-                        type="button" 
-                        aria-label="結果モーダルを閉じる"
-                        data-close-result-modal>×</button>
-                </div>
-                <div class="modal-body">
-                    <div id="resultModalDescription" class="sr-only">置換処理の実行結果を表示しています</div>
-                    <div 
-                        class="result-summary" 
-                        id="resultSummary"
-                        aria-labelledby="resultSummaryTitle"
-                        data-result-summary>
-                        <h3 id="resultSummaryTitle" class="sr-only">実行結果サマリー</h3>
-                        <!-- 結果はJavaScriptで動的に表示 -->
-                    </div>
-                    <div 
-                        class="result-details" 
-                        id="resultDetails"
-                        aria-labelledby="resultDetailsTitle"
-                        data-result-details>
-                        <h3 id="resultDetailsTitle" class="sr-only">詳細な実行結果</h3>
-                        <!-- 詳細な結果はJavaScriptで動的に表示 -->
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button 
-                        class="action-btn btn btn-secondary btn-hover-lift" 
-                        id="exportResultsBtn"
-                        type="button"
-                        aria-label="結果をファイルにエクスポート"
-                        data-export-results>📤 Export Results</button>
-                    <button 
-                        class="action-btn btn btn-secondary btn-hover-lift" 
-                        id="copySummaryBtn"
-                        type="button"
-                        aria-label="サマリーをクリップボードにコピー"
-                        data-copy-summary>📋 Copy Summary</button>
-                    <button 
-                        class="action-btn primary btn btn-primary btn-hover-lift" 
-                        id="closeResultBtn"
-                        type="button"
-                        aria-label="結果モーダルを閉じる"
-                        data-close-result-modal>✅ Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 設定管理ダイアログ群 -->
+<body>
+  <div class="container">
+    <header>
+      <h1>Multi Grep Replacer</h1>
+      <p class="subtitle">Hello World! Electronアプリケーションが正常に起動しました。</p>
+    </header>
     
-    <!-- 設定読み込みダイアログ -->
-    <div class="config-dialog" id="loadConfigDialog" style="display: none;"
-         role="dialog" aria-modal="true" aria-labelledby="loadConfigTitle">
-        <div class="config-dialog-content">
-            <div class="config-dialog-header">
-                <h2 id="loadConfigTitle" class="config-dialog-title">📂 設定ファイルを読み込み</h2>
-                <button class="config-dialog-close" type="button" 
-                        aria-label="ダイアログを閉じる" data-close-config-dialog>×</button>
-            </div>
-            <div class="config-dialog-body">
-                <!-- ドラッグ&ドロップゾーン -->
-                <div class="config-drop-zone" id="configDropZone">
-                    <div class="config-drop-zone-icon">📁</div>
-                    <p class="config-drop-zone-text">
-                        設定ファイルをここにドロップするか、下のボタンで選択してください
-                    </p>
-                </div>
-                
-                <!-- ファイル選択ボタン -->
-                <div style="text-align: center; margin-bottom: var(--spacing-lg);">
-                    <button class="btn btn-primary btn-hover-lift" id="selectConfigFileBtn" type="button">
-                        📂 設定ファイルを選択
-                    </button>
-                </div>
-                
-                <!-- 最近使用した設定 -->
-                <div class="form-group">
-                    <h3 style="margin: 0 0 var(--spacing-md) 0; font-size: var(--font-size-md);">
-                        📋 最近使用した設定
-                    </h3>
-                    <div class="config-history" id="configHistory">
-                        <!-- 履歴アイテムはJavaScriptで動的生成 -->
-                    </div>
-                </div>
-                
-                <!-- 設定プレビュー -->
-                <div class="config-preview" id="configPreview" style="display: none;">
-                    <!-- プレビュー内容はJavaScriptで動的生成 -->
-                </div>
-                
-                <!-- バリデーション結果 -->
-                <div class="config-validation-result" id="configValidationResult" style="display: none;">
-                    <!-- バリデーション結果はJavaScriptで動的生成 -->
-                </div>
-            </div>
-            <div class="config-dialog-footer">
-                <button class="btn btn-secondary" type="button" data-close-config-dialog>
-                    キャンセル
-                </button>
-                <button class="btn btn-primary" id="loadConfigConfirmBtn" type="button" disabled>
-                    📂 読み込み
-                </button>
-            </div>
+    <main>
+      <section class="info-section">
+        <h2>システム情報</h2>
+        <div id="system-info" class="info-box">
+          <p>読み込み中...</p>
         </div>
-    </div>
+      </section>
+      
+      <section class="test-section">
+        <h2>IPC通信テスト</h2>
+        <button id="ping-button" class="btn btn-primary">Ping テスト</button>
+        <div id="ping-result" class="result-box"></div>
+      </section>
+      
+      <section class="status-section">
+        <h2>セキュリティ設定</h2>
+        <ul class="status-list">
+          <li>✅ Context Isolation: 有効</li>
+          <li>✅ Node Integration: 無効</li>
+          <li>✅ Web Security: 有効</li>
+          <li>✅ Remote Module: 無効</li>
+        </ul>
+      </section>
+    </main>
     
-    <!-- 設定保存ダイアログ -->
-    <div class="config-dialog" id="saveConfigDialog" style="display: none;"
-         role="dialog" aria-modal="true" aria-labelledby="saveConfigTitle">
-        <div class="config-dialog-content">
-            <div class="config-dialog-header">
-                <h2 id="saveConfigTitle" class="config-dialog-title">💾 設定ファイルを保存</h2>
-                <button class="config-dialog-close" type="button" 
-                        aria-label="ダイアログを閉じる" data-close-config-dialog>×</button>
-            </div>
-            <div class="config-dialog-body">
-                <!-- 現在の設定プレビュー -->
-                <div class="config-preview" id="saveConfigPreview">
-                    <!-- プレビュー内容はJavaScriptで動的生成 -->
-                </div>
-                
-                <!-- 保存設定 -->
-                <div class="form-group">
-                    <label for="configName" class="form-label">設定名</label>
-                    <input type="text" id="configName" class="form-input form-input-animated"
-                           placeholder="例: Web開発用設定" aria-describedby="configNameHelp">
-                    <div id="configNameHelp" class="form-help">
-                        分かりやすい設定名を入力してください
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="configDescription" class="form-label">説明（オプション）</label>
-                    <textarea id="configDescription" class="form-input form-input-animated"
-                              placeholder="この設定の用途や内容を説明してください" 
-                              rows="3" aria-describedby="configDescHelp"></textarea>
-                    <div id="configDescHelp" class="form-help">
-                        設定の用途や含まれるルールについて説明できます
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="checkbox-wrapper">
-                        <input type="checkbox" id="addToTemplates" checked>
-                        <span class="checkbox-custom"></span>
-                        テンプレートとして保存
-                    </label>
-                    <div class="form-help">
-                        チェックすると、テンプレート一覧に表示されます
-                    </div>
-                </div>
-            </div>
-            <div class="config-dialog-footer">
-                <button class="btn btn-secondary" type="button" data-close-config-dialog>
-                    キャンセル
-                </button>
-                <button class="btn btn-primary" id="saveConfigConfirmBtn" type="button">
-                    💾 保存
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- テンプレート選択ダイアログ -->
-    <div class="config-dialog" id="templateDialog" style="display: none;"
-         role="dialog" aria-modal="true" aria-labelledby="templateTitle">
-        <div class="config-dialog-content">
-            <div class="config-dialog-header">
-                <h2 id="templateTitle" class="config-dialog-title">📋 テンプレートを選択</h2>
-                <button class="config-dialog-close" type="button" 
-                        aria-label="ダイアログを閉じる" data-close-config-dialog>×</button>
-            </div>
-            <div class="config-dialog-body">
-                <p style="margin: 0 0 var(--spacing-md) 0; color: var(--text-secondary);">
-                    よく使用される置換パターンのテンプレートを選択してください
-                </p>
-                
-                <!-- テンプレート一覧 -->
-                <div class="template-grid" id="templateGrid">
-                    <!-- テンプレートカードはJavaScriptで動的生成 -->
-                </div>
-                
-                <!-- 選択されたテンプレートのプレビュー -->
-                <div class="config-preview" id="templatePreview" style="display: none;">
-                    <!-- プレビュー内容はJavaScriptで動的生成 -->
-                </div>
-            </div>
-            <div class="config-dialog-footer">
-                <button class="btn btn-secondary" type="button" data-close-config-dialog>
-                    キャンセル
-                </button>
-                <button class="btn btn-primary" id="applyTemplateBtn" type="button" disabled>
-                    📋 適用
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript -->
-    <script src="js/utils.js"></script>
-    <script src="js/error-handler.js"></script>
-    <script src="js/api-client.js"></script>
-    <script src="js/config-manager.js"></script>
-    <script src="js/progress-display.js"></script>
-    <script src="js/results-display.js"></script>
-    <script src="js/execution-controller.js"></script>
-    <script src="js/replacement-ui.js"></script>
-    <script src="js/theme-manager.js"></script>
-    <script src="js/shortcuts-manager.js"></script>
-    <script src="js/tooltip-manager.js"></script>
-    <script src="js/drag-drop-handler.js"></script>
-    <script src="js/window-state.js"></script>
-    <script src="js/ui-controller.js"></script>
-    <script src="js/app.js"></script>
-
-    <!-- アクセシビリティ向上：スクリーンリーダー用追加情報 -->
-    <div aria-live="polite" aria-atomic="true" class="sr-only" id="globalAnnouncements"></div>
+    <footer>
+      <p>Multi Grep Replacer v1.0.0 - Electron Edition</p>
+    </footer>
+  </div>
+  
+  <script src="js/app.js"></script>
 </body>
 </html>

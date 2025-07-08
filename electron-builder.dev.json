@@ -1,0 +1,45 @@
+{
+  "appId": "com.multigrepreplacer.dev",
+  "productName": "Multi Grep Replacer (Dev)",
+  "directories": {
+    "output": "dist/dev"
+  },
+  "files": [
+    "src/**/*",
+    "package.json",
+    "!src/**/*.test.js",
+    "!src/**/*.spec.js"
+  ],
+  "mac": {
+    "category": "public.app-category.developer-tools",
+    "target": [
+      {
+        "target": "dir",
+        "arch": ["x64", "arm64"]
+      }
+    ]
+  },
+  "win": {
+    "target": [
+      {
+        "target": "dir",
+        "arch": ["x64"]
+      }
+    ]
+  },
+  "linux": {
+    "target": [
+      {
+        "target": "dir",
+        "arch": ["x64"]
+      }
+    ]
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true
+  },
+  "compression": "store",
+  "nodeGypRebuild": false,
+  "buildDependenciesFromSource": false
+}
