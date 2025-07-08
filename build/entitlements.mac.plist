@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<\!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <\!-- 基本的なアプリケーション権限 -->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    
+    <\!-- ネットワークアクセス（アップデート確認用） -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+    
+    <\!-- ファイルシステムアクセス -->
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+    
+    <\!-- アプリのサンドボックス化（推奨） -->
+    <key>com.apple.security.app-sandbox</key>
+    <false/>
+    
+    <\!-- JIT コンパイル（JavaScript実行に必要） -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    
+    <\!-- デバッガーアタッチ（開発時のみ） -->
+    <key>com.apple.security.cs.debugger</key>
+    <false/>
+    
+    <\!-- ファイルアクセス権限 -->
+    <key>com.apple.security.files.downloads.read-write</key>
+    <true/>
+    <key>com.apple.security.files.bookmarks.app-scope</key>
+    <true/>
+    
+    <\!-- 自動化権限（将来のスクリプト実行用） -->
+    <key>com.apple.security.automation.apple-events</key>
+    <false/>
+</dict>
+</plist>
+EOF < /dev/null

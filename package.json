@@ -3,21 +3,66 @@
   "version": "1.0.0",
   "description": "Multi Grep Replacer (Electron Edition) - クロスプラットフォーム対応の高速一括置換ツール",
   "main": "src/main/main.js",
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
     "start": "electron .",
     "dev": "node scripts/dev.js",
     "test": "jest",
     "lint": "eslint src/",
-    "format": "prettier --write \"src/**/*.{js,html,css}\""
+    "format": "prettier --write \"src/**/*.{js,html,css}\"",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "build": "npm run dist",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:all": "electron-builder --mac --win --linux",
+    "rebuild": "electron-rebuild",
+    "postinstall": "electron-builder install-app-deps"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "build": {
+    "appId": "com.multi-grep-replacer.app",
+    "productName": "Multi Grep Replacer",
+    "files": [
+      "src/**/*",
+      "config/**/*",
+      "package.json",
+      "!src/**/*.test.js",
+      "!**/*.map"
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "icon": "build/icons/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icons/icon.ico"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        }
+      ],
+      "category": "Development",
+      "icon": "build/icons"
+    }
+  },
   "dependencies": {
-    "electron": "^37.1.0",
     "electron-log": "^5.4.1",
     "electron-store": "^10.1.0"
   },
@@ -25,6 +70,7 @@
     "@electron/rebuild": "^4.0.1",
     "@types/jest": "^30.0.0",
     "chalk": "^4.1.2",
+    "electron": "^37.1.0",
     "electron-builder": "^26.0.12",
     "eslint": "^9.30.0",
     "eslint-config-prettier": "^10.1.5",
