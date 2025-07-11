@@ -1,6 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const SecurityValidator = require('./security-validator');
+const IPCHandlers = require('./ipc-handlers');
+const debugLogger = require('./debug-logger');
 
 // グローバル参照を保持してガベージコレクションを防ぐ
 let mainWindow = null;
@@ -56,12 +58,24 @@ function createWindow() {
 // Electronの初期化が完了したらウィンドウを作成
 app.whenReady().then(() => {
   console.log('App ready');
+  
+  // Debug Logger初期化完了をログ
+  debugLogger.logTaskCompletion('app_initialization', {
+    electron_version: process.versions.electron,
+    node_version: process.versions.node,
+    platform: process.platform
+  });
+  
   createWindow();
+  
+  // ウィンドウ作成後にIPC handlersを登録
+  registerIPCHandlers();
 
   app.on('activate', () => {
     // macOSでドックアイコンがクリックされた時
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
+      registerIPCHandlers();
     }
   });
 });
@@ -88,20 +102,10 @@ app.on('web-contents-created', (event, contents) => {
 
 // IPC通信ハンドラーの登録
 function registerIPCHandlers() {
-  // Pingテスト用ハンドラー
-  ipcMain.handle('ping', async () => {
-    return {
-      message: 'pong',
-      timestamp: Date.now(),
-      processInfo: {
-        pid: process.pid,
-        platform: process.platform,
-        version: app.getVersion()
-      }
-    };
-  });
-
-  // アプリ情報取得
+  // 基本のIPCハンドラーを登録
+  IPCHandlers.registerHandlers(mainWindow);
+  
+  // 追加のアプリ情報取得ハンドラー
   ipcMain.handle('get-app-info', async () => {
     return {
       name: app.getName(),
@@ -113,11 +117,8 @@ function registerIPCHandlers() {
     };
   });
 
-  console.log('IPC handlers registered');
+  console.log('All IPC handlers registered successfully');
 }
-
-// IPC通信ハンドラーを登録
-registerIPCHandlers();
 
 // アプリケーション情報
 console.log('Multi Grep Replacer starting...');

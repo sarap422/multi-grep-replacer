@@ -63,6 +63,48 @@ section h2 {
   color: #2c3e50;
 }
 
+/* 説明テキスト */
+.description {
+  margin-bottom: 15px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 情報ノート */
+.info-note {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 12px;
+  margin-top: 15px;
+  font-size: 13px;
+  color: #495057;
+}
+
+.info-note strong {
+  color: #2c3e50;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.info-note ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.info-note li {
+  margin: 4px 0;
+}
+
+.info-note em {
+  color: #6c757d;
+  font-style: italic;
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
 /* 情報ボックス */
 .info-box {
   background-color: #f8f9fa;
@@ -84,6 +126,7 @@ section h2 {
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin: 4px;
 }
 
 .btn-primary {
@@ -97,6 +140,45 @@ section h2 {
 
 .btn-primary:active {
   transform: translateY(1px);
+}
+
+.btn-secondary {
+  background-color: #95a5a6;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #7f8c8d;
+}
+
+.btn-secondary:active {
+  transform: translateY(1px);
+}
+
+.btn-accent {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-accent:hover {
+  background-color: #c0392b;
+}
+
+.btn-accent:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
 }
 
 /* 結果表示 */
