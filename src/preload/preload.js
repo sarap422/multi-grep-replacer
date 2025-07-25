@@ -319,13 +319,12 @@ try {
 /**
  * デバッグ情報（開発時のみ）
  */
-if (process.env.NODE_ENV === 'development') {
-  console.log('🔧 Development mode detected');
-  console.log('📊 Available APIs:', Object.keys(window));
-  
-  // メッセージ送信テスト用（将来の拡張）
-  window.electronAPI.testMessage = (message) => {
-    console.log('📨 Test message:', message);
-    return Promise.resolve({ status: 'received', message });
-  };
-}
+// 開発時デバッグ情報（process.envは使用不可のためコメントアウト）
+console.log('🔧 Debug mode active');
+console.log('📊 ElectronAPI loaded successfully');
+
+// メッセージ送信テスト用（将来の拡張）
+// window.electronAPI.testMessage = (message) => {
+//   console.log('📨 Test message:', message);
+//   return Promise.resolve({ status: 'received', message });
+// };

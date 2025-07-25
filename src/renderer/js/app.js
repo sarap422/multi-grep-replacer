@@ -182,7 +182,18 @@ class MultiGrepReplacerUI {
     try {
       this.updateStatus('Getting version info...', '📋');
       
+      // デバッグ情報
+      console.log('🔍 Debugging version info...');
+      console.log('📋 window.electronAPI available:', !!window.electronAPI);
+      console.log('📋 getVersion method available:', !!window.electronAPI?.getVersion);
+      
+      if (!window.electronAPI || !window.electronAPI.getVersion) {
+        throw new Error('electronAPI.getVersion is not available');
+      }
+      
       const version = await window.electronAPI.getVersion();
+      console.log('📋 Version data received:', version);
+      
       const responseTime = performance.now() - startTime;
       this.updateResponseTime(responseTime);
       
@@ -201,7 +212,20 @@ Chrome: ${version.chrome || 'N/A'}
       
     } catch (error) {
       console.error('❌ Version info failed:', error);
-      this.displayResult('versionResult', `❌ エラー: ${error.message}`);
+      console.error('❌ Error type:', typeof error);
+      console.error('❌ Error name:', error.name);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+      
+      // より詳細なエラー情報
+      const errorInfo = {
+        type: typeof error,
+        name: error.name,
+        message: error.message,
+        toString: error.toString()
+      };
+      
+      this.displayResult('versionResult', `❌ エラー: ${error.message || error.toString() || 'Unknown error'}`);
       this.updateStatus('Error', '🚨');
     }
   }

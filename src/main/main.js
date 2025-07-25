@@ -131,14 +131,26 @@ class MultiGrepReplacerApp {
 
     // アプリバージョン取得
     ipcMain.handle('get-version', async () => {
-      const packageJson = require('../../package.json');
-      return {
-        version: packageJson.version,
-        name: packageJson.name,
-        electron: process.versions.electron,
-        node: process.versions.node,
-        chrome: process.versions.chrome
-      };
+      try {
+        console.log('📋 Getting version info in main process...');
+        const packageJson = require('../../package.json');
+        console.log('📋 Package.json loaded:', { name: packageJson.name, version: packageJson.version });
+        console.log('📋 Process versions:', process.versions);
+        
+        const versionInfo = {
+          version: packageJson.version,
+          name: packageJson.name,
+          electron: process.versions.electron,
+          node: process.versions.node,
+          chrome: process.versions.chrome
+        };
+        
+        console.log('📋 Version info prepared:', versionInfo);
+        return versionInfo;
+      } catch (error) {
+        console.error('❌ Error in get-version handler:', error);
+        throw error;
+      }
     });
 
     // アプリ情報取得
