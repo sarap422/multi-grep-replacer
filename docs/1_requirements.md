@@ -30,6 +30,10 @@
 ### プロダクト名
 **Multi Grep Replacer (Electron Edition)**
 
+### アプリケーション名
+- MultiGrepReplacer.app (Mac)
+- MultiGrepReplacer.exe (Windows)
+
 ### 概要
 任意のフォルダパス（サブフォルダを含む）内のファイルの内容を、複数の検索・置換パターンで、一括で順次Grep置換できるクロスプラットフォーム対応デスクトップアプリケーション（Electron製）
 

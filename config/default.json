@@ -4,29 +4,21 @@
     "name": "Multi Grep Replacer",
     "version": "1.0.0",
     "created_at": "2025-07-11T00:00:00Z",
-    "description": "Multi Grep Replacer Default Configuration",
-    "author": "User"
+    "description": "Electron-based multi grep replacer with superior UI responsiveness",
+    "author": "Multi Grep Replacer Team"
   },
-  "replacements": [
-    {
-      "id": "rule_001",
-      "from": "old-text",
-      "to": "new-text",
-      "enabled": true,
-      "description": "サンプル置換ルール",
-      "case_sensitive": true,
-      "whole_word": false
-    }
-  ],
+  "replacements": [],
   "target_settings": {
-    "file_extensions": [".html", ".css", ".js", ".php", ".md", ".json"],
+    "file_extensions": [".html", ".css", ".js", ".php", ".md", ".json", ".xml", ".txt"],
     "exclude_patterns": [
       "node_modules/**",
       ".git/**", 
       "dist/**", 
       "build/**",
       "*.min.js",
-      "*.min.css"
+      "*.min.css",
+      ".DS_Store",
+      "Thumbs.db"
     ],
     "include_subdirectories": true,
     "max_file_size": 104857600,
@@ -45,7 +37,9 @@
       "width": 800,
       "height": 700,
       "resizable": true,
-      "center": true
+      "center": true,
+      "min_width": 600,
+      "min_height": 500
     },
     "remember_last_folder": true,
     "auto_save_config": false,
@@ -56,6 +50,7 @@
     "max_concurrent_files": 10,
     "progress_update_interval": 100,
     "log_level": "info",
-    "enable_crash_reporting": false
+    "enable_crash_reporting": false,
+    "ui_response_target": 100
   }
 }

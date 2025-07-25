@@ -1,285 +1,246 @@
-# Electronパターン・ベストプラクティス集
+# Electron開発パターン・ベストプラクティス
 
-## Electron基盤構築パターン
+## 🔒 セキュリティベストプラクティス
 
-### セキュアな初期設定パターン
-
+### 必須セキュリティ設定
 ```javascript
 // main.js - セキュリティベストプラクティス
-const { app, BrowserWindow, ipcMain } = require('electron');
-const path = require('path');
-const SecurityValidator = require('./security-validator');
-
-function createWindow() {
-  // セキュアなwebPreferences設定を取得
-  const securePreferences = SecurityValidator.getSecureWebPreferences();
-  const webPreferences = {
-    ...securePreferences,
-    preload: path.join(__dirname, '../preload/preload.js')
-  };
-  
-  // セキュリティ検証を実行
-  const issues = SecurityValidator.validateWebPreferences(webPreferences);
-  SecurityValidator.logValidationResults(issues);
-  
-  const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 700,
-    webPreferences
-  });
-}
+const mainWindow = new BrowserWindow({
+  webPreferences: {
+    nodeIntegration: false,           // 必須：セキュリティ強化
+    contextIsolation: true,           // 必須：Context Isolation有効
+    enableRemoteModule: false,        // 必須：Remote Module無効化
+    webSecurity: true,                // 必須：Web Security有効
+    allowRunningInsecureContent: false, // 必須：不正コンテンツ禁止
+    experimentalFeatures: false,      // 必須：実験的機能無効
+    preload: path.join(__dirname, '../preload/preload.js') // 必須
+  }
+});
 ```
 
-**学習ポイント**:
-- セキュリティ設定は別モジュールで管理
-- 設定の検証を自動化
-- 開発時にセキュリティ問題を早期発見
-
-### IPC通信基本パターン
-
+### セキュアなIPC通信パターン
 ```javascript
 // preload.js - セキュアAPI公開
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  // 基本的な通信テスト
+  // 基本通信
   ping: () => ipcRenderer.invoke('ping'),
   
-  // アプリケーション情報取得
-  getAppInfo: () => ipcRenderer.invoke('get-app-info'),
-  
-  // バージョン情報
-  versions: {
-    node: process.versions.node,
-    chrome: process.versions.chrome,
-    electron: process.versions.electron
+  // 非同期操作
+  getAppInfo: async () => {
+    try {
+      return await ipcRenderer.invoke('get-app-info');
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
   }
 });
 ```
 
-```javascript
-// main.js - IPCハンドラー登録
-function registerIPCHandlers() {
-  // Pingテスト用ハンドラー
-  ipcMain.handle('ping', async () => {
-    return {
-      message: 'pong',
-      timestamp: Date.now(),
-      processInfo: {
-        pid: process.pid,
-        platform: process.platform,
-        version: app.getVersion()
-      }
-    };
-  });
-  
-  // アプリ情報取得
-  ipcMain.handle('get-app-info', async () => {
-    return {
-      name: app.getName(),
-      version: app.getVersion(),
-      electronVersion: process.versions.electron
-    };
-  });
+## 📋 プロジェクト構造パターン
+
+### 推奨ディレクトリ構成
+```
+multi-grep-replacer/
+├── src/
+│   ├── main/          # メインプロセス（Node.js）
+│   ├── renderer/      # レンダラープロセス（Browser）
+│   └── preload/       # Preloadスクリプト
+├── config/            # アプリ設定
+├── tests/             # テストスイート
+├── build/             # ビルド設定
+└── dist/              # ビルド成果物
+```
+
+### package.json設定パターン
+```json
+{
+  "main": "src/main/main.js",
+  "dependencies": {
+    "electron-store": "^8.1.0",
+    "electron-log": "^4.4.8"
+  },
+  "devDependencies": {
+    "electron": "^25.0.0",        // 重要：devDependenciesに配置
+    "electron-builder": "^24.0.0"
+  },
+  "scripts": {
+    "start": "electron .",
+    "build:dev": "electron-builder --dir",
+    "build:mac": "electron-builder --mac"
+  }
 }
 ```
 
-**学習ポイント**:
-- `ipcRenderer.invoke()` + `ipcMain.handle()` パターンを使用
-- 非同期処理で応答性を確保
-- レスポンスにコンテキスト情報を含める
+## ⚡ パフォーマンス最適化パターン
 
-### UI応答性監視パターン
-
+### UI応答性監視
 ```javascript
-// app.js - UI応答性監視
+// src/renderer/js/performance-monitor.js
 class PerformanceMonitor {
   static UI_RESPONSE_TARGET = 100; // ms
   
-  static async performPingTest() {
-    const startTime = performance.now();
-    const response = await window.electronAPI.ping();
-    const responseTime = performance.now() - startTime;
-    
-    if (responseTime <= this.UI_RESPONSE_TARGET) {
-      console.log(`✅ UI応答性: ${responseTime.toFixed(2)}ms (目標達成)`);
-    } else {
-      console.warn(`⚠️ UI応答性: ${responseTime.toFixed(2)}ms (目標: ${this.UI_RESPONSE_TARGET}ms以内)`);
-    }
-    
-    return { response, responseTime };
+  static monitorButtonResponse(element, actionName) {
+    element.addEventListener('click', () => {
+      const startTime = performance.now();
+      
+      requestAnimationFrame(() => {
+        const responseTime = performance.now() - startTime;
+        
+        if (responseTime > this.UI_RESPONSE_TARGET) {
+          console.warn(`⚠️ UI応答性低下: ${actionName} (${responseTime}ms)`);
+        }
+      });
+    });
   }
 }
 ```
 
-**学習ポイント**:
-- `performance.now()` で正確な時間測定
-- 目標値（100ms）と比較して警告表示
-- 応答性の継続的監視
-
-### セキュリティ検証パターン
-
+### 非同期処理パターン
 ```javascript
-// security-validator.js - セキュリティ設定検証
-class SecurityValidator {
-  static validateWebPreferences(webPreferences) {
-    const issues = [];
-    
-    if (webPreferences.nodeIntegration === true) {
-      issues.push({
-        level: 'critical',
-        message: 'nodeIntegration must be false for security',
-        setting: 'nodeIntegration'
-      });
-    }
-    
-    if (webPreferences.contextIsolation === false) {
-      issues.push({
-        level: 'critical', 
-        message: 'contextIsolation must be true for security',
-        setting: 'contextIsolation'
-      });
-    }
-    
-    return issues;
-  }
+// UIフリーズ防止の非同期処理
+async function handleLongRunningTask() {
+  // 即座にUI反応表示
+  showLoadingState();
   
-  static getSecureWebPreferences() {
-    return {
-      nodeIntegration: false,
-      contextIsolation: true,
-      enableRemoteModule: false,
-      webSecurity: true,
-      allowRunningInsecureContent: false,
-      experimentalFeatures: false
-    };
-  }
+  // 重い処理は次のフレームで実行
+  setTimeout(async () => {
+    try {
+      await heavyProcessing();
+    } finally {
+      hideLoadingState();
+    }
+  }, 0);
 }
 ```
 
-**学習ポイント**:
-- セキュリティ設定の自動検証
-- 推奨設定の一元管理
-- 開発時のセキュリティリスク早期発見
+## 🧪 テスト・デバッグパターン
 
-## ビルド・パッケージングパターン
+### 基本起動テスト
+```bash
+# 時間制限付きElectronテスト
+npm start &
+APP_PID=$!
+sleep 5
+kill $APP_PID 2>/dev/null
+echo "App test completed"
+```
 
-### 開発版ビルド設定パターン
-
-```json
-// electron-builder.dev.json
-{
-  "appId": "com.multigrepreplacer.dev",
-  "productName": "Multi Grep Replacer (Dev)",
-  "directories": {
-    "output": "dist/dev"
-  },
-  "mac": {
-    "target": [
-      {
-        "target": "dir",
-        "arch": ["x64", "arm64"]
+### ESLint設定パターン
+```javascript
+// .eslintrc.js - プロセス別ルール設定
+module.exports = {
+  overrides: [
+    {
+      files: ['src/main/**/*.js'],
+      rules: { 'no-restricted-globals': 'off' }  // Node.js API許可
+    },
+    {
+      files: ['src/preload/**/*.js'],
+      rules: { 'no-restricted-globals': 'off' }  // require/process許可
+    },
+    {
+      files: ['src/renderer/**/*.js'],
+      rules: { 
+        'no-restricted-globals': ['error', 'require', '__dirname', '__filename']
       }
-    ]
-  },
-  "compression": "store",
-  "nodeGypRebuild": false
-}
-```
-
-**学習ポイント**:
-- 開発版は`dir`ターゲットで高速ビルド
-- Intel + Apple Silicon両対応
-- 圧縮なしで高速化
-
-### package.json スクリプトパターン
-
-```json
-{
-  "scripts": {
-    "start": "electron .",
-    "build:dev": "electron-builder --mac --config electron-builder.dev.json",
-    "build:production": "electron-builder --mac --config electron-builder.prod.json",
-    "lint": "eslint src/**/*.js",
-    "lint:fix": "eslint src/**/*.js --fix"
-  }
-}
-```
-
-**学習ポイント**:
-- 開発版と本番版のビルド設定を分離
-- Lintチェックの自動化
-- クロスプラットフォーム対応
-
-## トラブルシューティングパターン
-
-### よくある問題と解決方法
-
-#### 1. アイコンが見つからないエラー
-```
-⨯ icon directory doesn't contain icons
-```
-
-**解決方法**:
-```javascript
-// build/iconsディレクトリを削除または
-// electron-builder設定からicon指定を削除
-{
-  "mac": {
-    // "icon": "build/icons/icon.icns", // この行を削除
-    "target": [{"target": "dir"}]
-  }
-}
-```
-
-#### 2. セキュリティ警告の対処
-```
-contextIsolation must be true for security
-```
-
-**解決方法**:
-```javascript
-// main.js でセキュリティ設定を強制
-const webPreferences = {
-  nodeIntegration: false,      // 必須
-  contextIsolation: true,      // 必須
-  enableRemoteModule: false,   // 必須
-  webSecurity: true           // 推奨
+    }
+  ]
 };
 ```
 
-#### 3. IPC通信エラーの対処
-```
-Cannot read property 'invoke' of undefined
-```
+## 🏗️ ビルド・配布パターン
 
-**解決方法**:
-```javascript
-// preload.js で適切にAPI公開
-contextBridge.exposeInMainWorld('electronAPI', {
-  ping: () => ipcRenderer.invoke('ping')
-});
-
-// renderer側で存在確認
-if (window.electronAPI) {
-  const response = await window.electronAPI.ping();
+### electron-builder設定
+```json
+{
+  "build": {
+    "appId": "com.multigrepreplacer.app",
+    "directories": { "output": "dist" },
+    "files": ["src/**/*", "config/**/*", "package.json"],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": "dmg"
+    }
+  }
 }
 ```
 
-## 成功指標・KPI
+### 段階的ビルド戦略
+1. **開発ビルド**: `npm run build:dev` (.appファイルのみ)
+2. **本番ビルド**: `npm run build:mac` (.dmgインストーラー)
+3. **クロスプラットフォーム**: `npm run build:win` (Windows用)
 
-### Phase 1完了時の達成指標
-- ✅ **UI応答性**: 100ms以内達成
-- ✅ **セキュリティ**: 警告0件
-- ✅ **ビルド成功**: .app作成100%成功
-- ✅ **クロスプラットフォーム**: Intel + ARM64対応
+## 🐛 よくある問題と解決方法
 
-### 継続監視項目
-- アプリ起動時間: 2秒以内
-- メモリ使用量: 200MB以下
-- IPC通信遅延: 50ms以下
-- セキュリティ検証: 100%合格
+### 問題: IPC通信が動作しない
+```javascript
+// 原因: contextBridge設定ミス
+// 解決: preload.jsでのAPI公開確認
+if (typeof window.electronAPI === 'undefined') {
+  console.error('ElectronAPI not available');
+}
+```
 
----
+### 問題: electron-builderで "electron must be in devDependencies"
+```json
+// 解決: electronをdevDependenciesに移動
+{
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^25.0.0"
+  }
+}
+```
 
-このパターン集により、後続のTaskでも一貫したElectronベストプラクティスを適用し、Python版の課題を根本的に解決できます。
+### 問題: macOSでtimeoutコマンドなし
+```bash
+# 解決: sleep + kill の組み合わせ使用
+command &
+PID=$!
+sleep 5
+kill $PID
+```
+
+## 📊 成功指標パターン
+
+### 起動時間測定
+```javascript
+// main.js
+class App {
+  constructor() {
+    this.startTime = performance.now();
+  }
+  
+  onReady() {
+    const startupTime = performance.now() - this.startTime;
+    console.log(`⚡ Startup time: ${startupTime.toFixed(2)}ms`);
+  }
+}
+```
+
+### 品質確認チェックリスト
+- [ ] ESLint チェック通過（0エラー）
+- [ ] 基本起動テスト成功
+- [ ] IPC通信テスト成功  
+- [ ] .appファイル作成・動作確認
+- [ ] UI応答性100ms以内
+- [ ] メモリ使用量200MB以下
+
+## 🔄 継続的改善パターン
+
+### ログ出力統一
+```javascript
+// 構造化ログパターン
+const logEntry = {
+  timestamp: new Date().toISOString(),
+  level: 'INFO',
+  message: 'Action completed',
+  context: { duration: 120, memory: process.memoryUsage() }
+};
+console.log(JSON.stringify(logEntry));
+```
+
+このパターン集により、Electronアプリ開発での試行錯誤を削減し、品質の高いアプリケーションを効率的に開発できます。

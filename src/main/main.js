@@ -1,140 +1,189 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const SecurityValidator = require('./security-validator');
-const IPCHandlers = require('./ipc-handlers');
-const debugLogger = require('./debug-logger');
 
-// グローバル参照を保持してガベージコレクションを防ぐ
-let mainWindow = null;
-
-// Electronのセキュリティ推奨事項を有効化
-if (process.env.NODE_ENV === 'production') {
-  app.enableSandbox();
-}
-
-function createWindow() {
-  // セキュアなwebPreferences設定を取得
-  const securePreferences = SecurityValidator.getSecureWebPreferences();
-  const webPreferences = {
-    ...securePreferences,
-    preload: path.join(__dirname, '../preload/preload.js')
-  };
-  
-  // セキュリティ検証を実行
-  const issues = SecurityValidator.validateWebPreferences(webPreferences);
-  SecurityValidator.logValidationResults(issues);
-  
-  // メインウィンドウ作成
-  mainWindow = new BrowserWindow({
-    width: 800,
-    height: 700,
-    minWidth: 600,
-    minHeight: 500,
-    title: 'Multi Grep Replacer',
-    center: true,
-    webPreferences
-  });
-
-  // index.htmlをロード
-  mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
-
-  // 開発環境では開発者ツールを開く
-  if (process.env.NODE_ENV !== 'production') {
-    mainWindow.webContents.openDevTools();
+/**
+ * Multi Grep Replacer - Main Process
+ * Electronアプリケーションのエントリーポイント
+ */
+class MultiGrepReplacerApp {
+  constructor() {
+    this.mainWindow = null;
+    this.isDevelopment = process.env.NODE_ENV === 'development';
+    this.startTime = performance.now();
   }
 
-  // ウィンドウが閉じられた時の処理
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
-
-  // 外部リンクはブラウザで開く
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    require('electron').shell.openExternal(url);
-    return { action: 'deny' };
-  });
-}
-
-// Electronの初期化が完了したらウィンドウを作成
-app.whenReady().then(() => {
-  console.log('App ready');
-  
-  // Debug Logger初期化完了をログ
-  debugLogger.logTaskCompletion('app_initialization', {
-    electron_version: process.versions.electron,
-    node_version: process.versions.node,
-    platform: process.platform
-  });
-  
-  createWindow();
-  
-  // ウィンドウ作成後にIPC handlersを登録
-  registerIPCHandlers();
-
-  app.on('activate', () => {
-    // macOSでドックアイコンがクリックされた時
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-      registerIPCHandlers();
-    }
-  });
-});
-
-// 全てのウィンドウが閉じられた時の処理
-app.on('window-all-closed', () => {
-  // macOS以外ではアプリケーションを終了
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-// セキュリティ: HTTPSを強制
-app.on('web-contents-created', (event, contents) => {
-  contents.on('will-navigate', (event, navigationUrl) => {
-    const parsedUrl = new URL(navigationUrl);
+  /**
+   * アプリケーション初期化
+   */
+  async initialize() {
+    console.log('🚀 Multi Grep Replacer starting...');
     
-    if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'file:') {
-      console.warn(`Blocked navigation to ${navigationUrl}`);
-      event.preventDefault();
+    // アプリイベントリスナー設定
+    this.setupAppEventListeners();
+    
+    // IPC通信ハンドラー設定
+    this.setupIpcHandlers();
+    
+    console.log('✅ Application initialized');
+  }
+
+  /**
+   * メインウィンドウ作成
+   */
+  createMainWindow() {
+    console.log('🪟 Creating main window...');
+    
+    this.mainWindow = new BrowserWindow({
+      width: 800,
+      height: 700,
+      minWidth: 600,
+      minHeight: 500,
+      show: false, // 準備完了まで非表示
+      title: 'Multi Grep Replacer',
+      titleBarStyle: 'default',
+      webPreferences: {
+        // セキュリティ設定（必須）
+        nodeIntegration: false,
+        contextIsolation: true,
+        enableRemoteModule: false,
+        webSecurity: true,
+        allowRunningInsecureContent: false,
+        experimentalFeatures: false,
+        
+        // preload スクリプト
+        preload: path.join(__dirname, '../preload/preload.js')
+      }
+    });
+
+    // HTMLファイル読み込み
+    const htmlPath = path.join(__dirname, '../renderer/index.html');
+    this.mainWindow.loadFile(htmlPath);
+
+    // ウィンドウが準備完了したら表示
+    this.mainWindow.once('ready-to-show', () => {
+      console.log('✅ Window ready to show');
+      this.mainWindow.show();
+      
+      // 開発時のみ DevTools を開く
+      if (this.isDevelopment) {
+        this.mainWindow.webContents.openDevTools();
+      }
+      
+      // 起動時間を計測
+      const startupTime = performance.now() - this.startTime;
+      console.log(`⚡ App startup time: ${startupTime.toFixed(2)}ms`);
+    });
+
+    // ウィンドウクローズ時の処理
+    this.mainWindow.on('closed', () => {
+      this.mainWindow = null;
+    });
+
+    console.log('✅ Main window created');
+  }
+
+  /**
+   * アプリイベントリスナー設定
+   */
+  setupAppEventListeners() {
+    // アプリ準備完了
+    app.whenReady().then(() => {
+      this.createMainWindow();
+      
+      // macOS: Dock アイコンクリック時のウィンドウ再作成
+      app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+          this.createMainWindow();
+        }
+      });
+    });
+
+    // 全ウィンドウクローズ時
+    app.on('window-all-closed', () => {
+      // macOS以外では完全終了
+      if (process.platform !== 'darwin') {
+        app.quit();
+      }
+    });
+
+    // アプリ終了前の処理
+    app.on('before-quit', () => {
+      console.log('🔄 Application shutting down...');
+    });
+  }
+
+  /**
+   * IPC通信ハンドラー設定
+   */
+  setupIpcHandlers() {
+    // 基本通信テスト（ping-pong）
+    ipcMain.handle('ping', async () => {
+      const timestamp = Date.now();
+      console.log(`📡 IPC ping received at ${timestamp}`);
+      return { 
+        status: 'success', 
+        timestamp,
+        message: 'pong'
+      };
+    });
+
+    // アプリバージョン取得
+    ipcMain.handle('get-version', async () => {
+      const packageJson = require('../../package.json');
+      return {
+        version: packageJson.version,
+        name: packageJson.name,
+        electron: process.versions.electron,
+        node: process.versions.node
+      };
+    });
+
+    // アプリ情報取得
+    ipcMain.handle('get-app-info', async () => {
+      return {
+        platform: process.platform,
+        arch: process.arch,
+        memory: process.memoryUsage(),
+        pid: process.pid
+      };
+    });
+
+    console.log('✅ IPC handlers registered');
+  }
+
+  /**
+   * セキュリティ設定検証
+   */
+  validateSecuritySettings() {
+    const webPrefs = this.mainWindow?.webContents.getWebPreferences();
+    if (!webPrefs) return false;
+
+    const issues = [];
+    
+    if (webPrefs.nodeIntegration === true) {
+      issues.push('nodeIntegration must be false for security');
     }
-  });
-});
+    
+    if (webPrefs.contextIsolation === false) {
+      issues.push('contextIsolation must be true for security');
+    }
+    
+    if (webPrefs.enableRemoteModule === true) {
+      issues.push('enableRemoteModule must be false for security');
+    }
 
-// IPC通信ハンドラーの登録
-function registerIPCHandlers() {
-  // 基本のIPCハンドラーを登録
-  IPCHandlers.registerHandlers(mainWindow);
-  
-  // 追加のアプリ情報取得ハンドラー
-  ipcMain.handle('get-app-info', async () => {
-    return {
-      name: app.getName(),
-      version: app.getVersion(),
-      electronVersion: process.versions.electron,
-      nodeVersion: process.versions.node,
-      chromeVersion: process.versions.chrome,
-      userDataPath: app.getPath('userData')
-    };
-  });
+    if (issues.length > 0) {
+      console.error('🚨 Security issues found:', issues);
+      return false;
+    }
 
-  console.log('All IPC handlers registered successfully');
+    console.log('🔒 Security settings validated');
+    return true;
+  }
 }
 
-// アプリケーション情報
-console.log('Multi Grep Replacer starting...');
-console.log(`Electron: ${process.versions.electron}`);
-console.log(`Node: ${process.versions.node}`);
-console.log(`Chrome: ${process.versions.chrome}`);
+// アプリケーション実行
+const multiGrepReplacer = new MultiGrepReplacerApp();
+multiGrepReplacer.initialize();
 
-// セキュリティ検証
-function validateSecuritySettings() {
-  console.log('\nSecurity Settings Validation:');
-  console.log('- Sandbox: Enabled in production');
-  console.log('- Context Isolation: Enforced');
-  console.log('- Node Integration: Disabled');
-  console.log('- Remote Module: Disabled');
-  console.log('- Web Security: Enabled');
-  console.log('✅ All security settings validated\n');
-}
-
-validateSecuritySettings();
+module.exports = MultiGrepReplacerApp;

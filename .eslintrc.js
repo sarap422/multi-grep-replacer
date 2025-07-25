@@ -1,7 +1,6 @@
 module.exports = {
   env: {
     browser: true,
-    commonjs: true,
     es2021: true,
     node: true,
     jest: true
@@ -14,75 +13,68 @@ module.exports = {
     sourceType: 'module'
   },
   rules: {
-    // Code Style Rules
+    // コード品質
+    'no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
+    'no-console': 'off', // 開発時はconsole.logを許可
+    'no-debugger': 'error',
+    'no-var': 'error',
+    'prefer-const': 'error',
+    
+    // スタイル
     'indent': ['error', 2],
     'linebreak-style': ['error', 'unix'],
     'quotes': ['error', 'single'],
     'semi': ['error', 'always'],
-    'comma-dangle': ['error', 'never'],
-    'arrow-parens': ['error', 'always'],
-    'object-curly-spacing': ['error', 'always'],
-    'array-bracket-spacing': ['error', 'never'],
-    'max-len': ['warn', { 'code': 120 }],
     
-    // Development Rules
-    'no-unused-vars': ['warn', { 'argsIgnorePattern': '^_' }],
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    
-    // Security Rules (Electron specific)
+    // セキュリティ
     'no-eval': 'error',
     'no-implied-eval': 'error',
     'no-new-func': 'error',
-    'no-script-url': 'error',
     
-    // Performance Rules
-    'no-loop-func': 'warn',
-    'no-inner-declarations': 'error',
-    'prefer-const': 'error',
-    'no-var': 'error',
+    // ベストプラクティス
+    'eqeqeq': 'error',
+    'no-magic-numbers': ['warn', { 
+      'ignore': [-1, 0, 1, 2, 100, 1000, 1024], 
+      'ignoreArrayIndexes': true 
+    }],
+    'prefer-arrow-callback': 'error',
+    'arrow-spacing': 'error',
     
-    // Best Practice Rules
-    'eqeqeq': ['error', 'always'],
-    'curly': ['error', 'all'],
-    'no-throw-literal': 'error',
-    'prefer-promise-reject-errors': 'error',
-    'no-return-await': 'error',
-    
-    // Electron Security Rules
-    'no-restricted-globals': [
-      'error',
-      {
-        'name': 'require',
-        'message': 'Use import/export or secure IPC instead of require in renderer process'
-      }
-    ]
+    // Electron特有
+    'no-restricted-globals': ['error', 'require', 'process', '__dirname', '__filename']
   },
   overrides: [
     {
-      // Main process specific rules
+      // メインプロセスではNode.js APIを許可
       files: ['src/main/**/*.js'],
       rules: {
-        'no-restricted-globals': 'off' // Allow require in main process
+        'no-restricted-globals': 'off'
       }
     },
     {
-      // Preload script specific rules
+      // PreloadスクリプトではrequireとprocessAPIを許可
       files: ['src/preload/**/*.js'],
       rules: {
-        'no-restricted-globals': 'off' // Allow require in preload scripts
+        'no-restricted-globals': 'off'
       }
     },
     {
-      // Test files specific rules
-      files: ['tests/**/*.js', '**/*.test.js', '**/*.spec.js'],
+      // レンダラープロセスではprocessのバージョン情報アクセスを許可
+      files: ['src/renderer/**/*.js'],
       rules: {
-        'no-console': 'off',
-        'max-len': 'off'
+        'no-restricted-globals': ['error', 'require', '__dirname', '__filename']
+      }
+    },
+    {
+      // テストファイルでは一部ルールを緩和
+      files: ['tests/**/*.js', '**/*.test.js'],
+      rules: {
+        'no-magic-numbers': 'off'
       }
     }
   ],
   globals: {
-    'electronAPI': 'readonly'
+    // Electronプロセス別のグローバル変数
+    electronAPI: 'readonly'
   }
 };
