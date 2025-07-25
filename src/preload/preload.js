@@ -71,11 +71,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       level,
       message,
       context,
-      source: 'renderer'
+      source: 'renderer',
     };
     console.log(`[${level.toUpperCase()}] ${message}`, context);
     console.log('📝 Log entry:', logEntry);
-    
+
     // 将来の拡張: メインプロセスにログ送信
     // ipcRenderer.send('log', logEntry);
   },
@@ -90,16 +90,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
       action,
       duration,
       timestamp: Date.now(),
-      memory: performance.memory ? {
-        used: performance.memory.usedJSHeapSize,
-        total: performance.memory.totalJSHeapSize,
-        limit: performance.memory.jsHeapSizeLimit
-      } : null
+      memory: performance.memory
+        ? {
+            used: performance.memory.usedJSHeapSize,
+            total: performance.memory.totalJSHeapSize,
+            limit: performance.memory.jsHeapSizeLimit,
+          }
+        : null,
     };
-    
+
     console.log(`📊 Performance: ${action} took ${duration.toFixed(2)}ms`);
     console.log('📊 Performance data:', performanceData);
-    
+
     // 将来の拡張: パフォーマンスデータ送信
     // ipcRenderer.send('performance-data', performanceData);
   },
@@ -110,7 +112,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
    * @param {string} filePath - 設定ファイルパス
    * @returns {Promise<Object>} 設定オブジェクト
    */
-  loadConfig: async (filePath) => {
+  loadConfig: async filePath => {
     console.log('📖 Loading config via IPC:', filePath);
     try {
       const result = await ipcRenderer.invoke('load-config', filePath);
@@ -213,7 +215,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
    * @param {string} filePath - ファイルパス
    * @returns {Promise<Object>} ファイル内容
    */
-  readFile: async (filePath) => {
+  readFile: async filePath => {
     console.log('📄 Reading file via IPC:', filePath);
     try {
       const result = await ipcRenderer.invoke('read-file', filePath);
@@ -241,7 +243,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       console.error('❌ Write file failed:', error);
       throw error;
     }
-  }
+  },
 });
 
 /**
@@ -268,11 +270,17 @@ const initializePerformanceMonitoring = () => {
   // タイミングAPI利用可能性確認
   if (typeof performance !== 'undefined') {
     console.log('📊 Performance API available');
-    
+
     // メモリ監視（Chrome限定）
     if (performance.memory) {
-      const memory = performance.memory;
-      console.log(`💾 Memory: ${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)}MB used / ${(memory.totalJSHeapSize / 1024 / 1024).toFixed(2)}MB total`);
+      const { memory } = performance;
+      console.log(
+        `💾 Memory: ${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)}MB used / ${(
+          memory.totalJSHeapSize /
+          1024 /
+          1024
+        ).toFixed(2)}MB total`
+      );
     }
   }
 };
@@ -282,9 +290,9 @@ const initializePerformanceMonitoring = () => {
  */
 const setupErrorHandling = () => {
   // 未処理のエラーをキャッチ
-  window.addEventListener('error', (event) => {
+  window.addEventListener('error', event => {
     console.error('🚨 Unhandled error:', event.error);
-    
+
     // 将来の拡張: エラー報告
     // ipcRenderer.send('error-report', {
     //   message: event.error.message,
@@ -294,9 +302,9 @@ const setupErrorHandling = () => {
   });
 
   // 未処理のPromise rejectionをキャッチ
-  window.addEventListener('unhandledrejection', (event) => {
+  window.addEventListener('unhandledrejection', event => {
     console.error('🚨 Unhandled promise rejection:', event.reason);
-    
+
     // 将来の拡張: Promise rejectionエラー報告
     // ipcRenderer.send('promise-rejection', {
     //   reason: event.reason,
@@ -310,7 +318,7 @@ try {
   validateSecurity();
   initializePerformanceMonitoring();
   setupErrorHandling();
-  
+
   console.log('✅ Preload script initialized successfully');
 } catch (error) {
   console.error('❌ Preload script initialization failed:', error);

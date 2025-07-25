@@ -144,7 +144,7 @@ multi-grep-replacer/                       # GitHubリポジトリルート
 │   ├── 3_debugging.md                     # デバッグ環境整備
 │   ├── 4_tasks.md                         # 開発タスク一覧
 │   ├── CHANGELOG.md                       # 実装記録（開発中更新）
-│   └── patterns.md                        # Electronパターン集（開発中更新）
+│   └── PATTERNS.md                        # Electronパターン集（開発中更新）
 ├── src/                                   # アプリケーションソースコード
 │   ├── main/                              # Electronメインプロセス
 │   │   ├── main.js                        # アプリケーションエントリーポイント
@@ -273,7 +273,7 @@ try {
 2. ✅ 動作テスト: 段階的テスト実行・合格
 3. ✅ 実行ファイル確認: .appファイル作成・動作確認
 4. ✅ CHANGELOG.md更新: 実装内容・問題・解決方法記録
-5. ✅ patterns.md更新: Electronパターン・ベストプラクティス記録
+5. ✅ PATTERNS.md更新: Electronパターン・ベストプラクティス記録
 ```
 
 ### 🧪 段階的テスト実行パターン
@@ -332,7 +332,7 @@ npm run build:production    # 完全版.app作成
 - 今後に活かせる知見
 ```
 
-### 🎯 patterns.md更新パターン
+### 🎯 PATTERNS.md更新パターン
 ```markdown
 ## Electron[機能名]パターン
 
@@ -482,7 +482,7 @@ git push origin main
 
 ### 記録確認
 - [ ] CHANGELOG.md更新完了
-- [ ] patterns.md更新完了
+- [ ] PATTERNS.md更新完了
 - [ ] Git commit実行完了
 ```
 
@@ -496,7 +496,7 @@ git push origin main
 
 ### プロセス成功指標
 - **段階的テスト**: 各Task完了時テスト100%実行
-- **記録管理**: CHANGELOG.md、patterns.md継続更新100%
+- **記録管理**: CHANGELOG.md、PATTERNS.md継続更新100%
 - **知識蓄積**: Electronベストプラクティス記録・再利用実現
 
 このCLAUDE.mdに従って開発することで、Python版を大幅に上回るElectronアプリケーションを確実に開発し、再利用可能な知識・パターンを蓄積できます。

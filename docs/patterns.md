@@ -280,9 +280,218 @@ async function processFilesAsync(files) {
 
 ## ログ・デバッグパターン
 
-### Vibe Logger統合パターン
+### 統合DebugLoggerパターン（推奨）
 ```javascript
-// 構造化ログ出力
+// debug-logger.js - 包括的ログシステム
+class DebugLogger {
+  static LOG_LEVELS = {
+    ERROR: 1,   // アプリケーション停止を伴う重大エラー
+    WARN: 2,    // 処理継続可能だが注意が必要
+    INFO: 3,    // 重要な処理の開始・完了
+    DEBUG: 4,   // 詳細な処理状況（開発時のみ）
+    TRACE: 5    // 非常に詳細な追跡情報
+  };
+
+  // パフォーマンス追跡パターン
+  static startPerformance(operationName) {
+    const startTime = performance.now();
+    const startMemory = process.memoryUsage();
+    
+    this.performanceMetrics.set(operationName, {
+      startTime,
+      startMemory,
+      timestamp: new Date().toISOString()
+    });
+    
+    return operationName;
+  }
+
+  static async endPerformance(operationName, additionalContext = {}) {
+    const metrics = this.performanceMetrics.get(operationName);
+    const duration = performance.now() - metrics.startTime;
+    
+    const performanceData = {
+      operation: operationName,
+      duration: Math.round(duration * 100) / 100,
+      memory: {
+        delta: {
+          rss: endMemory.rss - metrics.startMemory.rss,
+          heapUsed: endMemory.heapUsed - metrics.startMemory.heapUsed
+        }
+      },
+      ...additionalContext
+    };
+
+    // パフォーマンス警告チェック
+    if (duration > 1000) {
+      this.warn(`Performance warning: ${operationName} took ${duration.toFixed(2)}ms`, performanceData);
+    } else {
+      this.debug(`Performance completed: ${operationName}`, performanceData);
+    }
+
+    this.performanceMetrics.delete(operationName);
+    return performanceData;
+  }
+}
+```
+
+### アプリケーション統合パターン
+```javascript
+// main.js - アプリライフサイクル統合
+class MultiGrepReplacerApp {
+  async initialize() {
+    // デバッグロガー初期化（最優先）
+    await DebugLogger.initialize();
+    DebugLogger.startPerformance('app-initialization');
+    
+    await DebugLogger.info('Multi Grep Replacer starting...', {
+      isDevelopment: this.isDevelopment,
+      platform: process.platform,
+      electronVersion: process.versions.electron
+    });
+
+    try {
+      // アプリイベントリスナー設定
+      DebugLogger.startPerformance('setup-app-listeners');
+      this.setupAppEventListeners();
+      await DebugLogger.endPerformance('setup-app-listeners');
+
+      await DebugLogger.info('Application initialized successfully');
+    } catch (error) {
+      await DebugLogger.logError(error, { 
+        phase: 'initialization',
+        component: 'MultiGrepReplacerApp'
+      });
+      throw error;
+    }
+  }
+}
+```
+
+### IPC操作ログパターン
+```javascript
+// IPC ハンドラーのログ統合
+ipcMain.handle('load-config', async (event, filePath) => {
+  const operationId = 'ipc-load-config';
+  DebugLogger.startPerformance(operationId);
+  
+  try {
+    await DebugLogger.debug('Loading config via IPC', { filePath });
+    const config = await ConfigManager.loadConfig(filePath);
+    await DebugLogger.endPerformance(operationId, { success: true, filePath });
+    return { success: true, config };
+  } catch (error) {
+    await DebugLogger.logError(error, {
+      operation: 'load-config',
+      filePath,
+      component: 'IPC-Handler'
+    });
+    await DebugLogger.endPerformance(operationId, { success: false });
+    return { success: false, error: error.message };
+  }
+});
+```
+
+### ファイル操作ログパターン
+```javascript
+// file-operations.js - ファイル操作統合
+static async readFileContent(filePath) {
+  const operationId = 'file-read-content';
+  DebugLogger.startPerformance(operationId);
+
+  try {
+    await DebugLogger.debug('Reading file content', { filePath });
+    
+    // ファイルサイズ検証
+    const stats = await fs.stat(filePath);
+    await DebugLogger.debug('File size validated', { 
+      filePath, 
+      fileSize: stats.size,
+      maxSize: this.MAX_FILE_SIZE 
+    });
+
+    const content = await fs.readFile(filePath, 'utf8');
+
+    await DebugLogger.endPerformance(operationId, {
+      success: true,
+      filePath,
+      fileSize: stats.size,
+      contentLength: content.length
+    });
+
+    return content;
+  } catch (error) {
+    await DebugLogger.logError(error, {
+      operation: 'readFileContent',
+      filePath,
+      component: 'FileOperations'
+    });
+    await DebugLogger.endPerformance(operationId, { success: false });
+    throw new Error(`ファイル読み込みエラー: ${error.message}`);
+  }
+}
+```
+
+### UI応答性監視パターン
+```javascript
+// UI応答性監視の統合
+static async logUIResponse(actionName, responseTime, target = 100) {
+  const isSlowResponse = responseTime > target;
+  const level = isSlowResponse ? this.LOG_LEVELS.WARN : this.LOG_LEVELS.DEBUG;
+  
+  await this.log(level, `UI Response: ${actionName}`, {
+    action: actionName,
+    responseTime: Math.round(responseTime * 100) / 100,
+    target,
+    status: isSlowResponse ? 'SLOW' : 'GOOD',
+    ratio: Math.round((responseTime / target) * 100) / 100
+  });
+}
+
+// レンダラープロセスでの使用
+window.electronAPI.logUIResponse('button-click', responseTime);
+```
+
+### ログファイル管理パターン
+```javascript
+// 自動ログローテーション
+static async rotateLogIfNeeded(logPath) {
+  try {
+    const stats = await fs.stat(logPath);
+    if (stats.size > this.MAX_LOG_SIZE) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const rotatedPath = `${logPath}.${timestamp}`;
+      
+      await fs.rename(logPath, rotatedPath);
+      this.info('Log file rotated', { originalPath: logPath, rotatedPath });
+      
+      // 古いログファイル自動削除
+      await this.cleanOldLogs(path.dirname(logPath), path.basename(logPath));
+    }
+  } catch (error) {
+    console.error('Failed to rotate log file:', error);
+  }
+}
+
+// メモリ使用量自動監視
+static startPerformanceMonitoring() {
+  setInterval(() => {
+    const memory = process.memoryUsage();
+    
+    // メモリ使用量警告（200MB以上）
+    if (memory.heapUsed > 200 * 1024 * 1024) {
+      this.warn('High memory usage detected', {
+        heapUsed: `${Math.round(memory.heapUsed / 1024 / 1024)}MB`,
+        rss: `${Math.round(memory.rss / 1024 / 1024)}MB`
+      });
+    }
+  }, 30000); // 30秒間隔
+}
+```
+
+### 従来のVibe Loggerパターン（参考用）
+```javascript
+// 旧パターン - 構造化ログ出力
 static logOperation(operation, data, result) {
   const logEntry = {
     timestamp: new Date().toISOString(),
@@ -298,24 +507,6 @@ static logOperation(operation, data, result) {
   };
   
   console.log('📋 Config:', JSON.stringify(logEntry, null, 2));
-}
-
-// エラーログパターン
-static logError(operation, error, context = {}) {
-  const errorEntry = {
-    timestamp: new Date().toISOString(),
-    level: 'ERROR',
-    component: this.constructor.name,
-    operation,
-    error: {
-      message: error.message,
-      stack: error.stack,
-      code: error.code
-    },
-    context
-  };
-  
-  console.error('❌ Error:', JSON.stringify(errorEntry, null, 2));
 }
 ```
 

@@ -4,10 +4,22 @@
  */
 
 class MultiGrepReplacerUI {
+  // UI制御基本定数
+  static RESPONSE_TARGET_MS = 100; // ms
+  static FILE_DISPLAY_LIMIT = 10; // 表示するファイル数上限
+  static FILE_LIST_PREVIEW_COUNT = 20; // ファイルリスト表示件数
+
+  // UI制御定数
+  static UI_RESPONSE_TARGET = MultiGrepReplacerUI.RESPONSE_TARGET_MS; // ms
+  static MAX_DISPLAY_FILES = MultiGrepReplacerUI.FILE_DISPLAY_LIMIT; // 表示するファイル数上限
+  static KB_DIVISOR = 1024; // KB変換用
+  static SIZE_DECIMAL_PLACES = 2; // サイズ表示小数点桁数
+  static FILE_LIST_ITEM_COUNT = MultiGrepReplacerUI.FILE_LIST_PREVIEW_COUNT; // ファイルリスト表示件数
+
   constructor() {
-    this.responseTimeTarget = 100; // ms
+    this.responseTimeTarget = MultiGrepReplacerUI.UI_RESPONSE_TARGET;
     this.startTime = performance.now();
-    
+
     console.log('🖥️ Renderer process initializing...');
     this.initialize();
   }
@@ -29,16 +41,16 @@ class MultiGrepReplacerUI {
    */
   setupUI() {
     console.log('🎨 Setting up UI...');
-    
+
     // イベントリスナー設定
     this.setupEventListeners();
-    
+
     // パフォーマンス監視開始
     this.initializePerformanceMonitoring();
-    
+
     // ElectronAPI利用可能性確認
     this.verifyElectronAPI();
-    
+
     // 初期化完了
     this.updateStatus('Ready', '⚡');
     console.log('✅ UI initialization completed');
@@ -106,16 +118,16 @@ class MultiGrepReplacerUI {
    */
   async handlePingTest() {
     const startTime = performance.now();
-    
+
     try {
       this.updateStatus('Testing IPC...', '📡');
-      
+
       // ElectronAPI経由でIPC通信
       const result = await window.electronAPI.ping();
-      
+
       const responseTime = performance.now() - startTime;
       this.updateResponseTime(responseTime);
-      
+
       // 結果表示
       const resultText = `✅ IPC通信成功!
 
@@ -126,9 +138,8 @@ class MultiGrepReplacerUI {
 
       this.displayResult('pingResult', resultText);
       this.updateStatus('Ready', '⚡');
-      
+
       console.log(`📡 Ping test completed in ${responseTime.toFixed(2)}ms`);
-      
     } catch (error) {
       console.error('❌ Ping test failed:', error);
       this.displayResult('pingResult', `❌ エラー: ${error.message}`);
@@ -141,14 +152,14 @@ class MultiGrepReplacerUI {
    */
   async handleAppInfo() {
     const startTime = performance.now();
-    
+
     try {
       this.updateStatus('Getting app info...', 'ℹ️');
-      
+
       const info = await window.electronAPI.getAppInfo();
       const responseTime = performance.now() - startTime;
       this.updateResponseTime(responseTime);
-      
+
       const resultText = `💻 アプリケーション情報
 
 プラットフォーム: ${info.platform}
@@ -165,7 +176,6 @@ class MultiGrepReplacerUI {
 
       this.displayResult('infoResult', resultText);
       this.updateStatus('Ready', '⚡');
-      
     } catch (error) {
       console.error('❌ App info failed:', error);
       this.displayResult('infoResult', `❌ エラー: ${error.message}`);
@@ -178,35 +188,35 @@ class MultiGrepReplacerUI {
    */
   async handleVersionInfo() {
     const startTime = performance.now();
-    
+
     try {
       this.updateStatus('Getting version info...', '📋');
       console.log('🔍 Starting version info request...');
-      
+
       // 基本的な確認
       if (!window.electronAPI) {
         throw new Error('electronAPI is not available');
       }
-      
+
       if (!window.electronAPI.getVersion) {
         throw new Error('getVersion method is not available');
       }
-      
+
       console.log('📋 Requesting version info via IPC...');
       const version = await window.electronAPI.getVersion();
       console.log('📋 Version data received:', version);
-      
+
       // バージョン情報の安全な表示
       const responseTime = performance.now() - startTime;
       this.updateResponseTime(responseTime);
-      
+
       // 安全な文字列構築
       const appName = version?.name || 'Unknown';
       const appVersion = version?.version || 'Unknown';
       const electronVersion = version?.electron || 'Unknown';
       const nodeVersion = version?.node || 'Unknown';
       const chromeVersion = version?.chrome || 'Unknown';
-      
+
       const resultText = `📋 バージョン情報
 
 アプリケーション: ${appName} v${appVersion}
@@ -218,7 +228,6 @@ Chrome: ${chromeVersion}
 
       this.displayResult('versionResult', resultText);
       this.updateStatus('Ready', '⚡');
-      
     } catch (error) {
       console.error('❌ Version info failed:', error);
       const errorMessage = error?.message || 'Unknown error occurred';
@@ -244,9 +253,13 @@ Chrome: ${chromeVersion}
   updateStatus(text, icon) {
     const statusText = document.getElementById('statusText');
     const statusIndicator = document.getElementById('statusIndicator');
-    
-    if (statusText) statusText.textContent = text;
-    if (statusIndicator) statusIndicator.textContent = icon;
+
+    if (statusText) {
+      statusText.textContent = text;
+    }
+    if (statusIndicator) {
+      statusIndicator.textContent = icon;
+    }
   }
 
   /**
@@ -256,11 +269,11 @@ Chrome: ${chromeVersion}
     const element = document.getElementById('responseTime');
     if (element) {
       element.textContent = `${responseTime.toFixed(2)}ms`;
-      
+
       // パフォーマンス監視
       const monitor = document.getElementById('performanceMonitor');
       if (monitor) {
-        monitor.className = 'performance-monitor ' + this.getPerformanceClass(responseTime);
+        monitor.className = `performance-monitor ${this.getPerformanceClass(responseTime)}`;
       }
     }
   }
@@ -298,16 +311,16 @@ Chrome: ${chromeVersion}
     if (typeof window.electronAPI === 'undefined') {
       console.error('❌ ElectronAPI not available');
       this.updateStatus('ElectronAPI Error', '🚨');
-      
+
       // エラーメッセージ表示
       const errorMsg = '❌ ElectronAPIが利用できません。preload.jsの設定を確認してください。';
       document.querySelectorAll('.test-result').forEach(el => {
         el.textContent = errorMsg;
       });
-      
+
       return false;
     }
-    
+
     console.log('✅ ElectronAPI available');
     return true;
   }
@@ -318,12 +331,12 @@ Chrome: ${chromeVersion}
   initializePerformanceMonitoring() {
     // ボタンクリック応答性監視
     document.querySelectorAll('button').forEach(button => {
-      button.addEventListener('click', (event) => {
+      button.addEventListener('click', event => {
         const actionName = button.textContent.trim();
         this.monitorButtonResponse(event, actionName);
       });
     });
-    
+
     console.log('📊 Performance monitoring initialized');
   }
 
@@ -332,11 +345,11 @@ Chrome: ${chromeVersion}
    */
   monitorButtonResponse(event, actionName) {
     const startTime = performance.now();
-    
+
     // 次のフレームで測定
     requestAnimationFrame(() => {
       const responseTime = performance.now() - startTime;
-      
+
       if (responseTime > this.responseTimeTarget) {
         console.warn(`⚠️ UI応答性低下: ${actionName} (${responseTime.toFixed(2)}ms)`);
       } else {
@@ -350,14 +363,14 @@ Chrome: ${chromeVersion}
    */
   async handleConfigLoad() {
     const startTime = performance.now();
-    
+
     try {
       this.updateStatus('Loading config...', '📖');
-      
+
       const result = await window.electronAPI.getDefaultConfig();
       const responseTime = performance.now() - startTime;
       this.updateResponseTime(responseTime);
-      
+
       if (result.success) {
         const resultText = `✅ 設定読み込み成功!
 
@@ -374,9 +387,8 @@ ${JSON.stringify(result.config, null, 2)}`;
       } else {
         this.displayResult('configResult', `❌ エラー: ${result.error}`);
       }
-      
+
       this.updateStatus('Ready', '⚡');
-      
     } catch (error) {
       console.error('❌ Config load test failed:', error);
       this.displayResult('configResult', `❌ エラー: ${error.message}`);
@@ -389,10 +401,10 @@ ${JSON.stringify(result.config, null, 2)}`;
    */
   async handleConfigSave() {
     const startTime = performance.now();
-    
+
     try {
       this.updateStatus('Saving config...', '💾');
-      
+
       // テスト用設定作成
       const testConfig = {
         app_info: {
@@ -400,7 +412,7 @@ ${JSON.stringify(result.config, null, 2)}`;
           version: '1.0.0',
           created_at: new Date().toISOString(),
           description: 'Test config created by UI',
-          author: 'Test User'
+          author: 'Test User',
         },
         replacements: [
           {
@@ -408,38 +420,38 @@ ${JSON.stringify(result.config, null, 2)}`;
             from: 'test-old',
             to: 'test-new',
             enabled: true,
-            description: 'Test replacement rule'
-          }
+            description: 'Test replacement rule',
+          },
         ],
         target_settings: {
           file_extensions: ['.html', '.css', '.js'],
           exclude_patterns: ['node_modules/**', '.git/**'],
           include_subdirectories: true,
           max_file_size: 104857600,
-          encoding: 'utf-8'
+          encoding: 'utf-8',
         },
         replacement_settings: {
           case_sensitive: true,
           use_regex: false,
-          backup_enabled: false
+          backup_enabled: false,
         },
         ui_settings: {
           theme: 'auto',
-          window: { width: 800, height: 700 }
+          window: { width: 800, height: 700 },
         },
         advanced_settings: {
           max_concurrent_files: 10,
-          ui_response_target: 100
-        }
+          ui_response_target: 100,
+        },
       };
-      
+
       // 一時ファイルパス作成
       const tempPath = `/tmp/multi-grep-replacer-test-${Date.now()}.json`;
-      
+
       const result = await window.electronAPI.saveConfig(testConfig, tempPath);
       const responseTime = performance.now() - startTime;
       this.updateResponseTime(responseTime);
-      
+
       if (result.success) {
         const resultText = `✅ 設定保存成功!
 
@@ -452,9 +464,8 @@ ${JSON.stringify(result.config, null, 2)}`;
       } else {
         this.displayResult('configResult', `❌ エラー: ${result.error}`);
       }
-      
+
       this.updateStatus('Ready', '⚡');
-      
     } catch (error) {
       console.error('❌ Config save test failed:', error);
       this.displayResult('configResult', `❌ エラー: ${error.message}`);
@@ -467,25 +478,27 @@ ${JSON.stringify(result.config, null, 2)}`;
    */
   async handleConfigRecent() {
     const startTime = performance.now();
-    
+
     try {
       this.updateStatus('Getting recent configs...', '📚');
-      
+
       const result = await window.electronAPI.getRecentConfigs();
       const responseTime = performance.now() - startTime;
       this.updateResponseTime(responseTime);
-      
+
       if (result.success) {
         const resultText = `✅ 最近の設定取得成功!
 
 応答時間: ${responseTime.toFixed(2)}ms
 設定ファイル数: ${result.configs.length}
 
-${result.configs.length > 0 ? 
-  result.configs.map((config, index) => 
-    `${index + 1}. ${config.name} (${config.lastUsed})`
-  ).join('\n') : 
-  '最近使用した設定ファイルはありません'}
+${
+  result.configs.length > 0
+    ? result.configs
+        .map((config, index) => `${index + 1}. ${config.name} (${config.lastUsed})`)
+        .join('\n')
+    : '最近使用した設定ファイルはありません'
+}
 
 詳細:
 ${JSON.stringify(result.configs, null, 2)}`;
@@ -494,9 +507,8 @@ ${JSON.stringify(result.configs, null, 2)}`;
       } else {
         this.displayResult('configResult', `❌ エラー: ${result.error}`);
       }
-      
+
       this.updateStatus('Ready', '⚡');
-      
     } catch (error) {
       console.error('❌ Recent configs test failed:', error);
       this.displayResult('configResult', `❌ エラー: ${error.message}`);
@@ -509,14 +521,14 @@ ${JSON.stringify(result.configs, null, 2)}`;
    */
   async handleFolderSelect() {
     const startTime = performance.now();
-    
+
     try {
       this.updateStatus('Opening folder dialog...', '📂');
-      
+
       const result = await window.electronAPI.selectFolder();
       const responseTime = performance.now() - startTime;
       this.updateResponseTime(responseTime);
-      
+
       if (result.success) {
         const resultText = `✅ フォルダ選択成功!
 
@@ -524,7 +536,7 @@ ${JSON.stringify(result.configs, null, 2)}`;
 選択されたフォルダ: ${result.folderPath || 'キャンセルされました'}`;
 
         this.displayResult('fileResult', resultText);
-        
+
         // 選択されたフォルダがある場合は次のテストボタンを有効化
         if (result.folderPath) {
           this.selectedFolder = result.folderPath;
@@ -532,9 +544,8 @@ ${JSON.stringify(result.configs, null, 2)}`;
       } else {
         this.displayResult('fileResult', `❌ エラー: ${result.error}`);
       }
-      
+
       this.updateStatus('Ready', '⚡');
-      
     } catch (error) {
       console.error('❌ Folder select test failed:', error);
       this.displayResult('fileResult', `❌ エラー: ${error.message}`);
@@ -547,21 +558,26 @@ ${JSON.stringify(result.configs, null, 2)}`;
    */
   async handleFileSearch() {
     const startTime = performance.now();
-    
+
     try {
       this.updateStatus('Searching files...', '🔍');
-      
+
       // テスト用のディレクトリ（現在のプロジェクトディレクトリ）
-      const testDirectory = this.selectedFolder || '/Volumes/CT1000P3/pCloud(CT1000P3)/(github)/multi-grep-replacer';
+      const testDirectory =
+        this.selectedFolder || '/Volumes/CT1000P3/pCloud(CT1000P3)/(github)/multi-grep-replacer';
       const testExtensions = ['.js', '.html', '.css', '.md'];
       const testExcludePatterns = ['node_modules/**', 'dist/**'];
-      
-      const result = await window.electronAPI.findFiles(testDirectory, testExtensions, testExcludePatterns);
+
+      const result = await window.electronAPI.findFiles(
+        testDirectory,
+        testExtensions,
+        testExcludePatterns
+      );
       const responseTime = performance.now() - startTime;
       this.updateResponseTime(responseTime);
-      
+
       if (result.success) {
-        const files = result.files;
+        const { files } = result;
         const resultText = `✅ ファイル検索成功!
 
 応答時間: ${responseTime.toFixed(2)}ms
@@ -569,15 +585,25 @@ ${JSON.stringify(result.configs, null, 2)}`;
 対象拡張子: ${testExtensions.join(', ')}
 見つかったファイル数: ${files.length}
 
-上位10ファイル:
-${files.slice(0, 10).map((file, index) => 
-  `${index + 1}. ${file.name} (${(file.size / 1024).toFixed(2)} KB)`
-).join('\n')}
+上位${MultiGrepReplacerUI.MAX_DISPLAY_FILES}ファイル:
+${files
+  .slice(0, MultiGrepReplacerUI.MAX_DISPLAY_FILES)
+  .map(
+    (file, index) =>
+      `${index + 1}. ${file.name} (${(file.size / MultiGrepReplacerUI.KB_DIVISOR).toFixed(
+        MultiGrepReplacerUI.SIZE_DECIMAL_PLACES
+      )} KB)`
+  )
+  .join('\n')}
 
-${files.length > 10 ? `... 他 ${files.length - 10} ファイル` : ''}`;
+${
+  files.length > MultiGrepReplacerUI.MAX_DISPLAY_FILES
+    ? `... 他 ${files.length - MultiGrepReplacerUI.MAX_DISPLAY_FILES} ファイル`
+    : ''
+}`;
 
         this.displayResult('fileResult', resultText);
-        
+
         // 最初のファイルを次のテスト用に保存
         if (files.length > 0) {
           this.selectedFile = files[0].path;
@@ -585,9 +611,8 @@ ${files.length > 10 ? `... 他 ${files.length - 10} ファイル` : ''}`;
       } else {
         this.displayResult('fileResult', `❌ エラー: ${result.error}`);
       }
-      
+
       this.updateStatus('Ready', '⚡');
-      
     } catch (error) {
       console.error('❌ File search test failed:', error);
       this.displayResult('fileResult', `❌ エラー: ${error.message}`);
@@ -600,22 +625,24 @@ ${files.length > 10 ? `... 他 ${files.length - 10} ファイル` : ''}`;
    */
   async handleFileRead() {
     const startTime = performance.now();
-    
+
     try {
       this.updateStatus('Reading file...', '📄');
-      
+
       // テスト用ファイル（package.jsonを読み込み）
-      const testFilePath = this.selectedFile || '/Volumes/CT1000P3/pCloud(CT1000P3)/(github)/multi-grep-replacer/package.json';
-      
+      const testFilePath =
+        this.selectedFile ||
+        '/Volumes/CT1000P3/pCloud(CT1000P3)/(github)/multi-grep-replacer/package.json';
+
       const result = await window.electronAPI.readFile(testFilePath);
       const responseTime = performance.now() - startTime;
       this.updateResponseTime(responseTime);
-      
+
       if (result.success) {
-        const content = result.content;
+        const { content } = result;
         const lines = content.split('\n').length;
         const size = content.length;
-        
+
         const resultText = `✅ ファイル読み込み成功!
 
 応答時間: ${responseTime.toFixed(2)}ms
@@ -623,18 +650,21 @@ ${files.length > 10 ? `... 他 ${files.length - 10} ファイル` : ''}`;
 ファイルサイズ: ${size} 文字
 行数: ${lines}
 
-内容プレビュー（最初の20行）:
-${content.split('\n').slice(0, 20).join('\n')}
+内容プレビュー（最初の${MultiGrepReplacerUI.FILE_LIST_ITEM_COUNT}行）:
+${content.split('\n').slice(0, MultiGrepReplacerUI.FILE_LIST_ITEM_COUNT).join('\n')}
 
-${lines > 20 ? `... 他 ${lines - 20} 行` : ''}`;
+${
+  lines > MultiGrepReplacerUI.FILE_LIST_ITEM_COUNT
+    ? `... 他 ${lines - MultiGrepReplacerUI.FILE_LIST_ITEM_COUNT} 行`
+    : ''
+}`;
 
         this.displayResult('fileResult', resultText);
       } else {
         this.displayResult('fileResult', `❌ エラー: ${result.error}`);
       }
-      
+
       this.updateStatus('Ready', '⚡');
-      
     } catch (error) {
       console.error('❌ File read test failed:', error);
       this.displayResult('fileResult', `❌ エラー: ${error.message}`);

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test HTML File</title>
+    <style>
+        .old-class { color: red; }
+        .is-plain { background: white; }
+        .is-ghost { opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="old-class">Test Header</h1>
+        <p class="is-plain">This is a plain paragraph with old-class styling.</p>
+        <button class="is-ghost">Ghost Button</button>
+        
+        <div class="old-variable-name">
+            <span>oldVariable content here</span>
+        </div>
+        
+        <!-- Test comment with old-class reference -->
+        <footer class="old-class is-plain">
+            Footer content with multiple classes
+        </footer>
+    </div>
+    
+    <script>
+        var oldVariable = "test value";
+        function processOldClass() {
+            console.log("Processing old-class elements");
+            return oldVariable;
+        }
+    </script>
+</body>
+</html>

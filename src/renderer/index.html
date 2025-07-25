@@ -1,117 +1,100 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Multi Grep Replacer</title>
-    <link rel="stylesheet" href="css/main.css">
-    
+    <link rel="stylesheet" href="css/main.css" />
+
     <!-- セキュリティヘッダー -->
-    <meta http-equiv="Content-Security-Policy" content="
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
         default-src 'self';
         script-src 'self' 'unsafe-inline';
         style-src 'self' 'unsafe-inline';
         img-src 'self' data:;
         connect-src 'self';
         font-src 'self';
-    ">
-</head>
-<body>
+    "
+    />
+  </head>
+  <body>
     <div id="app" class="app-container">
-        <!-- アプリヘッダー -->
-        <header class="app-header">
-            <h1 class="app-title">
-                <span class="app-icon">🔍</span>
-                Multi Grep Replacer
-            </h1>
-            <div class="app-status" id="appStatus">
-                <span class="status-indicator" id="statusIndicator">⚡</span>
-                <span class="status-text" id="statusText">Ready</span>
+      <!-- アプリヘッダー -->
+      <header class="app-header">
+        <h1 class="app-title">
+          <span class="app-icon">🔍</span>
+          Multi Grep Replacer
+        </h1>
+        <div class="app-status" id="appStatus">
+          <span class="status-indicator" id="statusIndicator">⚡</span>
+          <span class="status-text" id="statusText">Ready</span>
+        </div>
+      </header>
+
+      <!-- メインコンテンツ -->
+      <main class="main-content">
+        <!-- ウェルカムメッセージ -->
+        <section class="welcome-section">
+          <div class="welcome-content">
+            <h2>🎉 Hello World!</h2>
+            <p>Multi Grep Replacer (Electron Edition) が正常に起動しました。</p>
+
+            <!-- IPC通信テスト -->
+            <div class="test-section">
+              <h3>🔧 IPC通信テスト</h3>
+              <button id="pingButton" class="test-button">📡 Ping Test</button>
+              <div id="pingResult" class="test-result"></div>
             </div>
-        </header>
 
-        <!-- メインコンテンツ -->
-        <main class="main-content">
-            <!-- ウェルカムメッセージ -->
-            <section class="welcome-section">
-                <div class="welcome-content">
-                    <h2>🎉 Hello World!</h2>
-                    <p>Multi Grep Replacer (Electron Edition) が正常に起動しました。</p>
-                    
-                    <!-- IPC通信テスト -->
-                    <div class="test-section">
-                        <h3>🔧 IPC通信テスト</h3>
-                        <button id="pingButton" class="test-button">
-                            📡 Ping Test
-                        </button>
-                        <div id="pingResult" class="test-result"></div>
-                    </div>
-
-                    <!-- アプリ情報 -->
-                    <div class="info-section">
-                        <h3>📊 アプリ情報</h3>
-                        <button id="infoButton" class="test-button">
-                            ℹ️ アプリ情報取得
-                        </button>
-                        <div id="infoResult" class="test-result"></div>
-                    </div>
-
-                    <!-- バージョン情報 -->
-                    <div class="version-section">
-                        <h3>🏷️ バージョン情報</h3>
-                        <button id="versionButton" class="test-button">
-                            📋 バージョン確認
-                        </button>
-                        <div id="versionResult" class="test-result"></div>
-                    </div>
-
-                    <!-- 設定管理テスト -->
-                    <div class="config-section">
-                        <h3>📋 設定管理テスト</h3>
-                        <button id="configLoadButton" class="test-button">
-                            📖 デフォルト設定読み込み
-                        </button>
-                        <button id="configSaveButton" class="test-button">
-                            💾 設定保存テスト
-                        </button>
-                        <button id="configRecentButton" class="test-button">
-                            📚 最近の設定確認
-                        </button>
-                        <div id="configResult" class="test-result"></div>
-                    </div>
-
-                    <!-- ファイル操作テスト -->
-                    <div class="file-section">
-                        <h3>📁 ファイル操作テスト</h3>
-                        <button id="folderSelectButton" class="test-button">
-                            📂 フォルダ選択
-                        </button>
-                        <button id="fileSearchButton" class="test-button">
-                            🔍 ファイル検索
-                        </button>
-                        <button id="fileReadButton" class="test-button">
-                            📄 ファイル読み込み
-                        </button>
-                        <div id="fileResult" class="test-result"></div>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <!-- フッター -->
-        <footer class="app-footer">
-            <div class="footer-content">
-                <span class="footer-text">
-                    🚀 UI応答性目標: <strong>100ms以内</strong>
-                </span>
-                <div class="performance-monitor" id="performanceMonitor">
-                    <span>応答時間: <span id="responseTime">--ms</span></span>
-                </div>
+            <!-- アプリ情報 -->
+            <div class="info-section">
+              <h3>📊 アプリ情報</h3>
+              <button id="infoButton" class="test-button">ℹ️ アプリ情報取得</button>
+              <div id="infoResult" class="test-result"></div>
             </div>
-        </footer>
+
+            <!-- バージョン情報 -->
+            <div class="version-section">
+              <h3>🏷️ バージョン情報</h3>
+              <button id="versionButton" class="test-button">📋 バージョン確認</button>
+              <div id="versionResult" class="test-result"></div>
+            </div>
+
+            <!-- 設定管理テスト -->
+            <div class="config-section">
+              <h3>📋 設定管理テスト</h3>
+              <button id="configLoadButton" class="test-button">📖 デフォルト設定読み込み</button>
+              <button id="configSaveButton" class="test-button">💾 設定保存テスト</button>
+              <button id="configRecentButton" class="test-button">📚 最近の設定確認</button>
+              <div id="configResult" class="test-result"></div>
+            </div>
+
+            <!-- ファイル操作テスト -->
+            <div class="file-section">
+              <h3>📁 ファイル操作テスト</h3>
+              <button id="folderSelectButton" class="test-button">📂 フォルダ選択</button>
+              <button id="fileSearchButton" class="test-button">🔍 ファイル検索</button>
+              <button id="fileReadButton" class="test-button">📄 ファイル読み込み</button>
+              <div id="fileResult" class="test-result"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- フッター -->
+      <footer class="app-footer">
+        <div class="footer-content">
+          <span class="footer-text"> 🚀 UI応答性目標: <strong>100ms以内</strong> </span>
+          <div class="performance-monitor" id="performanceMonitor">
+            <span>応答時間: <span id="responseTime">--ms</span></span>
+          </div>
+        </div>
+      </footer>
     </div>
 
     <!-- JavaScript -->
     <script src="js/app.js"></script>
-</body>
+  </body>
 </html>

@@ -1,15 +1,17 @@
 const fs = require('fs').promises;
 const path = require('path');
 const { dialog } = require('electron');
+const DebugLogger = require('./debug-logger');
 
 /**
  * Multi Grep Replacer - File Operations
  * ファイルシステム操作API
  */
 class FileOperations {
-  // ファイルサイズ上限（100MB）
-  static MAX_FILE_SIZE = 104857600;
-  
+  // ファイルサイズ制限設定
+  static MAX_FILE_SIZE_MB = 100; // MB
+  static MAX_FILE_SIZE = FileOperations.MAX_FILE_SIZE_MB * 1024 * 1024; // bytes
+
   // 除外パターンのデフォルト
   static DEFAULT_EXCLUDE_PATTERNS = [
     'node_modules/**',
@@ -19,20 +21,23 @@ class FileOperations {
     '*.min.js',
     '*.min.css',
     '.DS_Store',
-    'Thumbs.db'
+    'Thumbs.db',
   ];
-  
-  // Vibe Logger統合
-  static logOperation(operation, data, result) {
-    const logEntry = {
-      timestamp: new Date().toISOString(),
+
+  // 一時ファイル生成設定
+  static RANDOM_ID_START_INDEX = 2; // ランダムID開始位置
+  static RANDOM_ID_END_INDEX = 8; // ランダムID終了位置
+  static RANDOM_ID_RADIX = 36; // ランダムID基数
+
+  // DebugLogger統合ヘルパー
+  static async logOperation(operation, data, result) {
+    const level = result.success ? 'info' : 'error';
+    await DebugLogger[level](`FileOperations: ${operation}`, {
       component: 'FileOperations',
       operation,
-      data,
-      result,
-      memory: process.memoryUsage()
-    };
-    console.log('📁 File:', JSON.stringify(logEntry, null, 2));
+      ...data,
+      ...result,
+    });
   }
 
   /**
@@ -41,46 +46,43 @@ class FileOperations {
    * @returns {Promise<string|null>} 選択されたフォルダパス
    */
   static async selectFolder(browserWindow) {
-    const startTime = performance.now();
-    
+    const operationId = 'file-select-folder';
+    DebugLogger.startPerformance(operationId);
+
     try {
-      console.log('📂 Opening folder selection dialog...');
-      
+      await DebugLogger.debug('Opening folder selection dialog');
+
       const result = await dialog.showOpenDialog(browserWindow, {
         title: 'Select Target Folder',
         buttonLabel: 'Select Folder',
         properties: ['openDirectory', 'createDirectory'],
-        message: 'Select the folder to search for files'
+        message: 'Select the folder to search for files',
       });
-      
-      const selectTime = performance.now() - startTime;
-      
+
       if (result.canceled) {
-        this.logOperation('selectFolder', {}, { 
-          success: true, 
+        await DebugLogger.endPerformance(operationId, {
           canceled: true,
-          selectTime: `${selectTime.toFixed(2)}ms`
+          selectedPath: null,
         });
+        await DebugLogger.debug('Folder selection canceled by user');
         return null;
       }
-      
-      const selectedPath = result.filePaths[0];
-      this.logOperation('selectFolder', {}, { 
-        success: true, 
+
+      const [selectedPath] = result.filePaths;
+      await DebugLogger.endPerformance(operationId, {
         selectedPath,
-        selectTime: `${selectTime.toFixed(2)}ms`
+        success: true,
       });
-      
+      await DebugLogger.info('Folder selected successfully', { selectedPath });
+
       return selectedPath;
-      
     } catch (error) {
-      const selectTime = performance.now() - startTime;
-      this.logOperation('selectFolder', {}, { 
-        success: false, 
-        error: error.message,
-        selectTime: `${selectTime.toFixed(2)}ms`
+      await DebugLogger.logError(error, {
+        operation: 'selectFolder',
+        component: 'FileOperations',
       });
-      
+      await DebugLogger.endPerformance(operationId, { success: false });
+
       throw new Error(`フォルダ選択エラー: ${error.message}`);
     }
   }
@@ -93,39 +95,46 @@ class FileOperations {
    * @returns {Promise<Array>} ファイルパスのリスト
    */
   static async findFiles(directory, extensions = [], excludePatterns = []) {
-    const startTime = performance.now();
+    const operationId = 'file-find-files';
+    DebugLogger.startPerformance(operationId);
     const files = [];
-    
+
     try {
-      console.log(`🔍 Searching files in: ${directory}`);
-      
+      await DebugLogger.info('Searching files', {
+        directory,
+        extensions,
+        excludePatterns: excludePatterns.length,
+      });
+
       // デフォルト除外パターンとマージ
       const allExcludePatterns = [...this.DEFAULT_EXCLUDE_PATTERNS, ...excludePatterns];
-      
+
       // 再帰的にファイルを検索
       await this.scanDirectory(directory, files, extensions, allExcludePatterns);
-      
-      const searchTime = performance.now() - startTime;
-      this.logOperation('findFiles', { 
-        directory, 
-        extensions, 
-        excludePatterns: allExcludePatterns 
-      }, { 
-        success: true, 
+
+      await DebugLogger.endPerformance(operationId, {
+        success: true,
         filesFound: files.length,
-        searchTime: `${searchTime.toFixed(2)}ms`
+        directory,
+        extensionCount: extensions.length,
+        excludePatternCount: allExcludePatterns.length,
       });
-      
+
+      await DebugLogger.info('File search completed', {
+        filesFound: files.length,
+        directory,
+      });
+
       return files;
-      
     } catch (error) {
-      const searchTime = performance.now() - startTime;
-      this.logOperation('findFiles', { directory, extensions }, { 
-        success: false, 
-        error: error.message,
-        searchTime: `${searchTime.toFixed(2)}ms`
+      await DebugLogger.logError(error, {
+        operation: 'findFiles',
+        directory,
+        extensions,
+        component: 'FileOperations',
       });
-      
+      await DebugLogger.endPerformance(operationId, { success: false });
+
       throw new Error(`ファイル検索エラー: ${error.message}`);
     }
   }
@@ -137,16 +146,16 @@ class FileOperations {
   static async scanDirectory(directory, fileList, extensions, excludePatterns) {
     try {
       const entries = await fs.readdir(directory, { withFileTypes: true });
-      
+
       for (const entry of entries) {
         const fullPath = path.join(directory, entry.name);
         const relativePath = path.relative(process.cwd(), fullPath);
-        
+
         // 除外パターンチェック
         if (this.shouldExclude(relativePath, excludePatterns)) {
           continue;
         }
-        
+
         if (entry.isDirectory()) {
           // サブディレクトリを再帰的に検索
           await this.scanDirectory(fullPath, fileList, extensions, excludePatterns);
@@ -160,7 +169,7 @@ class FileOperations {
                 path: fullPath,
                 name: entry.name,
                 size: stats.size,
-                modified: stats.mtime
+                modified: stats.mtime,
               });
             }
           }
@@ -168,7 +177,11 @@ class FileOperations {
       }
     } catch (error) {
       // アクセス権限がないディレクトリはスキップ
-      console.warn(`⚠️ Cannot access directory: ${directory} - ${error.message}`);
+      await DebugLogger.warn('Cannot access directory - skipping', {
+        directory,
+        error: error.message,
+        errorCode: error.code,
+      });
     }
   }
 
@@ -178,7 +191,7 @@ class FileOperations {
    */
   static shouldExclude(filePath, excludePatterns) {
     const normalizedPath = filePath.replace(/\\/g, '/');
-    
+
     for (const pattern of excludePatterns) {
       // 簡易的なパターンマッチング
       const regexPattern = pattern
@@ -186,13 +199,13 @@ class FileOperations {
         .replace(/\*/g, '.*')
         .replace(/\?/g, '.')
         .replace(/\//g, '\\/');
-      
+
       const regex = new RegExp(regexPattern);
       if (regex.test(normalizedPath)) {
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -205,7 +218,7 @@ class FileOperations {
     if (!extensions || extensions.length === 0) {
       return true;
     }
-    
+
     const fileExt = path.extname(filename).toLowerCase();
     return extensions.some(ext => {
       const targetExt = ext.toLowerCase();
@@ -219,40 +232,48 @@ class FileOperations {
    * @returns {Promise<string>} ファイル内容
    */
   static async readFileContent(filePath) {
-    const startTime = performance.now();
-    
+    const operationId = 'file-read-content';
+    DebugLogger.startPerformance(operationId);
+
     try {
-      console.log(`📄 Reading file: ${filePath}`);
-      
+      await DebugLogger.debug('Reading file content', { filePath });
+
       // ファイルアクセス権限チェック
       await this.checkFilePermissions(filePath, 'read');
-      
+
       // ファイルサイズチェック
       const stats = await fs.stat(filePath);
       if (stats.size > this.MAX_FILE_SIZE) {
-        throw new Error(`ファイルサイズが上限(${this.MAX_FILE_SIZE / 1024 / 1024}MB)を超えています`);
+        throw new Error(
+          `ファイルサイズが上限(${this.MAX_FILE_SIZE / 1024 / 1024}MB)を超えています`
+        );
       }
-      
+
+      await DebugLogger.debug('File size validated', {
+        filePath,
+        fileSize: stats.size,
+        maxSize: this.MAX_FILE_SIZE,
+      });
+
       // ファイル読み込み
       const content = await fs.readFile(filePath, 'utf8');
-      
-      const readTime = performance.now() - startTime;
-      this.logOperation('readFileContent', { filePath }, { 
-        success: true, 
+
+      await DebugLogger.endPerformance(operationId, {
+        success: true,
+        filePath,
         fileSize: stats.size,
-        readTime: `${readTime.toFixed(2)}ms`
+        contentLength: content.length,
       });
-      
+
       return content;
-      
     } catch (error) {
-      const readTime = performance.now() - startTime;
-      this.logOperation('readFileContent', { filePath }, { 
-        success: false, 
-        error: error.message,
-        readTime: `${readTime.toFixed(2)}ms`
+      await DebugLogger.logError(error, {
+        operation: 'readFileContent',
+        filePath,
+        component: 'FileOperations',
       });
-      
+      await DebugLogger.endPerformance(operationId, { success: false });
+
       throw new Error(`ファイル読み込みエラー: ${error.message}`);
     }
   }
@@ -264,36 +285,46 @@ class FileOperations {
    * @returns {Promise<void>}
    */
   static async writeFileContent(filePath, content) {
-    const startTime = performance.now();
-    
+    const operationId = 'file-write-content';
+    DebugLogger.startPerformance(operationId);
+
     try {
-      console.log(`💾 Writing file: ${filePath}`);
-      
+      await DebugLogger.debug('Writing file content', {
+        filePath,
+        contentLength: content.length,
+      });
+
       // ファイルアクセス権限チェック
       await this.checkFilePermissions(filePath, 'write');
-      
+
       // ディレクトリが存在しない場合は作成
       const dir = path.dirname(filePath);
       await fs.mkdir(dir, { recursive: true });
-      
+
+      await DebugLogger.debug('Directory ensured', { directory: dir });
+
       // ファイル書き込み
       await fs.writeFile(filePath, content, 'utf8');
-      
-      const writeTime = performance.now() - startTime;
-      this.logOperation('writeFileContent', { filePath }, { 
-        success: true, 
+
+      await DebugLogger.endPerformance(operationId, {
+        success: true,
+        filePath,
         contentSize: content.length,
-        writeTime: `${writeTime.toFixed(2)}ms`
       });
-      
+
+      await DebugLogger.info('File written successfully', {
+        filePath,
+        contentSize: content.length,
+      });
     } catch (error) {
-      const writeTime = performance.now() - startTime;
-      this.logOperation('writeFileContent', { filePath }, { 
-        success: false, 
-        error: error.message,
-        writeTime: `${writeTime.toFixed(2)}ms`
+      await DebugLogger.logError(error, {
+        operation: 'writeFileContent',
+        filePath,
+        contentLength: content.length,
+        component: 'FileOperations',
       });
-      
+      await DebugLogger.endPerformance(operationId, { success: false });
+
       throw new Error(`ファイル書き込みエラー: ${error.message}`);
     }
   }
@@ -318,19 +349,18 @@ class FileOperations {
         }
         throw new Error('ファイルが存在しません');
       }
-      
+
       // アクセス権限チェック
-      const accessMode = mode === 'write' 
-        ? fs.constants.W_OK 
-        : fs.constants.R_OK;
-      
+      const accessMode = mode === 'write' ? fs.constants.W_OK : fs.constants.R_OK;
+
       await fs.access(filePath, accessMode);
-      
+
       return true;
-      
     } catch (error) {
       if (error.code === 'EACCES') {
-        throw new Error(`ファイルへの${mode === 'write' ? '書き込み' : '読み取り'}権限がありません`);
+        throw new Error(
+          `ファイルへの${mode === 'write' ? '書き込み' : '読み取り'}権限がありません`
+        );
       }
       throw error;
     }
@@ -344,7 +374,7 @@ class FileOperations {
   static async getFileStats(filePath) {
     try {
       const stats = await fs.stat(filePath);
-      
+
       return {
         size: stats.size,
         created: stats.birthtime,
@@ -353,10 +383,9 @@ class FileOperations {
         isDirectory: stats.isDirectory(),
         permissions: {
           readable: await this.checkFilePermissions(filePath, 'read').catch(() => false),
-          writable: await this.checkFilePermissions(filePath, 'write').catch(() => false)
-        }
+          writable: await this.checkFilePermissions(filePath, 'write').catch(() => false),
+        },
       };
-      
     } catch (error) {
       throw new Error(`ファイル情報取得エラー: ${error.message}`);
     }
@@ -371,11 +400,13 @@ class FileOperations {
   static async createTempFile(prefix, content) {
     const tempDir = require('os').tmpdir();
     const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substring(2, 8);
+    const randomId = Math.random()
+      .toString(this.RANDOM_ID_RADIX)
+      .substring(this.RANDOM_ID_START_INDEX, this.RANDOM_ID_END_INDEX);
     const tempFilePath = path.join(tempDir, `${prefix}_${timestamp}_${randomId}.tmp`);
-    
+
     await this.writeFileContent(tempFilePath, content);
-    
+
     return tempFilePath;
   }
 
@@ -387,34 +418,41 @@ class FileOperations {
    */
   static async copyFile(sourcePath, destPath) {
     const startTime = performance.now();
-    
+
     try {
       console.log(`📋 Copying file: ${sourcePath} → ${destPath}`);
-      
+
       // コピー元の存在確認
       await fs.access(sourcePath);
-      
+
       // コピー先ディレクトリ作成
       const destDir = path.dirname(destPath);
       await fs.mkdir(destDir, { recursive: true });
-      
+
       // ファイルコピー
       await fs.copyFile(sourcePath, destPath);
-      
+
       const copyTime = performance.now() - startTime;
-      this.logOperation('copyFile', { sourcePath, destPath }, { 
-        success: true,
-        copyTime: `${copyTime.toFixed(2)}ms`
-      });
-      
+      this.logOperation(
+        'copyFile',
+        { sourcePath, destPath },
+        {
+          success: true,
+          copyTime: `${copyTime.toFixed(2)}ms`,
+        }
+      );
     } catch (error) {
       const copyTime = performance.now() - startTime;
-      this.logOperation('copyFile', { sourcePath, destPath }, { 
-        success: false, 
-        error: error.message,
-        copyTime: `${copyTime.toFixed(2)}ms`
-      });
-      
+      this.logOperation(
+        'copyFile',
+        { sourcePath, destPath },
+        {
+          success: false,
+          error: error.message,
+          copyTime: `${copyTime.toFixed(2)}ms`,
+        }
+      );
+
       throw new Error(`ファイルコピーエラー: ${error.message}`);
     }
   }
