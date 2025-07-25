@@ -66,6 +66,38 @@ class MultiGrepReplacerUI {
       versionButton.addEventListener('click', () => this.handleVersionInfo());
     }
 
+    // 設定管理テストボタン
+    const configLoadButton = document.getElementById('configLoadButton');
+    if (configLoadButton) {
+      configLoadButton.addEventListener('click', () => this.handleConfigLoad());
+    }
+
+    const configSaveButton = document.getElementById('configSaveButton');
+    if (configSaveButton) {
+      configSaveButton.addEventListener('click', () => this.handleConfigSave());
+    }
+
+    const configRecentButton = document.getElementById('configRecentButton');
+    if (configRecentButton) {
+      configRecentButton.addEventListener('click', () => this.handleConfigRecent());
+    }
+
+    // ファイル操作テストボタン
+    const folderSelectButton = document.getElementById('folderSelectButton');
+    if (folderSelectButton) {
+      folderSelectButton.addEventListener('click', () => this.handleFolderSelect());
+    }
+
+    const fileSearchButton = document.getElementById('fileSearchButton');
+    if (fileSearchButton) {
+      fileSearchButton.addEventListener('click', () => this.handleFileSearch());
+    }
+
+    const fileReadButton = document.getElementById('fileReadButton');
+    if (fileReadButton) {
+      fileReadButton.addEventListener('click', () => this.handleFileRead());
+    }
+
     console.log('👂 Event listeners attached');
   }
 
@@ -290,6 +322,303 @@ Chrome: ${process.versions.chrome || 'N/A'}
         console.log(`✅ UI応答性良好: ${actionName} (${responseTime.toFixed(2)}ms)`);
       }
     });
+  }
+
+  /**
+   * 設定読み込みテスト
+   */
+  async handleConfigLoad() {
+    const startTime = performance.now();
+    
+    try {
+      this.updateStatus('Loading config...', '📖');
+      
+      const result = await window.electronAPI.getDefaultConfig();
+      const responseTime = performance.now() - startTime;
+      this.updateResponseTime(responseTime);
+      
+      if (result.success) {
+        const resultText = `✅ 設定読み込み成功!
+
+応答時間: ${responseTime.toFixed(2)}ms
+設定内容:
+- アプリ名: ${result.config.app_info.name}
+- バージョン: ${result.config.app_info.version}
+- 置換ルール数: ${result.config.replacements.length}
+- 対象拡張子: ${result.config.target_settings.file_extensions.join(', ')}
+
+${JSON.stringify(result.config, null, 2)}`;
+
+        this.displayResult('configResult', resultText);
+      } else {
+        this.displayResult('configResult', `❌ エラー: ${result.error}`);
+      }
+      
+      this.updateStatus('Ready', '⚡');
+      
+    } catch (error) {
+      console.error('❌ Config load test failed:', error);
+      this.displayResult('configResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+    }
+  }
+
+  /**
+   * 設定保存テスト
+   */
+  async handleConfigSave() {
+    const startTime = performance.now();
+    
+    try {
+      this.updateStatus('Saving config...', '💾');
+      
+      // テスト用設定作成
+      const testConfig = {
+        app_info: {
+          name: 'Test Configuration',
+          version: '1.0.0',
+          created_at: new Date().toISOString(),
+          description: 'Test config created by UI',
+          author: 'Test User'
+        },
+        replacements: [
+          {
+            id: 'test_rule_1',
+            from: 'test-old',
+            to: 'test-new',
+            enabled: true,
+            description: 'Test replacement rule'
+          }
+        ],
+        target_settings: {
+          file_extensions: ['.html', '.css', '.js'],
+          exclude_patterns: ['node_modules/**', '.git/**'],
+          include_subdirectories: true,
+          max_file_size: 104857600,
+          encoding: 'utf-8'
+        },
+        replacement_settings: {
+          case_sensitive: true,
+          use_regex: false,
+          backup_enabled: false
+        },
+        ui_settings: {
+          theme: 'auto',
+          window: { width: 800, height: 700 }
+        },
+        advanced_settings: {
+          max_concurrent_files: 10,
+          ui_response_target: 100
+        }
+      };
+      
+      // 一時ファイルパス作成
+      const tempPath = `/tmp/multi-grep-replacer-test-${Date.now()}.json`;
+      
+      const result = await window.electronAPI.saveConfig(testConfig, tempPath);
+      const responseTime = performance.now() - startTime;
+      this.updateResponseTime(responseTime);
+      
+      if (result.success) {
+        const resultText = `✅ 設定保存成功!
+
+応答時間: ${responseTime.toFixed(2)}ms
+保存先: ${tempPath}
+設定内容: Test Configuration
+テストルール: test-old → test-new`;
+
+        this.displayResult('configResult', resultText);
+      } else {
+        this.displayResult('configResult', `❌ エラー: ${result.error}`);
+      }
+      
+      this.updateStatus('Ready', '⚡');
+      
+    } catch (error) {
+      console.error('❌ Config save test failed:', error);
+      this.displayResult('configResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+    }
+  }
+
+  /**
+   * 最近の設定確認テスト
+   */
+  async handleConfigRecent() {
+    const startTime = performance.now();
+    
+    try {
+      this.updateStatus('Getting recent configs...', '📚');
+      
+      const result = await window.electronAPI.getRecentConfigs();
+      const responseTime = performance.now() - startTime;
+      this.updateResponseTime(responseTime);
+      
+      if (result.success) {
+        const resultText = `✅ 最近の設定取得成功!
+
+応答時間: ${responseTime.toFixed(2)}ms
+設定ファイル数: ${result.configs.length}
+
+${result.configs.length > 0 ? 
+  result.configs.map((config, index) => 
+    `${index + 1}. ${config.name} (${config.lastUsed})`
+  ).join('\n') : 
+  '最近使用した設定ファイルはありません'}
+
+詳細:
+${JSON.stringify(result.configs, null, 2)}`;
+
+        this.displayResult('configResult', resultText);
+      } else {
+        this.displayResult('configResult', `❌ エラー: ${result.error}`);
+      }
+      
+      this.updateStatus('Ready', '⚡');
+      
+    } catch (error) {
+      console.error('❌ Recent configs test failed:', error);
+      this.displayResult('configResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+    }
+  }
+
+  /**
+   * フォルダ選択テスト
+   */
+  async handleFolderSelect() {
+    const startTime = performance.now();
+    
+    try {
+      this.updateStatus('Opening folder dialog...', '📂');
+      
+      const result = await window.electronAPI.selectFolder();
+      const responseTime = performance.now() - startTime;
+      this.updateResponseTime(responseTime);
+      
+      if (result.success) {
+        const resultText = `✅ フォルダ選択成功!
+
+応答時間: ${responseTime.toFixed(2)}ms
+選択されたフォルダ: ${result.folderPath || 'キャンセルされました'}`;
+
+        this.displayResult('fileResult', resultText);
+        
+        // 選択されたフォルダがある場合は次のテストボタンを有効化
+        if (result.folderPath) {
+          this.selectedFolder = result.folderPath;
+        }
+      } else {
+        this.displayResult('fileResult', `❌ エラー: ${result.error}`);
+      }
+      
+      this.updateStatus('Ready', '⚡');
+      
+    } catch (error) {
+      console.error('❌ Folder select test failed:', error);
+      this.displayResult('fileResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+    }
+  }
+
+  /**
+   * ファイル検索テスト
+   */
+  async handleFileSearch() {
+    const startTime = performance.now();
+    
+    try {
+      this.updateStatus('Searching files...', '🔍');
+      
+      // テスト用のディレクトリ（現在のプロジェクトディレクトリ）
+      const testDirectory = this.selectedFolder || '/Volumes/CT1000P3/pCloud(CT1000P3)/(github)/multi-grep-replacer';
+      const testExtensions = ['.js', '.html', '.css', '.md'];
+      const testExcludePatterns = ['node_modules/**', 'dist/**'];
+      
+      const result = await window.electronAPI.findFiles(testDirectory, testExtensions, testExcludePatterns);
+      const responseTime = performance.now() - startTime;
+      this.updateResponseTime(responseTime);
+      
+      if (result.success) {
+        const files = result.files;
+        const resultText = `✅ ファイル検索成功!
+
+応答時間: ${responseTime.toFixed(2)}ms
+検索ディレクトリ: ${testDirectory}
+対象拡張子: ${testExtensions.join(', ')}
+見つかったファイル数: ${files.length}
+
+上位10ファイル:
+${files.slice(0, 10).map((file, index) => 
+  `${index + 1}. ${file.name} (${(file.size / 1024).toFixed(2)} KB)`
+).join('\n')}
+
+${files.length > 10 ? `... 他 ${files.length - 10} ファイル` : ''}`;
+
+        this.displayResult('fileResult', resultText);
+        
+        // 最初のファイルを次のテスト用に保存
+        if (files.length > 0) {
+          this.selectedFile = files[0].path;
+        }
+      } else {
+        this.displayResult('fileResult', `❌ エラー: ${result.error}`);
+      }
+      
+      this.updateStatus('Ready', '⚡');
+      
+    } catch (error) {
+      console.error('❌ File search test failed:', error);
+      this.displayResult('fileResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+    }
+  }
+
+  /**
+   * ファイル読み込みテスト
+   */
+  async handleFileRead() {
+    const startTime = performance.now();
+    
+    try {
+      this.updateStatus('Reading file...', '📄');
+      
+      // テスト用ファイル（package.jsonを読み込み）
+      const testFilePath = this.selectedFile || '/Volumes/CT1000P3/pCloud(CT1000P3)/(github)/multi-grep-replacer/package.json';
+      
+      const result = await window.electronAPI.readFile(testFilePath);
+      const responseTime = performance.now() - startTime;
+      this.updateResponseTime(responseTime);
+      
+      if (result.success) {
+        const content = result.content;
+        const lines = content.split('\n').length;
+        const size = content.length;
+        
+        const resultText = `✅ ファイル読み込み成功!
+
+応答時間: ${responseTime.toFixed(2)}ms
+ファイルパス: ${testFilePath}
+ファイルサイズ: ${size} 文字
+行数: ${lines}
+
+内容プレビュー（最初の20行）:
+${content.split('\n').slice(0, 20).join('\n')}
+
+${lines > 20 ? `... 他 ${lines - 20} 行` : ''}`;
+
+        this.displayResult('fileResult', resultText);
+      } else {
+        this.displayResult('fileResult', `❌ エラー: ${result.error}`);
+      }
+      
+      this.updateStatus('Ready', '⚡');
+      
+    } catch (error) {
+      console.error('❌ File read test failed:', error);
+      this.displayResult('fileResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+    }
   }
 }
 

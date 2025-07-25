@@ -1,5 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const ConfigManager = require('./config-manager');
+const FileOperations = require('./file-operations');
 
 /**
  * Multi Grep Replacer - Main Process
@@ -146,6 +148,80 @@ class MultiGrepReplacerApp {
         memory: process.memoryUsage(),
         pid: process.pid
       };
+    });
+
+    // 設定管理 API
+    ipcMain.handle('load-config', async (event, filePath) => {
+      try {
+        const config = await ConfigManager.loadConfig(filePath);
+        return { success: true, config };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('save-config', async (event, config, filePath) => {
+      try {
+        await ConfigManager.saveConfig(config, filePath);
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('get-default-config', async () => {
+      try {
+        const config = await ConfigManager.getDefaultConfig();
+        return { success: true, config };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('get-recent-configs', async () => {
+      try {
+        const configs = await ConfigManager.getRecentConfigs();
+        return { success: true, configs };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
+    // ファイル操作 API
+    ipcMain.handle('select-folder', async () => {
+      try {
+        const folderPath = await FileOperations.selectFolder(this.mainWindow);
+        return { success: true, folderPath };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('find-files', async (event, directory, extensions, excludePatterns) => {
+      try {
+        const files = await FileOperations.findFiles(directory, extensions, excludePatterns);
+        return { success: true, files };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('read-file', async (event, filePath) => {
+      try {
+        const content = await FileOperations.readFileContent(filePath);
+        return { success: true, content };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('write-file', async (event, filePath, content) => {
+      try {
+        await FileOperations.writeFileContent(filePath, content);
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
     });
 
     console.log('✅ IPC handlers registered');

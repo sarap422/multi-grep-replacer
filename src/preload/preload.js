@@ -102,6 +102,145 @@ contextBridge.exposeInMainWorld('electronAPI', {
     
     // 将来の拡張: パフォーマンスデータ送信
     // ipcRenderer.send('performance-data', performanceData);
+  },
+
+  // 設定管理 API
+  /**
+   * 設定ファイル読み込み
+   * @param {string} filePath - 設定ファイルパス
+   * @returns {Promise<Object>} 設定オブジェクト
+   */
+  loadConfig: async (filePath) => {
+    console.log('📖 Loading config via IPC:', filePath);
+    try {
+      const result = await ipcRenderer.invoke('load-config', filePath);
+      console.log('📖 Config load result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Config load failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 設定ファイル保存
+   * @param {Object} config - 設定オブジェクト
+   * @param {string} filePath - 保存先パス
+   * @returns {Promise<Object>} 保存結果
+   */
+  saveConfig: async (config, filePath) => {
+    console.log('💾 Saving config via IPC:', filePath);
+    try {
+      const result = await ipcRenderer.invoke('save-config', config, filePath);
+      console.log('💾 Config save result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Config save failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * デフォルト設定取得
+   * @returns {Promise<Object>} デフォルト設定
+   */
+  getDefaultConfig: async () => {
+    console.log('🔧 Getting default config...');
+    try {
+      const result = await ipcRenderer.invoke('get-default-config');
+      console.log('🔧 Default config result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Default config failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 最近使用した設定取得
+   * @returns {Promise<Array>} 最近の設定リスト
+   */
+  getRecentConfigs: async () => {
+    console.log('📚 Getting recent configs...');
+    try {
+      const result = await ipcRenderer.invoke('get-recent-configs');
+      console.log('📚 Recent configs result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Recent configs failed:', error);
+      throw error;
+    }
+  },
+
+  // ファイル操作 API
+  /**
+   * フォルダ選択ダイアログ
+   * @returns {Promise<Object>} 選択されたフォルダパス
+   */
+  selectFolder: async () => {
+    console.log('📂 Opening folder selection dialog...');
+    try {
+      const result = await ipcRenderer.invoke('select-folder');
+      console.log('📂 Folder selection result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Folder selection failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * ファイル検索
+   * @param {string} directory - 検索ディレクトリ
+   * @param {Array} extensions - 対象拡張子
+   * @param {Array} excludePatterns - 除外パターン
+   * @returns {Promise<Object>} 検索結果
+   */
+  findFiles: async (directory, extensions, excludePatterns) => {
+    console.log('🔍 Finding files via IPC:', directory);
+    try {
+      const result = await ipcRenderer.invoke('find-files', directory, extensions, excludePatterns);
+      console.log('🔍 Find files result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Find files failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * ファイル読み込み
+   * @param {string} filePath - ファイルパス
+   * @returns {Promise<Object>} ファイル内容
+   */
+  readFile: async (filePath) => {
+    console.log('📄 Reading file via IPC:', filePath);
+    try {
+      const result = await ipcRenderer.invoke('read-file', filePath);
+      console.log('📄 Read file result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Read file failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * ファイル書き込み
+   * @param {string} filePath - ファイルパス
+   * @param {string} content - ファイル内容
+   * @returns {Promise<Object>} 書き込み結果
+   */
+  writeFile: async (filePath, content) => {
+    console.log('💾 Writing file via IPC:', filePath);
+    try {
+      const result = await ipcRenderer.invoke('write-file', filePath, content);
+      console.log('💾 Write file result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Write file failed:', error);
+      throw error;
+    }
   }
 });
 

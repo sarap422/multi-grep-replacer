@@ -100,7 +100,9 @@ body {
 /* テストセクション */
 .test-section,
 .info-section,
-.version-section {
+.version-section,
+.config-section,
+.file-section {
   margin: 2rem 0;
   padding: 1.5rem;
   background: #f8fafc;
@@ -110,10 +112,40 @@ body {
 
 .test-section h3,
 .info-section h3,
-.version-section h3 {
+.version-section h3,
+.config-section h3,
+.file-section h3 {
   color: #374151;
   margin-bottom: 1rem;
   font-size: 1.2rem;
+}
+
+/* 設定管理セクション専用スタイル */
+.config-section {
+  border-left-color: #059669; /* 緑色 */
+}
+
+.config-section .test-button {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  margin-right: 0.5rem;
+}
+
+.config-section .test-button:hover {
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+}
+
+/* ファイル操作セクション専用スタイル */
+.file-section {
+  border-left-color: #dc2626; /* 赤色 */
+}
+
+.file-section .test-button {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  margin-right: 0.5rem;
+}
+
+.file-section .test-button:hover {
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
 }
 
 /* ボタンスタイル */

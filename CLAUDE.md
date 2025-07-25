@@ -379,10 +379,11 @@ Task X.X: [機能名] の実装を開始します。
 
 **Task X.X.1: Explore（探索・理解）**
 以下のドキュメントを読んで、Task X.Xの要件を深く理解してください：
-- @docs/1_requirements.md: 要件定義
-- @docs/2_architecture.md: システム設計
-- @docs/3_debugging.md: デバッグ環境
-- @docs/4_tasks.md: 開発タスク詳細
+- @docs/1_requirements.md:    # 要件定義
+- @docs/2_architecture.md:    # システム設計
+- @docs/3_debugging.md:       # デバッグ環境
+- @docs/4_tasks.md:           # 開発タスク詳細
+- CLAUDE.md:                  # プロジェクト設定
 
 **重要**: この段階ではコードは書かないでください。理解に専念してください。
 完了後、Task X.X.2: Plan（計画・設計）に進んでください。
@@ -393,27 +394,53 @@ ultrathink を使って Task X.Xの詳細実装計画を策定してください
 - 必要なファイル・クラス設計
 - テスト方法の計画
 - UI応答性確保の方法
+- Vibe Logger統合計画
 
 完了後、Task X.X.3: Code & Test（実装・テスト）に進んでください。
 
 **Task X.X.3: Code & Test（実装・テスト）**
 計画に従って実装と動作確認を行ってください：
 
-**自動化設定**：
-- 全てのファイル操作・コマンド実行は自動承認
-- 中断せずに完了まで実行
+**AI支援統合**：
+- 全ファイルにVibe Logger統合を実装
+- 構造化ログによる詳細な動作記録
+- パフォーマンス監視の実装
 - UI応答性100ms以内を確認
 
-**Task X.X.4: App Build & Test（実行ファイル確認）**
+**Task X.X.4: Build & Test（実行ファイル確認）**
 ```bash
 npm run build:dev
 # → .appファイル作成・起動・機能動作確認
 ```
 
-**Task X.X.5: Record（記録）**
-- CHANGELOG.md更新
-- patterns.md更新
-- Git commit実行
+**Task X.X.5: AI Analysis（AI分析）**
+```bash
+npm run logs:analyze
+# → Claude Code によるログ分析実行
+# → 自動改善提案の生成・適用
+```
+
+**Task X.X.6: Record（記録）**
+- logs/CHANGELOG.md更新
+- logs/ERRORLOG.md更新（問題があった場合）
+- logs/PATTERNS.md更新（新しい知見）
+- **Git commit実行**：
+```bash
+git add .
+git commit -m "feat: [Task X.X] - [実装内容の要約]"
+git push origin main
+```
+
+**明示的なGit連続実行の徹底**：
+- 中断せずに実装完了まで実行してください
+- ファイル操作（mkdir、touch、write、cp、mv）は確認不要
+- プログラム実行（node、npm、electron）は確認不要
+- **Git操作（add、commit、push）は確認不要**
+
+**Git commit実行時の注意**：
+- 日本語メッセージは引用符に注意
+- 複数行の場合は -m を複数回使用
+- エラー時は Ctrl+C で終了して再実行
 
 「Task X.X: [機能名] → ✅完了」と報告してください。
 
