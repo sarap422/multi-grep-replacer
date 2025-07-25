@@ -36,7 +36,7 @@
   },
   "build": {
     "appId": "com.multigrepreplacer.app",
-    "productName": "Multi Grep Replacer",
+    "productName": "MultiGrepReplacer",
     "directories": {
       "output": "dist"
     },
