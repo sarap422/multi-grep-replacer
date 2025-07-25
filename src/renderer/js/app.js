@@ -181,30 +181,39 @@ class MultiGrepReplacerUI {
     
     try {
       this.updateStatus('Getting version info...', '📋');
+      console.log('🔍 Starting version info request...');
       
-      // デバッグ情報
-      console.log('🔍 Debugging version info...');
-      console.log('📋 window.electronAPI available:', !!window.electronAPI);
-      console.log('📋 getVersion method available:', !!window.electronAPI?.getVersion);
-      
-      if (!window.electronAPI || !window.electronAPI.getVersion) {
-        throw new Error('electronAPI.getVersion is not available');
+      // 基本的な確認
+      if (!window.electronAPI) {
+        throw new Error('electronAPI is not available');
       }
       
+      if (!window.electronAPI.getVersion) {
+        throw new Error('getVersion method is not available');
+      }
+      
+      console.log('📋 Requesting version info via IPC...');
       const version = await window.electronAPI.getVersion();
       console.log('📋 Version data received:', version);
       
+      // バージョン情報の安全な表示
       const responseTime = performance.now() - startTime;
       this.updateResponseTime(responseTime);
       
+      // 安全な文字列構築
+      const appName = version?.name || 'Unknown';
+      const appVersion = version?.version || 'Unknown';
+      const electronVersion = version?.electron || 'Unknown';
+      const nodeVersion = version?.node || 'Unknown';
+      const chromeVersion = version?.chrome || 'Unknown';
+      
       const resultText = `📋 バージョン情報
 
-アプリケーション: ${version.name} v${version.version}
-Electron: ${version.electron}
-Node.js: ${version.node}
-Chrome: ${version.chrome || 'N/A'}
+アプリケーション: ${appName} v${appVersion}
+Electron: ${electronVersion}
+Node.js: ${nodeVersion}
+Chrome: ${chromeVersion}
 
-ビルド日時: ${new Date().toISOString()}
 応答時間: ${responseTime.toFixed(2)}ms`;
 
       this.displayResult('versionResult', resultText);
@@ -212,20 +221,8 @@ Chrome: ${version.chrome || 'N/A'}
       
     } catch (error) {
       console.error('❌ Version info failed:', error);
-      console.error('❌ Error type:', typeof error);
-      console.error('❌ Error name:', error.name);
-      console.error('❌ Error message:', error.message);
-      console.error('❌ Error stack:', error.stack);
-      
-      // より詳細なエラー情報
-      const errorInfo = {
-        type: typeof error,
-        name: error.name,
-        message: error.message,
-        toString: error.toString()
-      };
-      
-      this.displayResult('versionResult', `❌ エラー: ${error.message || error.toString() || 'Unknown error'}`);
+      const errorMessage = error?.message || 'Unknown error occurred';
+      this.displayResult('versionResult', `❌ エラー: ${errorMessage}`);
       this.updateStatus('Error', '🚨');
     }
   }
