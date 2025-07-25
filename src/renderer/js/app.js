@@ -191,7 +191,7 @@ class MultiGrepReplacerUI {
 アプリケーション: ${version.name} v${version.version}
 Electron: ${version.electron}
 Node.js: ${version.node}
-Chrome: ${process.versions.chrome || 'N/A'}
+Chrome: ${version.chrome || 'N/A'}
 
 ビルド日時: ${new Date().toISOString()}
 応答時間: ${responseTime.toFixed(2)}ms`;

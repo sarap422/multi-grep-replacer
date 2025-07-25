@@ -136,7 +136,8 @@ class MultiGrepReplacerApp {
         version: packageJson.version,
         name: packageJson.name,
         electron: process.versions.electron,
-        node: process.versions.node
+        node: process.versions.node,
+        chrome: process.versions.chrome
       };
     });
 
