@@ -244,6 +244,78 @@ contextBridge.exposeInMainWorld('electronAPI', {
       throw error;
     }
   },
+
+  // 新しいファイル検索エンジン API
+  /**
+   * 高速ファイル検索（新エンジン）
+   * @param {string} directory - 検索ディレクトリ
+   * @param {Array} extensions - 対象拡張子
+   * @param {Object} options - 検索オプション
+   * @returns {Promise<Object>} 検索結果
+   */
+  searchFiles: async (directory, extensions, options = {}) => {
+    console.log('🚀 Searching files with new engine:', { directory, extensions, options });
+    try {
+      const result = await ipcRenderer.invoke('search-files', directory, extensions, options);
+      console.log('🚀 Search files result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Search files failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * ファイル検索キャンセル
+   * @returns {Promise<Object>} キャンセル結果
+   */
+  cancelSearch: async () => {
+    console.log('🛑 Cancelling file search...');
+    try {
+      const result = await ipcRenderer.invoke('cancel-search');
+      console.log('🛑 Cancel search result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Cancel search failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 検索統計情報取得
+   * @returns {Promise<Object>} 統計情報
+   */
+  getSearchStats: async () => {
+    console.log('📈 Getting search stats...');
+    try {
+      const result = await ipcRenderer.invoke('get-search-stats');
+      console.log('📈 Search stats result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Get search stats failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 検索進捗イベントリスナー設定
+   * @param {Function} callback - 進捗コールバック
+   */
+  onSearchProgress: callback => {
+    console.log('📊 Setting up search progress listener');
+    ipcRenderer.on('search-progress', (event, progressData) => {
+      console.log('📊 Search progress:', progressData);
+      callback(progressData);
+    });
+  },
+
+  /**
+   * 検索進捗イベントリスナー削除
+   */
+  removeSearchProgressListener: () => {
+    console.log('🔇 Removing search progress listener');
+    ipcRenderer.removeAllListeners('search-progress');
+  },
 });
 
 /**

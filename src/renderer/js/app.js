@@ -110,6 +110,22 @@ class MultiGrepReplacerUI {
       fileReadButton.addEventListener('click', () => this.handleFileRead());
     }
 
+    // 新しいファイル検索エンジンテストボタン
+    const newFileSearchButton = document.getElementById('newFileSearchButton');
+    if (newFileSearchButton) {
+      newFileSearchButton.addEventListener('click', () => this.handleNewFileSearch());
+    }
+
+    const cancelSearchButton = document.getElementById('cancelSearchButton');
+    if (cancelSearchButton) {
+      cancelSearchButton.addEventListener('click', () => this.handleCancelSearch());
+    }
+
+    const searchStatsButton = document.getElementById('searchStatsButton');
+    if (searchStatsButton) {
+      searchStatsButton.addEventListener('click', () => this.handleSearchStats());
+    }
+
     console.log('👂 Event listeners attached');
   }
 
@@ -668,6 +684,172 @@ ${
     } catch (error) {
       console.error('❌ File read test failed:', error);
       this.displayResult('fileResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+    }
+  }
+
+  /**
+   * 新しいファイル検索エンジンテスト
+   */
+  async handleNewFileSearch() {
+    const startTime = performance.now();
+
+    try {
+      this.updateStatus('Searching with new engine...', '🚀');
+
+      // テスト用のディレクトリ
+      const testDirectory =
+        this.selectedFolder || '/Volumes/CT1000P3/pCloud(CT1000P3)/(github)/multi-grep-replacer';
+      const testExtensions = ['.js', '.html', '.css', '.md'];
+      const testOptions = {
+        maxFileSize: 100 * 1024 * 1024, // 100MB
+        maxConcurrency: 10,
+      };
+
+      // 進捗監視の設定
+      window.electronAPI.onSearchProgress(progressData => {
+        console.log('🚀 Search progress:', progressData);
+        this.updateStatus(
+          `Searching... ${progressData.filesFound} files found, ${progressData.directoriesScanned} directories scanned`,
+          '🔍'
+        );
+      });
+
+      const result = await window.electronAPI.searchFiles(
+        testDirectory,
+        testExtensions,
+        testOptions
+      );
+      const responseTime = performance.now() - startTime;
+      this.updateResponseTime(responseTime);
+
+      // 進捗監視を停止
+      window.electronAPI.removeSearchProgressListener();
+
+      if (result.success) {
+        const { files, stats } = result.result;
+        const resultText = `✅ 新エンジンでのファイル検索成功!
+
+応答時間: ${responseTime.toFixed(2)}ms
+検索ディレクトリ: ${testDirectory}
+対象拡張子: ${testExtensions.join(', ')}
+
+検索結果:
+- 見つかったファイル数: ${files.length}
+- スキャンしたディレクトリ数: ${stats.totalDirectories}
+- スキップしたファイル数: ${stats.skippedFiles}
+- エラー数: ${stats.errors.length}
+
+パフォーマンス:
+- ファイル/秒: ${Math.round((files.length / responseTime) * 1000)}
+- 処理速度評価: ${this.getPerformanceRating(responseTime)}
+
+上位${MultiGrepReplacerUI.MAX_DISPLAY_FILES}ファイル:
+${files
+  .slice(0, MultiGrepReplacerUI.MAX_DISPLAY_FILES)
+  .map(
+    (file, index) =>
+      `${index + 1}. ${file.name} (${(file.size / MultiGrepReplacerUI.KB_DIVISOR).toFixed(
+        MultiGrepReplacerUI.SIZE_DECIMAL_PLACES
+      )} KB)`
+  )
+  .join('\n')}
+
+${
+  files.length > MultiGrepReplacerUI.MAX_DISPLAY_FILES
+    ? `... 他 ${files.length - MultiGrepReplacerUI.MAX_DISPLAY_FILES} ファイル`
+    : ''
+}
+
+${
+  stats.errors.length > 0
+    ? `\nエラー:\n${stats.errors
+        .slice(0, 3)
+        .map(e => `- ${e.path}: ${e.error}`)
+        .join('\n')}`
+    : ''
+}`;
+
+        this.displayResult('newSearchResult', resultText);
+
+        // 最初のファイルを保存
+        if (files.length > 0) {
+          this.selectedFile = files[0].path;
+        }
+      } else {
+        this.displayResult('newSearchResult', `❌ エラー: ${result.error}`);
+      }
+
+      this.updateStatus('Ready', '⚡');
+    } catch (error) {
+      console.error('❌ New file search test failed:', error);
+      this.displayResult('newSearchResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+      // 進捗監視を停止
+      window.electronAPI.removeSearchProgressListener();
+    }
+  }
+
+  /**
+   * 検索キャンセルテスト
+   */
+  async handleCancelSearch() {
+    try {
+      this.updateStatus('Cancelling search...', '🛑');
+
+      const result = await window.electronAPI.cancelSearch();
+
+      if (result.success) {
+        this.displayResult('newSearchResult', '🛑 検索がキャンセルされました');
+        this.updateStatus('Search cancelled', '🛑');
+      } else {
+        this.displayResult('newSearchResult', `❌ キャンセル失敗: ${result.error}`);
+        this.updateStatus('Error', '🚨');
+      }
+    } catch (error) {
+      console.error('❌ Cancel search failed:', error);
+      this.displayResult('newSearchResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+    }
+  }
+
+  /**
+   * 検索統計情報取得テスト
+   */
+  async handleSearchStats() {
+    const startTime = performance.now();
+
+    try {
+      this.updateStatus('Getting search stats...', '📈');
+
+      const result = await window.electronAPI.getSearchStats();
+      const responseTime = performance.now() - startTime;
+      this.updateResponseTime(responseTime);
+
+      if (result.success) {
+        const { stats } = result;
+        const resultText = `📈 検索統計情報
+
+応答時間: ${responseTime.toFixed(2)}ms
+
+統計情報:
+- 総ファイル数: ${stats.totalFiles}
+- 総ディレクトリ数: ${stats.totalDirectories}
+- スキップしたファイル数: ${stats.skippedFiles}
+- エラー数: ${stats.errors.length}
+
+詳細:
+${JSON.stringify(stats, null, 2)}`;
+
+        this.displayResult('newSearchResult', resultText);
+      } else {
+        this.displayResult('newSearchResult', `❌ エラー: ${result.error}`);
+      }
+
+      this.updateStatus('Ready', '⚡');
+    } catch (error) {
+      console.error('❌ Search stats failed:', error);
+      this.displayResult('newSearchResult', `❌ エラー: ${error.message}`);
       this.updateStatus('Error', '🚨');
     }
   }

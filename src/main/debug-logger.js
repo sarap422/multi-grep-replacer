@@ -238,6 +238,21 @@ class DebugLogger {
   }
 
   /**
+   * パフォーマンス測定の実行時間取得
+   */
+  static getPerformance(operationName) {
+    const metrics = this.performanceMetrics.get(operationName);
+    if (!metrics) {
+      this.warn(`Performance tracking not found: ${operationName}`);
+      return 0;
+    }
+
+    const currentTime = performance.now();
+    const duration = currentTime - metrics.startTime;
+    return Math.round(duration * 100) / 100; // ms、小数点2桁
+  }
+
+  /**
    * UI応答性監視（レンダラープロセス用）
    */
   static async logUIResponse(actionName, responseTime, target = 100) {

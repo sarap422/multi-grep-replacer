@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const ConfigManager = require('./config-manager');
 const FileOperations = require('./file-operations');
+const FileSearchEngine = require('./file-search-engine');
 const DebugLogger = require('./debug-logger');
 
 /**
@@ -14,6 +15,7 @@ class MultiGrepReplacerApp {
     this.isDevelopment = process.env.NODE_ENV === 'development';
     this.startTime = performance.now();
     this.initializationTracker = 'app-initialization';
+    this.fileSearchEngine = new FileSearchEngine();
   }
 
   /**
@@ -431,6 +433,83 @@ class MultiGrepReplacerApp {
         await DebugLogger.logError(error, {
           operation: 'write-file',
           filePath,
+          component: 'IPC-Handler',
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        return { success: false, error: error.message };
+      }
+    });
+
+    // 新しいファイル検索エンジン API
+    ipcMain.handle('search-files', async (event, directory, extensions, options = {}) => {
+      const operationId = 'ipc-search-files';
+      DebugLogger.startPerformance(operationId);
+
+      try {
+        await DebugLogger.debug('Searching files with new engine', {
+          directory,
+          extensions,
+          options,
+        });
+
+        // 進捗通知の設定
+        this.fileSearchEngine.removeAllListeners('progress');
+        this.fileSearchEngine.on('progress', progressData => {
+          event.sender.send('search-progress', progressData);
+        });
+
+        const result = await this.fileSearchEngine.searchFiles(directory, extensions, options);
+
+        await DebugLogger.endPerformance(operationId, {
+          success: true,
+          filesFound: result.files.length,
+          stats: result.stats,
+        });
+
+        return { success: true, result };
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'search-files',
+          directory,
+          component: 'IPC-Handler',
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        return { success: false, error: error.message };
+      }
+    });
+
+    // ファイル検索キャンセル
+    ipcMain.handle('cancel-search', async () => {
+      const operationId = 'ipc-cancel-search';
+      DebugLogger.startPerformance(operationId);
+
+      try {
+        await DebugLogger.debug('Cancelling file search');
+        this.fileSearchEngine.cancelSearch();
+        await DebugLogger.endPerformance(operationId, { success: true });
+        return { success: true };
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'cancel-search',
+          component: 'IPC-Handler',
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        return { success: false, error: error.message };
+      }
+    });
+
+    // ファイル検索統計情報取得
+    ipcMain.handle('get-search-stats', async () => {
+      const operationId = 'ipc-get-search-stats';
+      DebugLogger.startPerformance(operationId);
+
+      try {
+        const stats = this.fileSearchEngine.getStats();
+        await DebugLogger.endPerformance(operationId, { success: true });
+        return { success: true, stats };
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'get-search-stats',
           component: 'IPC-Handler',
         });
         await DebugLogger.endPerformance(operationId, { success: false });
