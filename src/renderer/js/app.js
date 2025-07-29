@@ -126,6 +126,35 @@ class MultiGrepReplacerUI {
       searchStatsButton.addEventListener('click', () => this.handleSearchStats());
     }
 
+    // 置換エンジンのイベントリスナー設定
+    const replacementProcessButton = document.getElementById('replacementProcessButton');
+    if (replacementProcessButton) {
+      replacementProcessButton.addEventListener('click', () => this.handleReplacementProcess());
+    }
+
+    const replacementPreviewButton = document.getElementById('replacementPreviewButton');
+    if (replacementPreviewButton) {
+      replacementPreviewButton.addEventListener('click', () => this.handleReplacementPreview());
+    }
+
+    const cancelReplacementButton = document.getElementById('cancelReplacementButton');
+    if (cancelReplacementButton) {
+      cancelReplacementButton.addEventListener('click', () => this.handleCancelReplacement());
+    }
+
+    const replacementStatsButton = document.getElementById('replacementStatsButton');
+    if (replacementStatsButton) {
+      replacementStatsButton.addEventListener('click', () => this.handleReplacementStats());
+    }
+
+    const addRuleButton = document.getElementById('addRuleButton');
+    if (addRuleButton) {
+      addRuleButton.addEventListener('click', () => this.handleAddRule());
+    }
+
+    // 置換エンジンのイベントリスナー設定
+    this.setupReplacementEventListeners();
+
     console.log('👂 Event listeners attached');
   }
 
@@ -776,6 +805,13 @@ ${
         if (files.length > 0) {
           this.selectedFile = files[0].path;
         }
+
+        // 置換テスト用にファイルパス配列を保存
+        this.lastSearchFiles = files.map(f => f.path);
+        this.displayResult(
+          'replacementResult',
+          `✅ ${this.lastSearchFiles.length}個のファイルが見つかりました。置換テストが可能です。`
+        );
       } else {
         this.displayResult('newSearchResult', `❌ エラー: ${result.error}`);
       }
@@ -852,6 +888,307 @@ ${JSON.stringify(stats, null, 2)}`;
       this.displayResult('newSearchResult', `❌ エラー: ${error.message}`);
       this.updateStatus('Error', '🚨');
     }
+  }
+
+  /**
+   * 置換エンジンのイベントリスナー設定
+   */
+  setupReplacementEventListeners() {
+    // 進捗通知リスナー
+    window.electronAPI.onReplacementProgress(progressData => {
+      this.updateReplacementProgress(progressData);
+    });
+
+    // 開始通知リスナー
+    window.electronAPI.onReplacementStart(startData => {
+      this.updateStatus('置換処理中...', '🔄');
+      this.displayResult('replacementResult', `🚀 置換処理開始: ${startData.totalFiles}ファイル`);
+    });
+
+    // 完了通知リスナー
+    window.electronAPI.onReplacementComplete(completeData => {
+      this.updateStatus('Ready', '⚡');
+      const { stats } = completeData;
+      const resultText = `✅ 置換処理完了!
+      
+総ファイル数: ${stats.totalFiles}
+変更されたファイル数: ${stats.modifiedFiles}
+総置換回数: ${stats.totalReplacements}
+処理時間: ${completeData.duration}ms`;
+
+      this.displayResult('replacementResult', resultText);
+    });
+
+    // エラー通知リスナー
+    window.electronAPI.onReplacementError(errorData => {
+      this.updateStatus('Error', '🚨');
+      this.displayResult('replacementResult', `❌ 置換エラー: ${errorData.error}`);
+    });
+
+    // テスト用ルール初期化
+    this.replacementRules = [];
+    this.lastSearchFiles = [];
+  }
+
+  /**
+   * 置換処理実行テスト
+   */
+  async handleReplacementProcess() {
+    const startTime = performance.now();
+
+    try {
+      this.updateStatus('置換処理中...', '🔄');
+
+      // テスト用ファイルが必要なので、まず検索を実行
+      if (this.lastSearchFiles.length === 0) {
+        this.displayResult('replacementResult', '⚠️ 先にファイル検索を実行してください');
+        return;
+      }
+
+      // テスト用ルールが無い場合、デフォルトルールを追加
+      if (this.replacementRules.length === 0) {
+        this.replacementRules = [
+          { from: 'test', to: 'TEST', enabled: true, id: 'rule1' },
+          { from: 'example', to: 'EXAMPLE', enabled: true, id: 'rule2' },
+        ];
+      }
+
+      const testOptions = {
+        caseSensitive: true,
+        dryRun: false,
+      };
+
+      const result = await window.electronAPI.processFiles(
+        this.lastSearchFiles.slice(0, 5), // 最初の5ファイルのみ
+        this.replacementRules,
+        testOptions
+      );
+
+      const responseTime = performance.now() - startTime;
+      this.updateResponseTime(responseTime);
+
+      if (result.success) {
+        const resultText = `✅ 置換処理成功!
+
+応答時間: ${responseTime.toFixed(2)}ms
+
+統計情報:
+- 処理ファイル数: ${result.stats.processedFiles}
+- 変更ファイル数: ${result.stats.modifiedFiles}
+- 総置換回数: ${result.stats.totalReplacements}
+- エラー数: ${result.stats.errors.length}
+
+詳細結果:
+${result.results
+  .slice(0, 3)
+  .map(r => `- ${r.path}: ${r.replacements}回置換`)
+  .join('\n')}`;
+
+        this.displayResult('replacementResult', resultText);
+      } else {
+        this.displayResult('replacementResult', `❌ エラー: ${result.error}`);
+      }
+
+      this.updateStatus('Ready', '⚡');
+    } catch (error) {
+      console.error('❌ Replacement processing failed:', error);
+      this.displayResult('replacementResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+    }
+  }
+
+  /**
+   * 置換プレビュー生成テスト
+   */
+  async handleReplacementPreview() {
+    const startTime = performance.now();
+
+    try {
+      this.updateStatus('プレビュー生成中...', '👀');
+
+      if (this.lastSearchFiles.length === 0) {
+        this.displayResult('replacementResult', '⚠️ 先にファイル検索を実行してください');
+        return;
+      }
+
+      if (this.replacementRules.length === 0) {
+        this.replacementRules = [{ from: 'test', to: 'TEST', enabled: true, id: 'rule1' }];
+      }
+
+      const result = await window.electronAPI.generatePreview(
+        this.lastSearchFiles.slice(0, 3),
+        this.replacementRules,
+        5
+      );
+
+      const responseTime = performance.now() - startTime;
+      this.updateResponseTime(responseTime);
+
+      if (result.success) {
+        const { preview } = result;
+        let resultText = `👀 置換プレビュー生成完了!
+
+応答時間: ${responseTime.toFixed(2)}ms
+プレビュー件数: ${preview.length}件
+
+`;
+
+        preview.forEach((item, index) => {
+          resultText += `\n${index + 1}. ${item.path}`;
+          item.changes.forEach(change => {
+            resultText += `\n   ${change.rule} (${change.totalCount}箇所)`;
+            change.matches.slice(0, 2).forEach(match => {
+              resultText += `\n   L${match.line}: ${match.context}`;
+            });
+          });
+        });
+
+        this.displayResult('replacementResult', resultText);
+      } else {
+        this.displayResult('replacementResult', `❌ エラー: ${result.error}`);
+      }
+
+      this.updateStatus('Ready', '⚡');
+    } catch (error) {
+      console.error('❌ Replacement preview failed:', error);
+      this.displayResult('replacementResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+    }
+  }
+
+  /**
+   * 置換処理キャンセルテスト
+   */
+  async handleCancelReplacement() {
+    try {
+      this.updateStatus('キャンセル中...', '🛑');
+
+      const result = await window.electronAPI.cancelReplacement();
+
+      if (result.success) {
+        this.displayResult('replacementResult', '🛑 置換処理がキャンセルされました');
+        this.updateStatus('Ready', '⚡');
+      } else {
+        this.displayResult('replacementResult', `❌ キャンセル失敗: ${result.error}`);
+        this.updateStatus('Error', '🚨');
+      }
+    } catch (error) {
+      console.error('❌ Cancel replacement failed:', error);
+      this.displayResult('replacementResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+    }
+  }
+
+  /**
+   * 置換統計情報取得テスト
+   */
+  async handleReplacementStats() {
+    const startTime = performance.now();
+
+    try {
+      this.updateStatus('統計情報取得中...', '📊');
+
+      const result = await window.electronAPI.getReplacementStats();
+      const responseTime = performance.now() - startTime;
+      this.updateResponseTime(responseTime);
+
+      if (result.success) {
+        const { stats } = result;
+        const resultText = `📊 置換統計情報
+
+応答時間: ${responseTime.toFixed(2)}ms
+
+統計情報:
+- 総ファイル数: ${stats.totalFiles}
+- 処理済みファイル数: ${stats.processedFiles}
+- 変更ファイル数: ${stats.modifiedFiles}
+- 総置換回数: ${stats.totalReplacements}
+- エラー数: ${stats.errors.length}
+
+詳細:
+${JSON.stringify(stats, null, 2)}`;
+
+        this.displayResult('replacementResult', resultText);
+      } else {
+        this.displayResult('replacementResult', `❌ エラー: ${result.error}`);
+      }
+
+      this.updateStatus('Ready', '⚡');
+    } catch (error) {
+      console.error('❌ Replacement stats failed:', error);
+      this.displayResult('replacementResult', `❌ エラー: ${error.message}`);
+      this.updateStatus('Error', '🚨');
+    }
+  }
+
+  /**
+   * 置換ルール追加
+   */
+  handleAddRule() {
+    const fromText = document.getElementById('fromText').value.trim();
+    const toText = document.getElementById('toText').value.trim();
+
+    if (!fromText || !toText) {
+      this.displayResult('replacementResult', '⚠️ From と To の両方を入力してください');
+      return;
+    }
+
+    const newRule = {
+      id: `rule_${Date.now()}`,
+      from: fromText,
+      to: toText,
+      enabled: true,
+    };
+
+    this.replacementRules.push(newRule);
+    this.updateRulesList();
+
+    // 入力フィールドをクリア
+    document.getElementById('fromText').value = '';
+    document.getElementById('toText').value = '';
+
+    this.displayResult('replacementResult', `✅ ルール追加: "${fromText}" → "${toText}"`);
+  }
+
+  /**
+   * ルール一覧を更新
+   */
+  updateRulesList() {
+    const rulesList = document.getElementById('rulesList');
+    if (!rulesList) {
+      return;
+    }
+
+    rulesList.innerHTML = '';
+
+    this.replacementRules.forEach((rule, index) => {
+      const ruleElement = document.createElement('div');
+      ruleElement.className = 'rule-item';
+      ruleElement.innerHTML = `
+        <span class="rule-text">${rule.from} → ${rule.to}</span>
+        <button class="remove-rule-btn" data-index="${index}">🗑️</button>
+      `;
+
+      const removeBtn = ruleElement.querySelector('.remove-rule-btn');
+      removeBtn.addEventListener('click', () => {
+        this.replacementRules.splice(index, 1);
+        this.updateRulesList();
+        this.displayResult('replacementResult', `🗑️ ルール削除: "${rule.from}" → "${rule.to}"`);
+      });
+
+      rulesList.appendChild(ruleElement);
+    });
+  }
+
+  /**
+   * 置換進捗更新
+   */
+  updateReplacementProgress(progressData) {
+    const progressText = `🔄 処理中: ${progressData.processedFiles}/${progressData.totalFiles} (${progressData.percentage}%)`;
+    this.updateStatus(progressText, '🔄');
+
+    // プログレスバーの実装は将来の拡張で
+    console.log('置換進捗:', progressData);
   }
 }
 

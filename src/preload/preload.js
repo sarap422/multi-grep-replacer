@@ -316,6 +316,162 @@ contextBridge.exposeInMainWorld('electronAPI', {
     console.log('🔇 Removing search progress listener');
     ipcRenderer.removeAllListeners('search-progress');
   },
+
+  // 置換エンジン API
+  /**
+   * 複数ファイル一括置換処理
+   * @param {Array} files - ファイルパス配列
+   * @param {Array} rules - 置換ルール配列
+   * @param {Object} options - 置換オプション
+   * @returns {Promise<Object>} 置換結果
+   */
+  processFiles: async (files, rules, options = {}) => {
+    console.log('🔄 Processing files with replacement engine:', {
+      fileCount: files.length,
+      ruleCount: rules.length,
+      options,
+    });
+    try {
+      const result = await ipcRenderer.invoke('process-files', files, rules, options);
+      console.log('🔄 Process files result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Process files failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 単一ファイル置換処理
+   * @param {string} filePath - ファイルパス
+   * @param {Array} rules - 置換ルール配列
+   * @returns {Promise<Object>} 置換結果
+   */
+  processFile: async (filePath, rules) => {
+    console.log('📝 Processing single file:', { filePath, ruleCount: rules.length });
+    try {
+      const result = await ipcRenderer.invoke('process-file', filePath, rules);
+      console.log('📝 Process file result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Process file failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 置換プレビュー生成
+   * @param {Array} files - ファイルパス配列
+   * @param {Array} rules - 置換ルール配列
+   * @param {number} limit - プレビュー件数制限
+   * @returns {Promise<Object>} プレビュー結果
+   */
+  generatePreview: async (files, rules, limit = 10) => {
+    console.log('👀 Generating replacement preview:', {
+      fileCount: files.length,
+      ruleCount: rules.length,
+      limit,
+    });
+    try {
+      const result = await ipcRenderer.invoke('generate-preview', files, rules, limit);
+      console.log('👀 Generate preview result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Generate preview failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 置換処理キャンセル
+   * @returns {Promise<Object>} キャンセル結果
+   */
+  cancelReplacement: async () => {
+    console.log('🛑 Cancelling replacement processing...');
+    try {
+      const result = await ipcRenderer.invoke('cancel-replacement');
+      console.log('🛑 Cancel replacement result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Cancel replacement failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 置換統計情報取得
+   * @returns {Promise<Object>} 統計情報
+   */
+  getReplacementStats: async () => {
+    console.log('📊 Getting replacement stats...');
+    try {
+      const result = await ipcRenderer.invoke('get-replacement-stats');
+      console.log('📊 Replacement stats result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Get replacement stats failed:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 置換進捗イベントリスナー設定
+   * @param {Function} callback - 進捗コールバック
+   */
+  onReplacementProgress: callback => {
+    console.log('📈 Setting up replacement progress listener');
+    ipcRenderer.on('replacement-progress', (event, progressData) => {
+      console.log('📈 Replacement progress:', progressData);
+      callback(progressData);
+    });
+  },
+
+  /**
+   * 置換開始イベントリスナー設定
+   * @param {Function} callback - 開始コールバック
+   */
+  onReplacementStart: callback => {
+    console.log('🚀 Setting up replacement start listener');
+    ipcRenderer.on('replacement-start', (event, startData) => {
+      console.log('🚀 Replacement started:', startData);
+      callback(startData);
+    });
+  },
+
+  /**
+   * 置換完了イベントリスナー設定
+   * @param {Function} callback - 完了コールバック
+   */
+  onReplacementComplete: callback => {
+    console.log('✅ Setting up replacement complete listener');
+    ipcRenderer.on('replacement-complete', (event, completeData) => {
+      console.log('✅ Replacement completed:', completeData);
+      callback(completeData);
+    });
+  },
+
+  /**
+   * 置換エラーイベントリスナー設定
+   * @param {Function} callback - エラーコールバック
+   */
+  onReplacementError: callback => {
+    console.log('🚨 Setting up replacement error listener');
+    ipcRenderer.on('replacement-error', (event, errorData) => {
+      console.log('🚨 Replacement error:', errorData);
+      callback(errorData);
+    });
+  },
+
+  /**
+   * 置換関連イベントリスナー削除
+   */
+  removeReplacementListeners: () => {
+    console.log('🔇 Removing replacement event listeners');
+    ipcRenderer.removeAllListeners('replacement-progress');
+    ipcRenderer.removeAllListeners('replacement-start');
+    ipcRenderer.removeAllListeners('replacement-complete');
+    ipcRenderer.removeAllListeners('replacement-error');
+  },
 });
 
 /**

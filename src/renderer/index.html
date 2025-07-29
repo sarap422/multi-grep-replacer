@@ -90,6 +90,28 @@
               </div>
               <div id="newSearchResult" class="test-result search-result"></div>
             </div>
+
+            <!-- 置換エンジンテスト -->
+            <div class="replacement-section">
+              <h3>🔄 置換エンジンテスト</h3>
+              <div class="button-group">
+                <button id="replacementProcessButton" class="test-button primary">🔄 置換実行</button>
+                <button id="replacementPreviewButton" class="test-button info">👀 プレビュー生成</button>
+                <button id="cancelReplacementButton" class="test-button warning">🛑 置換キャンセル</button>
+                <button id="replacementStatsButton" class="test-button info">📊 統計情報取得</button>
+              </div>
+              <div class="replacement-rules">
+                <h4>🔧 テスト用置換ルール</h4>
+                <div class="rule-inputs">
+                  <input type="text" id="fromText" placeholder="From (例: old-class)" value="old-class" />
+                  <span>→</span>
+                  <input type="text" id="toText" placeholder="To (例: new-class)" value="new-class" />
+                  <button id="addRuleButton" class="test-button small">➕</button>
+                </div>
+                <div id="rulesList" class="rules-list"></div>
+              </div>
+              <div id="replacementResult" class="test-result replacement-result"></div>
+            </div>
           </div>
         </section>
       </main>

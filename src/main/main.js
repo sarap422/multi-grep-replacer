@@ -3,6 +3,7 @@ const path = require('path');
 const ConfigManager = require('./config-manager');
 const FileOperations = require('./file-operations');
 const FileSearchEngine = require('./file-search-engine');
+const ReplacementEngine = require('./replacement-engine');
 const DebugLogger = require('./debug-logger');
 
 /**
@@ -16,6 +17,7 @@ class MultiGrepReplacerApp {
     this.startTime = performance.now();
     this.initializationTracker = 'app-initialization';
     this.fileSearchEngine = new FileSearchEngine();
+    this.replacementEngine = new ReplacementEngine();
   }
 
   /**
@@ -510,6 +512,159 @@ class MultiGrepReplacerApp {
       } catch (error) {
         await DebugLogger.logError(error, {
           operation: 'get-search-stats',
+          component: 'IPC-Handler',
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        return { success: false, error: error.message };
+      }
+    });
+
+    // 置換エンジン API
+    ipcMain.handle('process-files', async (event, files, rules, options = {}) => {
+      const operationId = 'ipc-process-files';
+      DebugLogger.startPerformance(operationId);
+
+      try {
+        await DebugLogger.debug('Processing files with replacement engine', {
+          fileCount: files.length,
+          ruleCount: rules.length,
+          options,
+        });
+
+        // 進捗通知の設定
+        this.replacementEngine.removeAllListeners('progress');
+        this.replacementEngine.removeAllListeners('start');
+        this.replacementEngine.removeAllListeners('complete');
+        this.replacementEngine.removeAllListeners('error');
+
+        this.replacementEngine.on('progress', progressData => {
+          event.sender.send('replacement-progress', progressData);
+        });
+
+        this.replacementEngine.on('start', startData => {
+          event.sender.send('replacement-start', startData);
+        });
+
+        this.replacementEngine.on('complete', completeData => {
+          event.sender.send('replacement-complete', completeData);
+        });
+
+        this.replacementEngine.on('error', errorData => {
+          event.sender.send('replacement-error', errorData);
+        });
+
+        // 置換エンジンのオプション設定
+        this.replacementEngine.options = { ...this.replacementEngine.options, ...options };
+
+        const result = await this.replacementEngine.processFiles(files, rules);
+
+        await DebugLogger.endPerformance(operationId, {
+          success: true,
+          modifiedFiles: result.stats.modifiedFiles,
+          totalReplacements: result.stats.totalReplacements,
+        });
+
+        return result;
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'process-files',
+          fileCount: files.length,
+          component: 'IPC-Handler',
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        throw error;
+      }
+    });
+
+    // 単一ファイル処理
+    ipcMain.handle('process-file', async (event, filePath, rules) => {
+      const operationId = 'ipc-process-file';
+      DebugLogger.startPerformance(operationId);
+
+      try {
+        await DebugLogger.debug('Processing single file', { filePath, ruleCount: rules.length });
+        const result = await this.replacementEngine.processFile(filePath, rules);
+
+        await DebugLogger.endPerformance(operationId, {
+          success: true,
+          modified: result.modified,
+          replacements: result.replacements,
+        });
+
+        return { success: true, result };
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'process-file',
+          filePath,
+          component: 'IPC-Handler',
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        return { success: false, error: error.message };
+      }
+    });
+
+    // 置換プレビュー生成
+    ipcMain.handle('generate-preview', async (event, files, rules, limit = 10) => {
+      const operationId = 'ipc-generate-preview';
+      DebugLogger.startPerformance(operationId);
+
+      try {
+        await DebugLogger.debug('Generating replacement preview', {
+          fileCount: files.length,
+          ruleCount: rules.length,
+          limit,
+        });
+
+        const preview = await this.replacementEngine.generatePreview(files, rules, limit);
+
+        await DebugLogger.endPerformance(operationId, {
+          success: true,
+          previewCount: preview.length,
+        });
+
+        return { success: true, preview };
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'generate-preview',
+          fileCount: files.length,
+          component: 'IPC-Handler',
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        return { success: false, error: error.message };
+      }
+    });
+
+    // 置換処理キャンセル
+    ipcMain.handle('cancel-replacement', async () => {
+      const operationId = 'ipc-cancel-replacement';
+      DebugLogger.startPerformance(operationId);
+
+      try {
+        const cancelled = this.replacementEngine.cancelProcessing();
+        await DebugLogger.endPerformance(operationId, { success: true, cancelled });
+        return { success: true, cancelled };
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'cancel-replacement',
+          component: 'IPC-Handler',
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        return { success: false, error: error.message };
+      }
+    });
+
+    // 置換統計情報取得
+    ipcMain.handle('get-replacement-stats', async () => {
+      const operationId = 'ipc-get-replacement-stats';
+      DebugLogger.startPerformance(operationId);
+
+      try {
+        const stats = this.replacementEngine.getStats();
+        await DebugLogger.endPerformance(operationId, { success: true });
+        return { success: true, stats };
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'get-replacement-stats',
           component: 'IPC-Handler',
         });
         await DebugLogger.endPerformance(operationId, { success: false });
