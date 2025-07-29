@@ -35,8 +35,8 @@ Electronベースのクロスプラットフォーム対応デスクトップア
 npm start                    # Electron開発モード起動
 npm run lint                 # ESLint チェック実行
 npm run lint:fix            # ESLint 自動修正
-npm test                     # テストスイート実行
-npm run test:e2e            # E2Eテスト実行
+npm TEST                     # テストスイート実行
+npm run TEST:e2e            # E2Eテスト実行
 
 # 実行ファイル作成（段階的確認用）
 npm run build:dev           # 開発版.app作成
@@ -46,8 +46,8 @@ npm run build:win           # Windows用パッケージ作成
 
 # デバッグ・監視
 npm run debug               # デバッグモード起動
-npm run test:performance    # パフォーマンステスト
-npm run test:security       # セキュリティテスト
+npm run TEST:performance    # パフォーマンステスト
+npm run TEST:security       # セキュリティテスト
 ```
 
 ### ファイル操作・確認
@@ -165,7 +165,7 @@ multi-grep-replacer/                       # GitHubリポジトリルート
 │   │       └── performance-monitor.js     # UI応答性監視
 │   └── preload/                           # Preloadスクリプト
 │       └── preload.js                     # セキュアなAPI公開
-├── tests/                                 # テストスイート
+├── TESTs/                                 # テストスイート
 ├── config/                                # 設定ファイルディレクトリ
 ├── build/                                 # ビルド設定・リソース
 ├── dist/                                  # ビルド成果物（.gitignoreで除外）
@@ -284,12 +284,12 @@ npm run build:dev           # Hello World.app作成
 # → .appファイル単体起動・動作確認
 
 # Phase 2完了時テスト  
-npm run test:core           # コア機能テスト実行
+npm run TEST:core           # コア機能テスト実行
 npm run build:dev           # 置換機能付き.app作成
 # → .appで実際のファイル置換テスト実行
 
 # Phase 3完了時テスト
-npm run test:ui             # UI応答性テスト実行
+npm run TEST:ui             # UI応答性テスト実行
 npm run build:production    # 完全版.app作成
 # → .appで全機能統合テスト実行
 ```

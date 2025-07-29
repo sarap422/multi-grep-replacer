@@ -114,7 +114,7 @@ module.exports = {
     },
     {
       // テストファイルでは一部ルールを緩和
-      files: ['tests/**/*.js', '**/*.test.js'],
+      files: ['TESTs/**/*.js', '**/*.TEST.js'],
       rules: {
         'no-magic-numbers': 'off'
       }

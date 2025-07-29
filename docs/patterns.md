@@ -2,6 +2,197 @@
 
 このファイルには、Multi Grep Replacer開発で発見・確立したElectronパターンとベストプラクティスを記録します。
 
+## Async/Await統一パターン
+
+### メインプロセスでの非同期関数統一
+```javascript
+// ✅ 良い例：すべてのDebugLogger呼び出しをawaitで統一
+class MultiGrepReplacerApp {
+  async createMainWindow() {
+    await DebugLogger.info('Creating main window...');
+    
+    try {
+      // ウィンドウ作成処理
+      await DebugLogger.debug('Loading HTML file', { htmlPath });
+      
+      // ファイル存在確認
+      if (!require('fs').existsSync(absoluteHtmlPath)) {
+        await DebugLogger.error('HTML file loading failed', { error: error.message });
+        throw error;
+      }
+      
+      await DebugLogger.info('Main window created successfully');
+    } catch (error) {
+      await DebugLogger.logError(error, { phase: 'window-creation' });
+      throw error;
+    }
+  }
+}
+
+// ❌ 避けるべき例：同期・非同期の混在
+function createMainWindow() {
+  DebugLogger.info('Creating window...'); // 同期
+  await DebugLogger.error('Error occurred'); // SyntaxError!
+}
+```
+
+### 非同期メソッド呼び出しの統一
+```javascript
+// ✅ 良い例：呼び出し側もawaitで統一
+app.whenReady().then(async () => {
+  await DebugLogger.info('App ready, creating main window');
+  await this.createMainWindow(); // awaitを忘れずに
+  
+  app.on('activate', async () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      await this.createMainWindow(); // ここもawait
+    }
+  });
+});
+
+// ❌ 避けるべき例：awaitなしの呼び出し
+this.createMainWindow(); // Promiseが放置される
+```
+
+## セキュリティパターン
+
+### Context Isolationでのセキュリティ検証
+```javascript
+// preload.js - 適切なセキュリティ検証
+const validateSecurity = () => {
+  // preloadスクリプト内では require は利用可能 (正常)
+  // レンダラープロセスでの require 利用をチェック
+  if (typeof window !== 'undefined' && typeof window.require !== 'undefined') {
+    console.warn('⚠️ Potential context isolation bypass detected');
+  }
+
+  // process オブジェクトの漏れを検証
+  if (typeof window !== 'undefined' && typeof window.process !== 'undefined') {
+    console.warn('⚠️ process object leak detected in renderer process');
+  }
+
+  console.log('🔒 Security validation completed - preload context is secure');
+};
+
+// ❌ 避けるべき例：preload内での誤検知
+if (typeof require !== 'undefined') {
+  console.warn('⚠️ Node.js integration detected'); // preloadでは正常なので誤検知
+}
+```
+
+### レンダラープロセスでのエラーハンドリング
+```javascript
+// app.js - 詳細なエラー情報とガイダンス
+async handleNewFileSearch() {
+  try {
+    // セキュリティチェック
+    if (typeof process !== 'undefined') {
+      console.warn('⚠️ process object detected in renderer - this should not happen');
+    }
+    
+    const result = await window.electronAPI.searchFiles(directory, extensions, options);
+  } catch (error) {
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    
+    // 詳細なエラー情報を表示
+    let errorMessage = error.message;
+    if (error.message.includes('process is not defined')) {
+      errorMessage += '\n\n解決方法: Electronのセキュリティ設定により、レンダラープロセスでは process オブジェクトを使用できません。';
+    }
+    
+    this.displayResult('searchResult', `❌ エラー: ${errorMessage}`);
+  }
+}
+```
+
+## ウィンドウライフサイクル管理パターン
+
+### 適切なウィンドウクリーンアップ
+```javascript
+// ✅ 良い例：適切なウィンドウライフサイクル管理
+class MultiGrepReplacerApp {
+  async createMainWindow() {
+    this.mainWindow = new BrowserWindow({ /* options */ });
+    
+    // HTMLファイル読み込み (パッケージ版対応)
+    const htmlPath = path.join(__dirname, '../renderer/index.html');
+    const absoluteHtmlPath = path.resolve(htmlPath);
+    
+    // ファイル存在確認
+    if (!require('fs').existsSync(absoluteHtmlPath)) {
+      const error = new Error(`HTML file not found: ${absoluteHtmlPath}`);
+      await DebugLogger.error('HTML file loading failed', { error: error.message });
+      throw error;
+    }
+    
+    this.mainWindow.loadFile(absoluteHtmlPath);
+
+    // ウィンドウクローズイベント - 適切なクリーンアップ
+    this.mainWindow.on('closed', async () => {
+      await DebugLogger.info('Main window closed');
+      this.mainWindow = null; // 参照をクリア
+    });
+  }
+  
+  // アプリイベントリスナー
+  setupAppEventListeners() {
+    // 全ウィンドウクローズ時
+    app.on('window-all-closed', async () => {
+      await DebugLogger.info('All windows closed');
+      
+      // メインウィンドウ参照をクリア
+      this.mainWindow = null;
+      
+      // macOS以外では完全終了
+      if (process.platform !== 'darwin') {
+        app.quit();
+      }
+    });
+    
+    // macOS: Dock アイコンクリック時のウィンドウ再作成
+    app.on('activate', async () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        await this.createMainWindow();
+      }
+    });
+  }
+}
+
+// ❌ 避けるべき例：参照の適切な管理なし
+this.mainWindow.on('closed', () => {
+  // this.mainWindow = null; // これを忘れると参照が残る
+});
+```
+
+### パッケージ版対応のファイルパス解決
+```javascript
+// ✅ 良い例：開発・パッケージ両対応のパス解決
+const htmlPath = path.join(__dirname, '../renderer/index.html');
+const absoluteHtmlPath = path.resolve(htmlPath);
+
+await DebugLogger.debug('Loading HTML file', { 
+  htmlPath, 
+  absoluteHtmlPath,
+  exists: require('fs').existsSync(absoluteHtmlPath) 
+});
+
+// ファイル存在確認
+if (!require('fs').existsSync(absoluteHtmlPath)) {
+  const error = new Error(`HTML file not found: ${absoluteHtmlPath}`);
+  await DebugLogger.error('HTML file loading failed', { error: error.message });
+  throw error;
+}
+
+this.mainWindow.loadFile(absoluteHtmlPath);
+
+// ❌ 避けるべき例：相対パスの直接使用
+this.mainWindow.loadFile('../renderer/index.html'); // パッケージ版で失敗する可能性
+```
+
 ## ファイル検索エンジンパターン
 
 ### EventEmitterベースの非同期検索

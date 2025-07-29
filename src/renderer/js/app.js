@@ -724,7 +724,13 @@ ${
     const startTime = performance.now();
 
     try {
+      console.log('🚀 Starting new file search...');
       this.updateStatus('Searching with new engine...', '🚀');
+
+      // セキュリティチェック: process オブジェクトが利用できないことを確認
+      if (typeof process !== 'undefined') {
+        console.warn('⚠️ process object detected in renderer - this should not happen');
+      }
 
       // テスト用のディレクトリ
       const testDirectory =
@@ -819,10 +825,29 @@ ${
       this.updateStatus('Ready', '⚡');
     } catch (error) {
       console.error('❌ New file search test failed:', error);
-      this.displayResult('newSearchResult', `❌ エラー: ${error.message}`);
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        cause: error.cause,
+      });
+
+      // 詳細なエラー情報を表示
+      let errorMessage = error.message;
+      if (error.message.includes('process is not defined')) {
+        errorMessage +=
+          '\n\n解決方法: Electronのセキュリティ設定により、レンダラープロセスでは process オブジェクトを使用できません。';
+      }
+
+      this.displayResult('newSearchResult', `❌ エラー: ${errorMessage}`);
       this.updateStatus('Error', '🚨');
+
       // 進捗監視を停止
-      window.electronAPI.removeSearchProgressListener();
+      try {
+        window.electronAPI.removeSearchProgressListener();
+      } catch (cleanupError) {
+        console.warn('Failed to cleanup search progress listener:', cleanupError);
+      }
     }
   }
 

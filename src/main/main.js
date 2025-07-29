@@ -58,9 +58,9 @@ class MultiGrepReplacerApp {
   /**
    * メインウィンドウ作成
    */
-  createMainWindow() {
+  async createMainWindow() {
     DebugLogger.startPerformance('create-main-window');
-    DebugLogger.info('Creating main window...');
+    await DebugLogger.info('Creating main window...');
 
     try {
       this.mainWindow = new BrowserWindow({
@@ -87,12 +87,32 @@ class MultiGrepReplacerApp {
 
       // セキュリティ設定検証
       const securityValid = this.validateSecuritySettings();
-      DebugLogger.info('Security settings validation', { isValid: securityValid });
+      await DebugLogger.info('Security settings validation', { isValid: securityValid });
 
-      // HTMLファイル読み込み
+      // HTMLファイル読み込み (パッケージ版対応)
       const htmlPath = path.join(__dirname, '../renderer/index.html');
-      DebugLogger.debug('Loading HTML file', { htmlPath });
-      this.mainWindow.loadFile(htmlPath);
+      const absoluteHtmlPath = path.resolve(htmlPath);
+
+      await DebugLogger.debug('Loading HTML file', {
+        htmlPath,
+        absoluteHtmlPath,
+        exists: require('fs').existsSync(absoluteHtmlPath),
+      });
+
+      // ファイル存在確認
+      if (!require('fs').existsSync(absoluteHtmlPath)) {
+        const error = new Error(`HTML file not found: ${absoluteHtmlPath}`);
+        await DebugLogger.error('HTML file loading failed', { error: error.message });
+        throw error;
+      }
+
+      this.mainWindow.loadFile(absoluteHtmlPath);
+
+      // ウィンドウクローズイベント
+      this.mainWindow.on('closed', async () => {
+        await DebugLogger.info('Main window closed');
+        this.mainWindow = null;
+      });
 
       // ウィンドウが準備完了したら表示
       this.mainWindow.once('ready-to-show', async () => {
@@ -126,10 +146,10 @@ class MultiGrepReplacerApp {
         this.mainWindow = null;
       });
 
-      DebugLogger.endPerformance('create-main-window');
-      DebugLogger.info('Main window created successfully');
+      await DebugLogger.endPerformance('create-main-window');
+      await DebugLogger.info('Main window created successfully');
     } catch (error) {
-      DebugLogger.logError(error, {
+      await DebugLogger.logError(error, {
         phase: 'window-creation',
         component: 'MultiGrepReplacerApp',
       });
@@ -146,14 +166,14 @@ class MultiGrepReplacerApp {
     // アプリ準備完了
     app.whenReady().then(async () => {
       await DebugLogger.info('App ready, creating main window');
-      this.createMainWindow();
+      await this.createMainWindow();
 
       // macOS: Dock アイコンクリック時のウィンドウ再作成
       app.on('activate', async () => {
         await DebugLogger.debug('App activated (macOS dock click)');
         if (BrowserWindow.getAllWindows().length === 0) {
           await DebugLogger.info('No windows found, creating new main window');
-          this.createMainWindow();
+          await this.createMainWindow();
         }
       });
     });
@@ -161,6 +181,10 @@ class MultiGrepReplacerApp {
     // 全ウィンドウクローズ時
     app.on('window-all-closed', async () => {
       await DebugLogger.info('All windows closed', { platform: process.platform });
+
+      // メインウィンドウ参照をクリア
+      this.mainWindow = null;
+
       // macOS以外では完全終了
       if (process.platform !== 'darwin') {
         await DebugLogger.info('Quitting application (non-macOS)');

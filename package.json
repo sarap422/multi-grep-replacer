@@ -61,7 +61,13 @@
     "files": [
       "src/**/*",
       "config/**/*",
-      "package.json"
+      "package.json",
+      "!tests/**/*",
+      "!coverage/**/*",
+      "!debug/**/*"
+    ],
+    "extraResources": [
+      "config/**/*"
     ],
     "mac": {
       "category": "public.app-category.developer-tools",

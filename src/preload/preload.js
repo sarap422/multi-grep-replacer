@@ -478,17 +478,19 @@ contextBridge.exposeInMainWorld('electronAPI', {
  * セキュリティ検証
  */
 const validateSecurity = () => {
-  // Node.js統合が無効であることを確認
-  if (typeof require !== 'undefined') {
-    console.warn('⚠️ Node.js integration detected in renderer');
-  }
-
-  // Context Isolationが有効であることを確認
-  if (typeof window.require !== 'undefined') {
+  // preloadスクリプト内では require は利用可能 (正常)
+  // レンダラープロセスでの require 利用をチェック
+  if (typeof window !== 'undefined' && typeof window.require !== 'undefined') {
     console.warn('⚠️ Potential context isolation bypass detected');
   }
 
-  console.log('🔒 Security validation completed');
+  // process オブジェクトの漏れを検証
+  if (typeof window !== 'undefined' && typeof window.process !== 'undefined') {
+    console.warn('⚠️ process object leak detected in renderer process');
+    console.warn('This could cause ReferenceError: process is not defined');
+  }
+
+  console.log('🔒 Security validation completed - preload context is secure');
 };
 
 /**
