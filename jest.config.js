@@ -1,19 +1,19 @@
 module.exports = {
   // テスト環境設定
-  TESTEnvironment: 'node',
+  testEnvironment: 'node',
   
   // テストファイルパターン
-  TESTMatch: [
-    '**/TESTs/**/*.TEST.js',
-    '**/TESTs/**/*.spec.js',
-    '**/__TESTs__/**/*.js'
+  testMatch: [
+    '**/tests/**/*.test.js',
+    '**/tests/**/*.spec.js',
+    '**/__tests__/**/*.js'
   ],
   
   // カバレッジ設定
   collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.js',
-    '!src/**/*.TEST.js',
+    '!src/**/*.test.js',
     '!src/**/*.spec.js',
     '!**/node_modules/**',
     '!**/dist/**'
@@ -32,15 +32,15 @@ module.exports = {
   },
   
   // セットアップファイル
-  setupFilesAfterEnv: ['<rootDir>/TESTs/setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   
   // テスト除外パターン
-  TESTPathIgnorePatterns: [
+  testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
     '/build/',
     '/coverage/',
-    '/TESTs/e2e/' // E2Eテストは除外（専用設定で実行）
+    '/tests/e2e/' // E2Eテストは除外（専用設定で実行）
   ],
   
   // ファイル変換設定
@@ -49,7 +49,7 @@ module.exports = {
   },
   
   // タイムアウト設定
-  TESTTimeout: 10000,
+  testTimeout: 10000,
   
   // 詳細出力
   verbose: true,
@@ -62,7 +62,7 @@ module.exports = {
     'default',
     ['jest-html-reporters', {
       publicPath: './coverage',
-      filename: 'TEST-report.html'
+      filename: 'test-report.html'
     }]
   ]
 };
