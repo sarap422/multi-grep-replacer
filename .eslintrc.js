@@ -10,7 +10,7 @@ module.exports = {
     'prettier'  // Prettierとの競合回避
   ],
   parserOptions: {
-    ecmaVersion: 'laTEST',
+    ecmaVersion: 'latest',
     sourceType: 'module'
   },
   plugins: [
