@@ -1,0 +1,12 @@
+{
+  "targets": {
+    "fileSearchSpeed": "5s for 1000files",
+    "memoryUsage": "<200MB",
+    "ipcResponseTime": "<50ms"
+  },
+  "monitoring": {
+    "enabled": true,
+    "interval": "per-build",
+    "alertThreshold": 150
+  }
+}

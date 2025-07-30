@@ -142,8 +142,10 @@ multi-grep-replacer/                       # GitHubリポジトリルート
 │   ├── 1_requirements.md                  # 要件定義書
 │   ├── 2_architecture.md                  # システム設計書
 │   ├── 3_debugging.md                     # デバッグ環境整備
-│   ├── 4_tasks.md                         # 開発タスク一覧
+│   └── 4_tasks.md                         # 開発タスク一覧
+├── logs/                                  # プロジェクトドキュメント
 │   ├── CHANGELOG.md                       # 実装記録（開発中更新）
+│   ├── ERRORLOG.md                       # エラー内容の記録（問題があった場合）
 │   └── PATTERNS.md                        # Electronパターン集（開発中更新）
 ├── src/                                   # アプリケーションソースコード
 │   ├── main/                              # Electronメインプロセス

@@ -15,8 +15,8 @@
 1. ✅ **機能実装**: 設計通りの機能実装
 2. ✅ **動作テスト**: 段階的テスト実行・合格
 3. ✅ **実行ファイル確認**: .appファイル作成・動作確認
-4. ✅ **CHANGELOG.md更新**: 実装内容・問題・解決方法記録
-5. ✅ **PATTERNS.md更新**: Electronパターン・ベストプラクティス記録
+4. ✅ **logs/CHANGELOG.md更新**: 実装内容・問題・解決方法記録
+5. ✅ **logs/PATTERNS.md更新**: Electronパターン・ベストプラクティス記録
 
 ## 📋 Phase 1: プロジェクト基盤構築（推定: 1-2日）
 
@@ -96,7 +96,7 @@
   - Hello World表示確認
   - IPC通信動作確認
 
-- **CHANGELOG.md更新**:
+- **logs/CHANGELOG.md更新**:
   ```markdown
   ## [Phase 1 - Task 1.1] - 2025-07-08
   
@@ -117,7 +117,7 @@
   - IPC通信応答時間: <10ms
   ```
 
-- **PATTERNS.md更新**:
+- **logs/PATTERNS.md更新**:
   ```markdown
   ## Electron基盤構築パターン
   
@@ -197,8 +197,8 @@
   # → .appでのファイル操作確認
   ```
 
-- **CHANGELOG.md更新**: 設定管理・ファイル操作実装記録
-- **PATTERNS.md更新**: Electronファイル操作パターン記録
+- **logs/CHANGELOG.md更新**: 設定管理・ファイル操作実装記録
+- **logs/PATTERNS.md更新**: Electronファイル操作パターン記録
 
 **Task 1.2 完了確認**: ✅ "設定管理・ファイル操作機能付きElectronアプリ(.app)の正常動作確認完了"
 
@@ -257,8 +257,8 @@
   # → .appでの全機能動作確認
   ```
 
-- **CHANGELOG.md更新**: 開発環境・テスト環境構築記録
-- **PATTERNS.md更新**: Electronテスト・デバッグパターン記録
+- **logs/CHANGELOG.md更新**: 開発環境・テスト環境構築記録
+- **logs/PATTERNS.md更新**: Electronテスト・デバッグパターン記録
 
 **Task 1.3 完了確認**: ✅ "開発・テスト環境完備のElectronアプリ(.app)の正常動作確認完了"
 
@@ -328,8 +328,8 @@
   # → .appでの実際のプロジェクトフォルダ検索テスト
   ```
 
-- **CHANGELOG.md更新**: ファイル検索エンジン実装記録
-- **PATTERNS.md更新**: 高速ファイル検索パターン記録
+- **logs/CHANGELOG.md更新**: ファイル検索エンジン実装記録
+- **logs/PATTERNS.md更新**: 高速ファイル検索パターン記録
 
 **Task 2.1 完了確認**: ✅ "高速ファイル検索機能付きElectronアプリ(.app)の正常動作確認完了"
 
@@ -404,8 +404,8 @@
   - 複数ルール置換結果確認
   - エラーケース動作確認
 
-- **CHANGELOG.md更新**: 置換エンジン実装・テスト結果記録
-- **PATTERNS.md更新**: 高性能置換処理パターン記録
+- **logs/CHANGELOG.md更新**: 置換エンジン実装・テスト結果記録
+- **logs/PATTERNS.md更新**: 高性能置換処理パターン記録
 
 **Task 2.2 完了確認**: ✅ "実用的な置換機能を持つElectronアプリ(.app)での実際の置換作業成功確認完了"
 
@@ -456,8 +456,8 @@
   - エラーケース・境界値テスト
   - パフォーマンス測定・記録
 
-- **CHANGELOG.md更新**: IPC統合・全コア機能完成記録
-- **PATTERNS.md更新**: IPC設計・セキュリティパターン記録
+- **logs/CHANGELOG.md更新**: IPC統合・全コア機能完成記録
+- **logs/PATTERNS.md更新**: IPC設計・セキュリティパターン記録
 
 **Task 2.3 完了確認**: ✅ "全コア機能統合済みElectronアプリ(.app)での実用レベル動作確認完了"
 
@@ -524,8 +524,8 @@
   - ユーザビリティテスト実行
   - UI/UXの改善点記録
 
-- **CHANGELOG.md更新**: メインUI実装・応答性改善記録
-- **PATTERNS.md更新**: Electron UI設計パターン記録
+- **logs/CHANGELOG.md更新**: メインUI実装・応答性改善記録
+- **logs/PATTERNS.md更新**: Electron UI設計パターン記録
 
 **Task 3.1 完了確認**: ✅ "モダンUI搭載ElectronアプリでのUI応答性100ms以内達成確認完了"
 
@@ -582,8 +582,8 @@
   - 設定保存・復元の動作確認
   - UI操作の直感性・効率性評価
 
-- **CHANGELOG.md更新**: 置換ルールUI・設定管理実装記録
-- **PATTERNS.md更新**: 動的UI管理パターン記録
+- **logs/CHANGELOG.md更新**: 置換ルールUI・設定管理実装記録
+- **logs/PATTERNS.md更新**: 動的UI管理パターン記録
 
 **Task 3.2 完了確認**: ✅ "直感的な置換ルール管理UI搭載Electronアプリでの実用的操作確認完了"
 
@@ -655,8 +655,8 @@
   - エラーケース・境界値での動作確認
   - Python版との機能・性能比較テスト
 
-- **CHANGELOG.md更新**: 完全版UI・全機能統合完成記録
-- **PATTERNS.md更新**: 進捗表示・結果管理パターン記録
+- **logs/CHANGELOG.md更新**: 完全版UI・全機能統合完成記録
+- **logs/PATTERNS.md更新**: 進捗表示・結果管理パターン記録
 
 **Task 3.3 完了確認**: ✅ "完全版Multi Grep Replacer(.app)でのPython版を上回る全機能動作確認完了"
 
@@ -713,8 +713,8 @@
   # → パフォーマンス・品質確認
   ```
 
-- **CHANGELOG.md更新**: 最適化・品質向上実装記録
-- **PATTERNS.md更新**: パフォーマンス最適化パターン記録
+- **logs/CHANGELOG.md更新**: 最適化・品質向上実装記録
+- **logs/PATTERNS.md更新**: パフォーマンス最適化パターン記録
 
 **Task 4.1 完了確認**: ✅ "商用レベル品質のMulti Grep Replacer(.app)完成確認完了"
 
