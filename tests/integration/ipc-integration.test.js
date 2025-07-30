@@ -10,11 +10,18 @@ describe('IPC Integration Tests', () => {
         console.log('🧪 Starting IPC Integration Tests...');
     });
     
-    afterAll(() => {
+    afterAll(async () => {
         console.log('📊 IPC Integration Test Results Summary:');
         testResults.forEach(result => {
             console.log(`  ✅ ${result.test}: ${result.status}`);
         });
+        // 非同期処理の確実な終了を待つ
+        await new Promise(resolve => setTimeout(resolve, 100));
+    });
+    
+    afterEach(async () => {
+        // 各テスト後のクリーンアップ
+        await new Promise(resolve => setTimeout(resolve, 10));
     });
     
     describe('Core IPC Functionality', () => {
@@ -81,6 +88,7 @@ describe('IPC Integration Tests', () => {
             expect(result).toHaveProperty('totalChanges');
             expect(result).toHaveProperty('processedFiles');
             expect(result.processedFiles).toBe(files.length);
+            expect(result.totalChanges).toBeGreaterThan(0);
             
             testResults.push({
                 test: 'Replacement Engine',
@@ -144,7 +152,7 @@ describe('IPC Integration Tests', () => {
                     extensions: null,
                     excludePatterns: 'not-an-array'
                 })
-            ).rejects.toThrow('Invalid input');
+            ).rejects.toThrow('Invalid path');
             
             testResults.push({
                 test: 'Input Validation',
