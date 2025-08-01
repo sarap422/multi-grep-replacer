@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Multi Grep Replacer</title>
     <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/themes.css" />
+    <link rel="stylesheet" href="css/animations.css" />
 
     <!-- セキュリティヘッダー -->
     <meta
@@ -19,7 +22,7 @@
     "
     />
   </head>
-  <body>
+  <body class="theme-light">
     <div id="app" class="app-container">
       <!-- アプリヘッダー -->
       <header class="app-header">
@@ -27,107 +30,265 @@
           <span class="app-icon">🔍</span>
           Multi Grep Replacer
         </h1>
-        <div class="app-status" id="appStatus">
-          <span class="status-indicator" id="statusIndicator">⚡</span>
-          <span class="status-text" id="statusText">Ready</span>
+        <div class="header-controls">
+          <button id="themeToggle" class="icon-button" title="テーマ切り替え" aria-label="Toggle theme">
+            <span class="theme-icon">🌙</span>
+          </button>
+          <button id="settingsButton" class="icon-button" title="設定" aria-label="Settings">
+            <span class="settings-icon">⚙️</span>
+          </button>
+          <button id="helpButton" class="icon-button" title="ヘルプ" aria-label="Help">
+            <span class="help-icon">❓</span>
+          </button>
         </div>
       </header>
 
       <!-- メインコンテンツ -->
       <main class="main-content">
-        <!-- ウェルカムメッセージ -->
-        <section class="welcome-section">
-          <div class="welcome-content">
-            <h2>🎉 Hello World!</h2>
-            <p>Multi Grep Replacer (Electron Edition) が正常に起動しました。</p>
-
-            <!-- IPC通信テスト -->
-            <div class="test-section">
-              <h3>🔧 IPC通信テスト</h3>
-              <button id="pingButton" class="test-button">📡 Ping Test</button>
-              <div id="pingResult" class="test-result"></div>
-            </div>
-
-            <!-- アプリ情報 -->
-            <div class="info-section">
-              <h3>📊 アプリ情報</h3>
-              <button id="infoButton" class="test-button">ℹ️ アプリ情報取得</button>
-              <div id="infoResult" class="test-result"></div>
-            </div>
-
-            <!-- バージョン情報 -->
-            <div class="version-section">
-              <h3>🏷️ バージョン情報</h3>
-              <button id="versionButton" class="test-button">📋 バージョン確認</button>
-              <div id="versionResult" class="test-result"></div>
-            </div>
-
-            <!-- 設定管理テスト -->
-            <div class="config-section">
-              <h3>📋 設定管理テスト</h3>
-              <button id="configLoadButton" class="test-button">📖 デフォルト設定読み込み</button>
-              <button id="configSaveButton" class="test-button">💾 設定保存テスト</button>
-              <button id="configRecentButton" class="test-button">📚 最近の設定確認</button>
-              <div id="configResult" class="test-result"></div>
-            </div>
-
-            <!-- ファイル操作テスト -->
-            <div class="file-section">
-              <h3>📁 ファイル操作テスト</h3>
-              <button id="folderSelectButton" class="test-button">📂 フォルダ選択</button>
-              <button id="fileSearchButton" class="test-button">🔍 ファイル検索</button>
-              <button id="fileReadButton" class="test-button">📄 ファイル読み込み</button>
-              <div id="fileResult" class="test-result"></div>
-            </div>
-
-            <!-- 新しいファイル検索エンジンテスト -->
-            <div class="new-search-section">
-              <h3>🚀 新ファイル検索エンジンテスト</h3>
-              <div class="button-group">
-                <button id="newFileSearchButton" class="test-button primary">🚀 新エンジンで検索</button>
-                <button id="cancelSearchButton" class="test-button warning">🛑 検索キャンセル</button>
-                <button id="searchStatsButton" class="test-button info">📈 統計情報取得</button>
+        <!-- ターゲットフォルダ選択 -->
+        <section class="target-folder-section" aria-labelledby="folder-heading">
+          <h2 id="folder-heading" class="section-title">
+            <span class="section-icon">📁</span>
+            Target Folder
+          </h2>
+          <div class="folder-input-group">
+            <div class="folder-input-wrapper" id="folderDropZone">
+              <input
+                type="text"
+                id="targetFolder"
+                class="folder-input"
+                placeholder="/path/to/project/folder"
+                readonly
+                aria-label="Target folder path"
+              />
+              <div class="drop-overlay">
+                <span class="drop-icon">📂</span>
+                <span class="drop-text">Drop folder here</span>
               </div>
-              <div id="newSearchResult" class="test-result search-result"></div>
             </div>
+            <button id="browseButton" class="primary-button browse-button">
+              <span class="button-icon">📂</span>
+              Browse...
+            </button>
+          </div>
+          <div class="folder-info">
+            <span class="info-text" id="folderStatus">No folder selected</span>
+          </div>
+        </section>
 
-            <!-- 置換エンジンテスト -->
-            <div class="replacement-section">
-              <h3>🔄 置換エンジンテスト</h3>
-              <div class="button-group">
-                <button id="replacementProcessButton" class="test-button primary">🔄 置換実行</button>
-                <button id="replacementPreviewButton" class="test-button info">👀 プレビュー生成</button>
-                <button id="cancelReplacementButton" class="test-button warning">🛑 置換キャンセル</button>
-                <button id="replacementStatsButton" class="test-button info">📊 統計情報取得</button>
-              </div>
-              <div class="replacement-rules">
-                <h4>🔧 テスト用置換ルール</h4>
-                <div class="rule-inputs">
-                  <input type="text" id="fromText" placeholder="From (例: old-class)" value="old-class" />
-                  <span>→</span>
-                  <input type="text" id="toText" placeholder="To (例: new-class)" value="new-class" />
-                  <button id="addRuleButton" class="test-button small">➕</button>
-                </div>
-                <div id="rulesList" class="rules-list"></div>
-              </div>
-              <div id="replacementResult" class="test-result replacement-result"></div>
+        <!-- ファイル拡張子フィルタ -->
+        <section class="extensions-section" aria-labelledby="extensions-heading">
+          <h2 id="extensions-heading" class="section-title">
+            <span class="section-icon">🔍</span>
+            File Extensions
+            <span class="section-subtitle">(comma-separated, blank = all files)</span>
+          </h2>
+          <div class="extensions-input-group">
+            <input
+              type="text"
+              id="fileExtensions"
+              class="extensions-input"
+              placeholder=".html,.css,.js,.php,.md,.json"
+              value=".html,.css,.js,.php,.md,.json"
+              aria-label="File extensions filter"
+            />
+            <div class="extensions-presets">
+              <button class="preset-button" data-preset="web">Web</button>
+              <button class="preset-button" data-preset="docs">Docs</button>
+              <button class="preset-button" data-preset="code">Code</button>
+              <button class="preset-button" data-preset="all">All</button>
             </div>
           </div>
         </section>
+
+        <!-- 置換ルール管理 -->
+        <section class="replacement-rules-section" aria-labelledby="rules-heading">
+          <div class="section-header">
+            <h2 id="rules-heading" class="section-title">
+              <span class="section-icon">⚙️</span>
+              Replacement Rules
+            </h2>
+            <div class="section-controls">
+              <select id="templateSelect" class="template-select" aria-label="Rule templates">
+                <option value="">📋 Templates ▼</option>
+                <option value="web-development">Web Development</option>
+                <option value="css-modernization">CSS Modernization</option>
+                <option value="variable-rename">Variable Rename</option>
+                <option value="framework-migration">Framework Migration</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="rules-container" id="rulesContainer">
+            <div class="rules-list" id="rulesList">
+              <!-- 初期ルール -->
+              <div class="rule-item" data-rule-id="rule-1">
+                <input type="checkbox" class="rule-checkbox" checked aria-label="Enable rule" />
+                <span class="rule-from-label">From:</span>
+                <input type="text" class="rule-from" placeholder="old-class" value="old-class" />
+                <span class="rule-arrow">→</span>
+                <span class="rule-to-label">To:</span>
+                <input type="text" class="rule-to" placeholder="new-class" value="new-class" />
+                <button class="icon-button rule-delete" title="Delete rule" aria-label="Delete rule">
+                  <span>🗑️</span>
+                </button>
+                <button class="icon-button rule-drag" title="Drag to reorder" aria-label="Reorder rule">
+                  <span>↕️</span>
+                </button>
+              </div>
+
+              <div class="rule-item" data-rule-id="rule-2">
+                <input type="checkbox" class="rule-checkbox" checked aria-label="Enable rule" />
+                <span class="rule-from-label">From:</span>
+                <input type="text" class="rule-from" placeholder="oldVariable" value="oldVariable" />
+                <span class="rule-arrow">→</span>
+                <span class="rule-to-label">To:</span>
+                <input type="text" class="rule-to" placeholder="newVariable" value="newVariable" />
+                <button class="icon-button rule-delete" title="Delete rule" aria-label="Delete rule">
+                  <span>🗑️</span>
+                </button>
+                <button class="icon-button rule-drag" title="Drag to reorder" aria-label="Reorder rule">
+                  <span>↕️</span>
+                </button>
+              </div>
+            </div>
+
+            <button id="addRuleButton" class="add-rule-button">
+              <span class="button-icon">➕</span>
+              Add new rule
+            </button>
+          </div>
+        </section>
+
+        <!-- プレビュー情報 -->
+        <section class="preview-section" aria-labelledby="preview-heading">
+          <h2 id="preview-heading" class="visually-hidden">Preview</h2>
+          <div class="preview-info">
+            <span class="preview-icon">📊</span>
+            <span class="preview-text">Preview: </span>
+            <span class="preview-stats" id="previewStats">
+              <span id="fileCount">0</span> files found, <span id="activeRuleCount">2</span> rules active
+            </span>
+          </div>
+        </section>
+
+        <!-- アクションボタン -->
+        <section class="actions-section" aria-label="Actions">
+          <div class="action-buttons">
+            <button id="loadConfigButton" class="secondary-button">
+              <span class="button-icon">💾</span>
+              Load Config
+            </button>
+            <button id="saveConfigButton" class="secondary-button">
+              <span class="button-icon">💾</span>
+              Save Config
+            </button>
+            <button id="executeButton" class="primary-button execute-button">
+              <span class="button-icon">🚀</span>
+              Execute Replacement
+            </button>
+          </div>
+        </section>
+
+        <!-- 進捗モーダル（初期非表示） -->
+        <div id="progressModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="progress-title">
+          <div class="modal-content progress-modal">
+            <h3 id="progress-title" class="modal-title">
+              <span class="progress-icon">🚀</span>
+              Executing Replacements...
+            </h3>
+            <div class="progress-container">
+              <div class="progress-bar-wrapper">
+                <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+              </div>
+              <div class="progress-text">
+                <span id="progressPercent">0%</span>
+                (<span id="progressCurrent">0</span>/<span id="progressTotal">0</span> files)
+              </div>
+            </div>
+            <div class="current-file">
+              <span class="file-icon">📄</span>
+              Currently processing: <span id="currentFile">-</span>
+            </div>
+            <div class="progress-stats">
+              <span class="stat-item">
+                <span class="stat-icon">⏱️</span>
+                Elapsed: <span id="elapsedTime">00:00</span>
+              </span>
+              <span class="stat-item">
+                <span class="stat-icon">📊</span>
+                Changes made: <span id="changesMade">0</span>
+              </span>
+            </div>
+            <div class="modal-actions">
+              <button id="pauseButton" class="secondary-button">
+                <span class="button-icon">⏸️</span>
+                Pause
+              </button>
+              <button id="stopButton" class="danger-button">
+                <span class="button-icon">⏹️</span>
+                Stop
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 結果モーダル（初期非表示） -->
+        <div id="resultModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="result-title">
+          <div class="modal-content result-modal">
+            <button class="modal-close" aria-label="Close">&times;</button>
+            <h3 id="result-title" class="modal-title">
+              <span class="success-icon">✅</span>
+              Replacement Completed Successfully!
+            </h3>
+            <div class="result-summary">
+              <span class="summary-icon">📊</span>
+              Summary: <span id="resultSummary">0 files modified with 0 total changes</span>
+            </div>
+            <div class="result-time">
+              <span class="time-icon">⏱️</span>
+              Completed in: <span id="completionTime">00:00</span>
+            </div>
+            <div class="result-details" id="resultDetails">
+              <!-- 動的に結果が挿入される -->
+            </div>
+            <div class="modal-actions">
+              <button id="exportResultsButton" class="secondary-button">
+                <span class="button-icon">📤</span>
+                Export Results
+              </button>
+              <button id="copySummaryButton" class="secondary-button">
+                <span class="button-icon">📋</span>
+                Copy Summary
+              </button>
+              <button id="closeResultButton" class="primary-button">
+                <span class="button-icon">✅</span>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       </main>
 
       <!-- フッター -->
       <footer class="app-footer">
         <div class="footer-content">
-          <span class="footer-text"> 🚀 UI応答性目標: <strong>100ms以内</strong> </span>
+          <span class="footer-text">UI応答性: <strong id="responseStatus">✅ Good</strong></span>
           <div class="performance-monitor" id="performanceMonitor">
-            <span>応答時間: <span id="responseTime">--ms</span></span>
+            <span class="monitor-label">Last response:</span>
+            <span id="responseTime" class="response-time good">--ms</span>
           </div>
         </div>
       </footer>
     </div>
 
+    <!-- ツールチップコンテナ -->
+    <div id="tooltip" class="tooltip hidden" role="tooltip"></div>
+
     <!-- JavaScript -->
     <script src="js/app.js"></script>
+    <script src="js/ui-controller.js"></script>
+    <script src="js/performance-monitor.js"></script>
+    <script src="js/theme-switcher.js"></script>
   </body>
 </html>
