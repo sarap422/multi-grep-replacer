@@ -2,13 +2,13 @@
   "app_info": {
     "name": "Multi Grep Replacer Configuration",
     "version": "1.0.0",
-    "created_at": "2025-08-01T01:56:14.787Z",
+    "created_at": "2025-08-01T03:29:38.462Z",
     "description": "User configuration",
     "author": "User",
-    "saved_at": "2025-08-01T01:56:22.604Z",
+    "saved_at": "2025-08-01T03:29:44.543Z",
     "schema_version": "1.0.0"
   },
-  "target_folder": "",
+  "target_folder": "/Volumes/CT1000P3/pCloud(CT1000P3)/(github)/multi-grep-replacer",
   "replacements": [],
   "target_settings": {
     "file_extensions": [

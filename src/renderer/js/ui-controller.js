@@ -302,31 +302,16 @@ class UIController {
   }
 
   /**
-   * テンプレート選択処理
+   * テンプレート選択処理（現在無効化）
    */
   async handleTemplateSelect() {
+    // テンプレート機能は将来の実装予定（現在はエラー防止のため無効化）
+    console.log('📋 Template functionality is not yet implemented');
+
+    // テンプレート選択をリセット
     const templateSelect = document.getElementById('templateSelect');
-    if (!templateSelect || !templateSelect.value) {
-      return;
-    }
-
-    try {
-      console.log(`📋 Loading template: ${templateSelect.value}`);
-
-      const result = await window.electronAPI.loadTemplate(templateSelect.value);
-
-      if (result.success) {
-        this.loadConfigData(result.template);
-        this.showSuccess(
-          'テンプレート読み込み完了',
-          `${result.template.app_info.name} を読み込みました`
-        );
-      } else {
-        this.showError('テンプレート読み込み失敗', result.error);
-      }
-    } catch (error) {
-      console.error('❌ Template loading failed:', error);
-      this.showError('テンプレート読み込み失敗', error.message);
+    if (templateSelect) {
+      templateSelect.value = '';
     }
   }
 
