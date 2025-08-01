@@ -618,12 +618,123 @@
     font-size: 11px;
   }
 
-  .performance-warning {
+  .performance-warning,
+  .success-notification,
+  .error-notification {
     right: 16px;
     left: 16px;
-    right: 16px;
     max-width: none;
   }
+}
+
+/* 成功通知 */
+.success-notification {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  background: var(--success-color);
+  color: var(--text-inverse);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 1003;
+  max-width: 350px;
+  animation: slideInRight 0.3s ease;
+}
+
+.success-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.success-icon {
+  font-size: 16px;
+}
+
+.success-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.success-message {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 12px;
+}
+
+.success-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--text-inverse);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.success-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* エラー通知 */
+.error-notification {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  background: var(--error-color);
+  color: var(--text-inverse);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 1003;
+  max-width: 350px;
+  animation: slideInRight 0.3s ease;
+}
+
+.error-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.error-icon {
+  font-size: 16px;
+}
+
+.error-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.error-message {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 12px;
+}
+
+.error-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--text-inverse);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.error-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 @media (max-width: 480px) {
@@ -638,5 +749,127 @@
   .context-menu-item {
     padding: 6px 12px;
     font-size: 12px;
+  }
+}
+
+/* Success notification styles */
+.success-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--success-color, #4caf50);
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  z-index: 10000;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.success-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.success-icon {
+  font-size: 20px;
+}
+
+.success-title {
+  flex: 1;
+}
+
+.success-message {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+}
+
+.success-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+
+.success-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+/* Error notification styles */
+.error-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--error-color, #f44336);
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  z-index: 10000;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.error-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.error-icon {
+  font-size: 20px;
+}
+
+.error-title {
+  flex: 1;
+}
+
+.error-message {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+}
+
+.error-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+
+.error-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+/* Fade out animation */
+.fade-out {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }

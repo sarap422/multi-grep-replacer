@@ -88,6 +88,107 @@ class FileOperations {
   }
 
   /**
+   * 設定ファイル読み込みダイアログ
+   * @param {BrowserWindow} browserWindow - 親ウィンドウ
+   * @returns {Promise<string|null>} 選択されたファイルパス
+   */
+  static async selectLoadConfigFile(browserWindow) {
+    const operationId = 'file-select-load-config';
+    DebugLogger.startPerformance(operationId);
+
+    try {
+      await DebugLogger.debug('Opening load config dialog');
+
+      const result = await dialog.showOpenDialog(browserWindow, {
+        title: 'Load Configuration',
+        buttonLabel: 'Load',
+        filters: [
+          { name: 'JSON Files', extensions: ['json'] },
+          { name: 'All Files', extensions: ['*'] },
+        ],
+        properties: ['openFile'],
+      });
+
+      if (result.canceled || result.filePaths.length === 0) {
+        await DebugLogger.endPerformance(operationId, {
+          canceled: true,
+          selectedPath: null,
+        });
+        await DebugLogger.debug('Load config dialog canceled by user');
+        return null;
+      }
+
+      const [selectedPath] = result.filePaths;
+      await DebugLogger.endPerformance(operationId, {
+        selectedPath,
+        success: true,
+      });
+      await DebugLogger.info('Load path selected successfully', { selectedPath });
+
+      return selectedPath;
+    } catch (error) {
+      await DebugLogger.endPerformance(operationId, { success: false });
+      await DebugLogger.logError(error, {
+        operation: 'selectLoadConfigFile',
+        component: 'FileOperations',
+      });
+
+      throw new Error(`ファイル選択エラー: ${error.message}`);
+    }
+  }
+
+  /**
+   * 設定ファイル保存ダイアログ
+   * @param {BrowserWindow} browserWindow - 親ウィンドウ
+   * @returns {Promise<string|null>} 選択されたファイルパス
+   */
+  static async selectSaveConfigFile(browserWindow) {
+    const operationId = 'file-select-save-config';
+    DebugLogger.startPerformance(operationId);
+
+    try {
+      await DebugLogger.debug('Opening save config dialog');
+
+      const result = await dialog.showSaveDialog(browserWindow, {
+        title: 'Save Configuration',
+        defaultPath: 'multi-grep-replacer-config.json',
+        buttonLabel: 'Save',
+        filters: [
+          { name: 'JSON Files', extensions: ['json'] },
+          { name: 'All Files', extensions: ['*'] },
+        ],
+        properties: ['createDirectory', 'showOverwriteConfirmation'],
+      });
+
+      if (result.canceled) {
+        await DebugLogger.endPerformance(operationId, {
+          canceled: true,
+          selectedPath: null,
+        });
+        await DebugLogger.debug('Save config dialog canceled by user');
+        return null;
+      }
+
+      const selectedPath = result.filePath;
+      await DebugLogger.endPerformance(operationId, {
+        selectedPath,
+        success: true,
+      });
+      await DebugLogger.info('Save path selected successfully', { selectedPath });
+
+      return selectedPath;
+    } catch (error) {
+      await DebugLogger.logError(error, {
+        operation: 'selectSaveConfigFile',
+        component: 'FileOperations',
+      });
+      await DebugLogger.endPerformance(operationId, { success: false });
+
+      throw new Error(`設定保存ダイアログエラー: ${error.message}`);
+    }
+  }
+
+  /**
    * ディレクトリ内のファイルを再帰的に検索
    * @param {string} directory - 検索対象ディレクトリ
    * @param {Array<string>} extensions - 対象拡張子リスト

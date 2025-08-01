@@ -109,10 +109,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // 設定管理 API
   /**
    * 設定ファイル読み込み
-   * @param {string} filePath - 設定ファイルパス
+   * @param {string} [filePath] - 設定ファイルパス（省略時はダイアログ表示）
    * @returns {Promise<Object>} 設定オブジェクト
    */
-  loadConfig: async filePath => {
+  loadConfig: async (filePath = null) => {
     console.log('📖 Loading config via IPC:', filePath);
     try {
       const result = await ipcRenderer.invoke('load-config', filePath);
@@ -127,10 +127,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   /**
    * 設定ファイル保存
    * @param {Object} config - 設定オブジェクト
-   * @param {string} filePath - 保存先パス
+   * @param {string} [filePath] - 保存先パス（省略時はダイアログ表示）
    * @returns {Promise<Object>} 保存結果
    */
-  saveConfig: async (config, filePath) => {
+  saveConfig: async (config, filePath = null) => {
     console.log('💾 Saving config via IPC:', filePath);
     try {
       const result = await ipcRenderer.invoke('save-config', config, filePath);

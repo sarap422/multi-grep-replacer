@@ -289,6 +289,18 @@ class MultiGrepReplacerApp {
       DebugLogger.startPerformance(operationId);
 
       try {
+        // filePathが指定されていない場合は、ファイル選択ダイアログを表示
+        if (!filePath) {
+          await DebugLogger.debug('No file path provided, opening file dialog');
+          filePath = await FileOperations.selectLoadConfigFile(this.mainWindow);
+
+          if (!filePath) {
+            await DebugLogger.debug('Config file selection cancelled');
+            await DebugLogger.endPerformance(operationId, { cancelled: true });
+            return { success: false, cancelled: true };
+          }
+        }
+
         await DebugLogger.debug('Loading config via IPC', { filePath });
         const config = await ConfigManager.loadConfig(filePath);
         await DebugLogger.endPerformance(operationId, { success: true, filePath });
@@ -309,6 +321,18 @@ class MultiGrepReplacerApp {
       DebugLogger.startPerformance(operationId);
 
       try {
+        // filePathが指定されていない場合は、ファイル保存ダイアログを表示
+        if (!filePath) {
+          await DebugLogger.debug('No file path provided, opening save dialog');
+          filePath = await FileOperations.selectSaveConfigFile(this.mainWindow);
+
+          if (!filePath) {
+            await DebugLogger.debug('Config save cancelled');
+            await DebugLogger.endPerformance(operationId, { cancelled: true });
+            return { success: false, cancelled: true };
+          }
+        }
+
         await DebugLogger.debug('Saving config via IPC', { filePath });
         await ConfigManager.saveConfig(config, filePath);
         await DebugLogger.endPerformance(operationId, { success: true, filePath });

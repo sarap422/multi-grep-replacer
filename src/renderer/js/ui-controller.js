@@ -578,15 +578,15 @@ class UIController {
       });
 
       // 置換実行
-      const result = await window.electronAPI.executeReplacement({
-        files: this.foundFiles.map(f => f.path),
-        rules: activeRules,
-        options: {
+      const result = await window.electronAPI.processFiles(
+        this.foundFiles.map(f => f.path),
+        activeRules,
+        {
           caseSensitive: true,
           wholeWord: false,
           dryRun: false,
-        },
-      });
+        }
+      );
 
       this.hideProgressModal();
 
@@ -648,13 +648,17 @@ class UIController {
   async handleLoadConfig() {
     try {
       console.log('📖 Loading configuration...');
+      // ファイルパスは指定しない（IPCハンドラー側でダイアログを表示）
       const result = await window.electronAPI.loadConfig();
 
       if (result.success) {
         this.loadConfigData(result.config);
         this.showSuccess('設定読み込み完了', '設定ファイルを読み込みました');
-      } else if (!result.cancelled) {
-        this.showError('設定読み込み失敗', result.error);
+      } else if (result.cancelled) {
+        console.log('📖 Config loading cancelled by user');
+        // キャンセルの場合はエラー表示しない
+      } else {
+        this.showError('設定読み込み失敗', result.error || '不明なエラーが発生しました');
       }
     } catch (error) {
       console.error('❌ Config loading failed:', error);
@@ -670,12 +674,16 @@ class UIController {
       console.log('💾 Saving configuration...');
 
       const config = this.getCurrentConfig();
+      // ファイルパスは指定しない（IPCハンドラー側でダイアログを表示）
       const result = await window.electronAPI.saveConfig(config);
 
       if (result.success) {
         this.showSuccess('設定保存完了', '設定ファイルを保存しました');
-      } else if (!result.cancelled) {
-        this.showError('設定保存失敗', result.error);
+      } else if (result.cancelled) {
+        console.log('💾 Config saving cancelled by user');
+        // キャンセルの場合はエラー表示しない
+      } else {
+        this.showError('設定保存失敗', result.error || '不明なエラーが発生しました');
       }
     } catch (error) {
       console.error('❌ Config saving failed:', error);
@@ -925,7 +933,31 @@ class UIController {
    */
   showSuccess(title, message) {
     console.log(`✅ ${title}: ${message}`);
-    // TODO: 成功通知実装
+
+    // 成功通知表示
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-notification slide-in-right';
+    successDiv.innerHTML = `
+      <div class="success-header">
+        <span class="success-icon">✅</span>
+        <span class="success-title">${title}</span>
+      </div>
+      <div class="success-message">${message}</div>
+      <button class="success-close">×</button>
+    `;
+
+    document.body.appendChild(successDiv);
+
+    // 閉じるボタンと自動削除
+    const closeButton = successDiv.querySelector('.success-close');
+    closeButton.addEventListener('click', () => successDiv.remove());
+
+    setTimeout(() => {
+      if (successDiv.parentNode) {
+        successDiv.classList.add('fade-out');
+        setTimeout(() => successDiv.remove(), 300);
+      }
+    }, 3000);
   }
 
   /**
