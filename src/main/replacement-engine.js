@@ -148,7 +148,8 @@ class ReplacementEngine extends EventEmitter {
       path: filePath,
       modified: false,
       replacements: 0,
-      changes: [],
+      changes: 0, // UI表示用：変更総数
+      details: [], // UI表示用：ルール別詳細
       error: null,
     };
 
@@ -169,7 +170,7 @@ class ReplacementEngine extends EventEmitter {
           modifiedContent = result.content;
           totalReplacements += result.replacements;
 
-          fileResult.changes.push({
+          fileResult.details.push({
             rule: `${rule.from} → ${rule.to}`,
             count: result.replacements,
           });
@@ -179,6 +180,7 @@ class ReplacementEngine extends EventEmitter {
       // replacements数を設定（dryRunでも）
       if (totalReplacements > 0) {
         fileResult.replacements = totalReplacements;
+        fileResult.changes = totalReplacements; // UI表示用
 
         // 実際のファイル更新はdryRunでない場合のみ
         if (!this.options.dryRun) {
