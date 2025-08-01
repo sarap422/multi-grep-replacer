@@ -71,6 +71,20 @@ class UIController {
       this.setupDragAndDrop(folderDropZone);
     }
 
+    // Target Folder入力欄の変更監視
+    const targetFolderInput = document.getElementById('targetFolder');
+    if (targetFolderInput) {
+      // フォーカス離脱時にパスを検証・設定
+      targetFolderInput.addEventListener('blur', () => this.handleFolderPathInput());
+      // Enter キー押下時にパスを検証・設定
+      targetFolderInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.handleFolderPathInput();
+        }
+      });
+    }
+
     // ファイル拡張子入力
     const fileExtensions = document.getElementById('fileExtensions');
     if (fileExtensions) {
@@ -193,6 +207,67 @@ class UIController {
 
     if (copySummaryButton) {
       copySummaryButton.addEventListener('click', () => this.handleCopySummary());
+    }
+  }
+
+  /**
+   * 手動入力されたフォルダパス処理
+   */
+  async handleFolderPathInput() {
+    const targetFolderInput = document.getElementById('targetFolder');
+    if (!targetFolderInput) {
+      return;
+    }
+
+    const inputPath = targetFolderInput.value.trim();
+
+    // 空の場合は何もしない
+    if (!inputPath) {
+      this.selectedFolder = '';
+      this.updateFolderDisplay('');
+      await this.updatePreview();
+      return;
+    }
+
+    const startTime = performance.now();
+
+    try {
+      console.log(`📂 Validating manual folder path: ${inputPath}`);
+
+      // パスの存在確認（IPCを通じてメインプロセスで確認）
+      const result = await window.electronAPI.validateFolderPath(inputPath);
+      const responseTime = performance.now() - startTime;
+
+      // パフォーマンス監視
+      if (
+        window.performanceMonitor &&
+        typeof window.performanceMonitor.recordResponse === 'function'
+      ) {
+        window.performanceMonitor.recordResponse('folderPathInput', responseTime);
+      }
+
+      if (result.success && result.exists) {
+        this.selectedFolder = inputPath;
+        this.updateFolderDisplay(inputPath);
+        await this.updatePreview();
+        console.log(`✅ Manual folder path validated: ${inputPath}`);
+      } else {
+        // パスが存在しない場合の処理
+        this.showError(
+          'フォルダパス無効',
+          `指定されたパス "${inputPath}" は存在しないか、アクセスできません`
+        );
+        // 入力欄を元の値に戻す
+        targetFolderInput.value = this.selectedFolder || '';
+      }
+    } catch (error) {
+      console.error('❌ Folder path validation failed:', error);
+      this.showError(
+        'パス検証失敗',
+        `フォルダパスの確認中にエラーが発生しました: ${error.message}`
+      );
+      // 入力欄を元の値に戻す
+      targetFolderInput.value = this.selectedFolder || '';
     }
   }
 

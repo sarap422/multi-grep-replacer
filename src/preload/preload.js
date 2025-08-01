@@ -176,6 +176,23 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // ファイル操作 API
   /**
+   * フォルダパス検証
+   * @param {string} folderPath - 検証するフォルダパス
+   * @returns {Promise<Object>} 検証結果
+   */
+  validateFolderPath: async folderPath => {
+    console.log('📂 Validating folder path via IPC:', folderPath);
+    try {
+      const result = await ipcRenderer.invoke('validate-folder-path', folderPath);
+      console.log('📂 Folder path validation result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Folder path validation failed:', error);
+      throw error;
+    }
+  },
+
+  /**
    * フォルダ選択ダイアログ
    * @returns {Promise<Object>} 選択されたフォルダパス
    */

@@ -412,6 +412,68 @@ class MultiGrepReplacerApp {
       }
     });
 
+    // フォルダパス検証
+    ipcMain.handle('validate-folder-path', async (event, folderPath) => {
+      const operationId = 'ipc-validate-folder-path';
+      DebugLogger.startPerformance(operationId);
+
+      try {
+        await DebugLogger.debug('Validating folder path via IPC', { folderPath });
+
+        // ファイルシステムでパスの存在確認
+        const fs = require('fs').promises;
+        const path = require('path');
+
+        // パスの正規化
+        const normalizedPath = path.resolve(folderPath);
+
+        try {
+          const stats = await fs.stat(normalizedPath);
+          const exists = stats.isDirectory();
+
+          await DebugLogger.endPerformance(operationId, {
+            success: true,
+            exists,
+            folderPath: normalizedPath,
+          });
+
+          if (exists) {
+            await DebugLogger.info('Folder path validated successfully', {
+              folderPath: normalizedPath,
+            });
+          } else {
+            await DebugLogger.warn('Path exists but is not a directory', {
+              folderPath: normalizedPath,
+            });
+          }
+
+          return { success: true, exists, folderPath: normalizedPath };
+        } catch (statError) {
+          // ファイル/フォルダが存在しない
+          await DebugLogger.endPerformance(operationId, {
+            success: true,
+            exists: false,
+            folderPath: normalizedPath,
+          });
+
+          await DebugLogger.debug('Folder path does not exist', {
+            folderPath: normalizedPath,
+            error: statError.code,
+          });
+
+          return { success: true, exists: false, folderPath: normalizedPath };
+        }
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'validate-folder-path',
+          folderPath,
+          component: 'IPC-Handler',
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        return { success: false, error: error.message };
+      }
+    });
+
     ipcMain.handle('find-files', async (event, directory, extensions, excludePatterns) => {
       const operationId = 'ipc-find-files';
       DebugLogger.startPerformance(operationId);
