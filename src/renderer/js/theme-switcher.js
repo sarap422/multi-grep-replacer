@@ -150,7 +150,10 @@ class ThemeSwitcher {
 
     // パフォーマンス監視
     const responseTime = performance.now() - startTime;
-    if (window.performanceMonitor) {
+    if (
+      window.performanceMonitor &&
+      typeof window.performanceMonitor.recordResponse === 'function'
+    ) {
       window.performanceMonitor.recordResponse('themeToggle', responseTime);
     }
 

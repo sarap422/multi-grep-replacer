@@ -208,7 +208,10 @@ class UIController {
       const result = await window.electronAPI.selectFolder();
       const responseTime = performance.now() - startTime;
 
-      if (window.performanceMonitor) {
+      if (
+        window.performanceMonitor &&
+        typeof window.performanceMonitor.recordResponse === 'function'
+      ) {
         window.performanceMonitor.recordResponse('folderSelect', responseTime);
       }
 
@@ -264,7 +267,10 @@ class UIController {
     // 入力応答性を監視
     setTimeout(() => {
       const responseTime = performance.now() - startTime;
-      if (window.performanceMonitor) {
+      if (
+        window.performanceMonitor &&
+        typeof window.performanceMonitor.recordResponse === 'function'
+      ) {
         window.performanceMonitor.recordResponse('extensionsInput', responseTime);
       }
     }, 0);
@@ -350,7 +356,10 @@ class UIController {
       }
 
       const responseTime = performance.now() - startTime;
-      if (window.performanceMonitor) {
+      if (
+        window.performanceMonitor &&
+        typeof window.performanceMonitor.recordResponse === 'function'
+      ) {
         window.performanceMonitor.recordResponse('addRule', responseTime);
       }
     }, 100);

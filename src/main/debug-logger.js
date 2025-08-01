@@ -366,13 +366,17 @@ class DebugLogger {
    */
   static async writeToFile(logEntry) {
     try {
-      const logLine = `${JSON.stringify(logEntry)}\n`;
-      await fs.appendFile(this.logFilePath, logLine);
+      // 開発環境でのみファイル書き込みを実行
+      if (process.env.NODE_ENV === 'development' && this.logFilePath) {
+        const logLine = `${JSON.stringify(logEntry)}\n`;
+        await fs.appendFile(this.logFilePath, logLine);
 
-      // ログローテーション確認
-      await this.rotateLogIfNeeded(this.logFilePath);
+        // ログローテーション確認
+        await this.rotateLogIfNeeded(this.logFilePath);
+      }
     } catch (error) {
-      console.error('Failed to write to log file:', error);
+      // ファイル書き込みエラーは無視（コンソール出力は継続）
+      // console.error('Failed to write to log file:', error);
     }
   }
 
@@ -381,13 +385,17 @@ class DebugLogger {
    */
   static async writeToErrorLog(logEntry) {
     try {
-      const logLine = `${JSON.stringify(logEntry)}\n`;
-      await fs.appendFile(this.errorLogPath, logLine);
+      // 開発環境でのみファイル書き込みを実行
+      if (process.env.NODE_ENV === 'development' && this.errorLogPath) {
+        const logLine = `${JSON.stringify(logEntry)}\n`;
+        await fs.appendFile(this.errorLogPath, logLine);
 
-      // ログローテーション確認
-      await this.rotateLogIfNeeded(this.errorLogPath);
+        // ログローテーション確認
+        await this.rotateLogIfNeeded(this.errorLogPath);
+      }
     } catch (error) {
-      console.error('Failed to write to error log file:', error);
+      // ファイル書き込みエラーは無視（コンソール出力は継続）
+      // console.error('Failed to write to error log file:', error);
     }
   }
 
