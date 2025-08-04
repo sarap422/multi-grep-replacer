@@ -24,6 +24,29 @@ class MultiGrepReplacerApp {
    * アプリケーション初期化
    */
   async initialize() {
+    // シングルインスタンス制御
+    const gotTheLock = app.requestSingleInstanceLock();
+
+    if (!gotTheLock) {
+      // 既に別のインスタンスが実行中
+      console.log('Another instance is already running, quitting...');
+      app.quit();
+      return;
+    }
+
+    // 2つ目のインスタンスが起動された時の処理
+    app.on('second-instance', async () => {
+      console.log('Second instance detected, focusing existing window');
+      // 既存のウィンドウをフォーカス
+      if (this.mainWindow) {
+        if (this.mainWindow.isMinimized()) {
+          this.mainWindow.restore();
+        }
+        this.mainWindow.focus();
+        this.mainWindow.show();
+      }
+    });
+
     // デバッグロガー初期化（最優先）
     await DebugLogger.initialize();
     DebugLogger.startPerformance(this.initializationTracker);
@@ -144,6 +167,14 @@ class MultiGrepReplacerApp {
         await DebugLogger.logAppState({ phase: 'startup-complete' });
       });
 
+      // フォールバック: ready-to-showが発火しない場合の保険
+      setTimeout(() => {
+        if (this.mainWindow && !this.mainWindow.isVisible()) {
+          DebugLogger.warn('Window not shown after timeout, forcing show');
+          this.mainWindow.show();
+        }
+      }, 1000);
+
       await DebugLogger.endPerformance('create-main-window');
       await DebugLogger.info('Main window created successfully');
     } catch (error) {
@@ -172,6 +203,11 @@ class MultiGrepReplacerApp {
         if (BrowserWindow.getAllWindows().length === 0) {
           await DebugLogger.info('No windows found, creating new main window');
           await this.createMainWindow();
+        } else if (this.mainWindow) {
+          // 既存のウィンドウがある場合は表示・フォーカス
+          await DebugLogger.info('Focusing existing window');
+          this.mainWindow.show();
+          this.mainWindow.focus();
         }
       });
     });
