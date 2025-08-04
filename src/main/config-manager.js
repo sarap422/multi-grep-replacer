@@ -11,8 +11,16 @@ class ConfigManager {
   // 設定ファイルのスキーマバージョン
   static SCHEMA_VERSION = '1.0.0';
 
-  // デフォルト設定ファイルパス
-  static DEFAULT_CONFIG_PATH = path.join(__dirname, '../../config/default.json');
+  // デフォルト設定ファイルパス（パッケージ版対応）
+  static get DEFAULT_CONFIG_PATH() {
+    if (app.isPackaged) {
+      // パッケージ版: extraResourcesを使用
+      return path.join(process.resourcesPath, 'config/default.json');
+    } else {
+      // 開発版: 従来のパス
+      return path.join(__dirname, '../../config/default.json');
+    }
+  }
 
   // ユーザー設定ディレクトリ
   static USER_CONFIG_DIR = path.join(app.getPath('userData'), 'configs');
@@ -234,9 +242,30 @@ class ConfigManager {
    */
   static async getDefaultConfig() {
     try {
+      const configPath = this.DEFAULT_CONFIG_PATH;
       console.log('🔧 Loading default configuration');
+      console.log(`📁 Config path: ${configPath}`);
+      console.log(`📦 Is packaged: ${app.isPackaged}`);
+      console.log(`🗂️ Process resources path: ${process.resourcesPath || 'N/A'}`);
 
-      const config = await this.loadConfig(this.DEFAULT_CONFIG_PATH);
+      // ファイル存在確認
+      try {
+        await fs.access(configPath);
+        console.log(`✅ Config file exists: ${configPath}`);
+      } catch (accessError) {
+        console.log(`❌ Config file not found: ${configPath}`);
+        console.log(`📂 Checking directory contents...`);
+
+        const dir = path.dirname(configPath);
+        try {
+          const files = await fs.readdir(dir);
+          console.log(`📁 Directory contents (${dir}):`, files);
+        } catch (dirError) {
+          console.log(`❌ Directory not accessible: ${dir}`, dirError.message);
+        }
+      }
+
+      const config = await this.loadConfig(configPath);
 
       // カスタマイズ可能な初期値を設定
       config.app_info = {

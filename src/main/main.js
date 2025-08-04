@@ -140,12 +140,6 @@ class MultiGrepReplacerApp {
         await DebugLogger.logAppState({ phase: 'startup-complete' });
       });
 
-      // ウィンドウクローズ時の処理
-      this.mainWindow.on('closed', async () => {
-        await DebugLogger.info('Main window closed');
-        this.mainWindow = null;
-      });
-
       await DebugLogger.endPerformance('create-main-window');
       await DebugLogger.info('Main window created successfully');
     } catch (error) {
