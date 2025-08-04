@@ -13,7 +13,7 @@ const DebugLogger = require('./debug-logger');
 class MultiGrepReplacerApp {
   constructor() {
     this.mainWindow = null;
-    this.isDevelopment = process.env.NODE_ENV === 'development';
+    this.isDevelopment = !app.isPackaged;
     this.startTime = performance.now();
     this.initializationTracker = 'app-initialization';
     this.fileSearchEngine = new FileSearchEngine();
@@ -89,24 +89,28 @@ class MultiGrepReplacerApp {
       const securityValid = this.validateSecuritySettings();
       await DebugLogger.info('Security settings validation', { isValid: securityValid });
 
-      // HTMLファイル読み込み (パッケージ版対応)
+      // HTMLファイル読み込み (統一アプローチ)
       const htmlPath = path.join(__dirname, '../renderer/index.html');
-      const absoluteHtmlPath = path.resolve(htmlPath);
 
       await DebugLogger.debug('Loading HTML file', {
         htmlPath,
-        absoluteHtmlPath,
-        exists: require('fs').existsSync(absoluteHtmlPath),
+        isPackaged: app.isPackaged,
+        __dirname,
+        resolvedPath: path.resolve(htmlPath),
       });
 
-      // ファイル存在確認
-      if (!require('fs').existsSync(absoluteHtmlPath)) {
-        const error = new Error(`HTML file not found: ${absoluteHtmlPath}`);
-        await DebugLogger.error('HTML file loading failed', { error: error.message });
-        throw error;
+      // loadFileを使用（Electronが自動的にパス解決を行う）
+      try {
+        await this.mainWindow.loadFile(htmlPath);
+        await DebugLogger.debug('HTML file loaded successfully');
+      } catch (loadError) {
+        await DebugLogger.error('HTML file loading failed', {
+          error: loadError.message,
+          htmlPath,
+          exists: require('fs').existsSync(htmlPath),
+        });
+        throw loadError;
       }
-
-      this.mainWindow.loadFile(absoluteHtmlPath);
 
       // ウィンドウクローズイベント
       this.mainWindow.on('closed', async () => {
