@@ -2,18 +2,25 @@
   "app_info": {
     "name": "Multi Grep Replacer Configuration",
     "version": "1.0.0",
-    "created_at": "2025-08-04T06:34:12.349Z",
+    "created_at": "2025-08-05T07:56:26.342Z",
     "description": "User configuration",
     "author": "User",
-    "saved_at": "2025-08-04T06:34:15.984Z",
+    "saved_at": "2025-08-05T07:56:29.689Z",
     "schema_version": "1.0.0"
   },
-  "target_folder": "/Volumes/CT1000P3/pCloud(CT1000P3)/(github)/multi-grep-replacer/config",
+  "target_folder": "/Volumes/CT1000P3/pCloud(CT1000P3)/(github)/multi-grep-replacer",
   "replacements": [
     {
       "id": "rule-1",
       "from": "【テスト用テキスト置換前】",
       "to": "【テスト用テキスト置換後】",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-2",
+      "from": "【テスト用テキスト2置換前】",
+      "to": "【テスト用テキスト2置換後】",
       "enabled": true,
       "description": ""
     }
