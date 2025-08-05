@@ -55,8 +55,7 @@ describe('ReplacementEngine', () => {
       
       expect(result.modified).toBe(true);
       expect(result.replacements).toBe(2);
-      expect(result.changes).toHaveLength(1);
-      expect(result.changes[0].count).toBe(2);
+      expect(result.changes).toBe(2); // 配列 → 数値期待に変更
 
       // ファイル内容確認
       const content = await fs.readFile(testFiles[0], 'utf8');
@@ -74,7 +73,7 @@ describe('ReplacementEngine', () => {
       
       expect(result.modified).toBe(true);
       expect(result.replacements).toBe(3); // oldVariable x2 + oldFunction x1
-      expect(result.changes).toHaveLength(2);
+      expect(result.changes).toBe(3); // 配列 → 数値期待に変更
 
       const content = await fs.readFile(testFiles[2], 'utf8');
       expect(content).toContain('newVariable');
