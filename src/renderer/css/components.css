@@ -105,6 +105,12 @@
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
+.rule-fields {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 /* ルールラベル */
 .rule-from-label,
 .rule-to-label {
