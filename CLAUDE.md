@@ -57,8 +57,8 @@ ls -la src/main src/renderer src/preload
 tree src/ -I node_modules
 
 # ログ・デバッグ情報確認
-tail -f debug/logs/app.log
-cat debug/performance-metrics.json
+tail -f logs/app.log
+cat logs/performance-metrics.json
 
 # 設定ファイル確認
 cat config/default.json
@@ -143,7 +143,7 @@ multi-grep-replacer/                       # GitHubリポジトリルート
 │   ├── 2_architecture.md                  # システム設計書
 │   ├── 3_debugging.md                     # デバッグ環境整備
 │   └── 4_tasks.md                         # 開発タスク一覧
-├── logs/                                  # プロジェクトドキュメント
+├── logs/                                  # デバッグ・ログディレクトリ
 │   ├── CHANGELOG.md                       # 実装記録（開発中更新）
 │   ├── ERRORLOG.md                       # エラー内容の記録（問題があった場合）
 │   └── PATTERNS.md                        # Electronパターン集（開発中更新）
@@ -171,7 +171,6 @@ multi-grep-replacer/                       # GitHubリポジトリルート
 ├── config/                                # 設定ファイルディレクトリ
 ├── build/                                 # ビルド設定・リソース
 ├── dist/                                  # ビルド成果物（.gitignoreで除外）
-├── debug/                                 # デバッグ・ログディレクトリ
 ├── package.json                           # npm設定・依存関係・スクリプト
 ├── CLAUDE.md                              # Claude Code設定（このファイル）
 ├── .claude/                               # Claude Code設定（Git管理対象外）

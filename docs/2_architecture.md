@@ -73,7 +73,7 @@
 │                          │                                         │ │
 │                          │ - config/default.json                   │ │
 │                          │ - config/samples/                       │ │
-│                          │ - debug/logs/                           │ │
+│                          │ - logs/                                 │ │
 │                          │ - user preferences                      │ │
 │                          └─────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────┘
@@ -151,8 +151,7 @@ multi-grep-replacer/
 │   ├── win/                            # Windows用アプリケーション
 │   │   └── Multi Grep Replacer.exe     # Windows実行ファイル
 │   └── linux/                          # Linux用アプリケーション（将来）
-├── debug/                              # デバッグ・ログディレクトリ
-│   ├── logs/                           # アプリケーションログ
+├── logs/                              # デバッグ・ログディレクトリ
 │   └── crash-reports/                  # クラッシュレポート
 ├── scripts/                            # ビルド・開発用スクリプト
 │   ├── dev.js                          # 開発サーバー起動

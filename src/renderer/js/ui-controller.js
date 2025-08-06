@@ -17,6 +17,10 @@ class UIController {
     this.uiResponseTarget = 100; // ms
     this.lastActionTime = 0;
 
+    // モジュール統合準備
+    this.ruleManager = null;
+    this.templateManager = null;
+
     console.log('🎮 UI Controller initializing...');
     this.initialize();
   }
@@ -39,6 +43,9 @@ class UIController {
   setupUI() {
     console.log('🎨 Setting up UI Controller...');
 
+    // モジュール初期化
+    this.initializeModules();
+
     // 基本イベントリスナー設定
     this.setupEventListeners();
 
@@ -53,6 +60,49 @@ class UIController {
     this.verifyElectronAPI();
 
     console.log('✅ UI Controller setup completed');
+  }
+
+  /**
+   * イベントリスナー設定
+   */
+  /**
+   * モジュール初期化（RuleManager、TemplateManager統合）
+   */
+  initializeModules() {
+    try {
+      // RuleManager初期化
+      if (window.RuleManager) {
+        this.ruleManager = new window.RuleManager(this);
+        console.log('🎯 RuleManager initialized');
+      } else {
+        console.warn('⚠️ RuleManager not available, using fallback functionality');
+      }
+
+      // TemplateManager初期化
+      if (window.TemplateManager) {
+        this.templateManager = new window.TemplateManager(this);
+        console.log('📋 TemplateManager initialized');
+      } else {
+        console.warn('⚠️ TemplateManager not available, using fallback functionality');
+      }
+
+      // Vibe Logger統合
+      if (window.vibeLogger) {
+        window.vibeLogger.logUIOperation('モジュール統合初期化', true, {
+          ruleManagerAvailable: !!this.ruleManager,
+          templateManagerAvailable: !!this.templateManager,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      console.error('❌ Module initialization failed:', error);
+      if (window.vibeLogger) {
+        window.vibeLogger.logUIOperation('モジュール統合初期化', false, {
+          error: error.message,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
   }
 
   /**
@@ -391,102 +441,157 @@ class UIController {
   }
 
   /**
-   * ルール追加処理
+   * ルール追加処理（RuleManager統合版）
    */
   handleAddRule() {
     const startTime = performance.now();
 
-    const newRule = {
-      id: `rule-${this.ruleIdCounter++}`,
-      from: '',
-      to: '',
-      enabled: true,
-      description: '',
-    };
-
-    this.replacementRules.push(newRule);
-    this.renderRules();
-    this.updateActiveRuleCount();
-
-    // 新しいルールの入力フィールドにフォーカス
-    setTimeout(() => {
-      const newRuleElement = document.querySelector(`[data-rule-id="${newRule.id}"] .rule-from`);
-      if (newRuleElement) {
-        newRuleElement.focus();
+    try {
+      // RuleManagerが利用可能な場合は委譲
+      if (this.ruleManager) {
+        return this.ruleManager.addRule();
       }
 
-      const responseTime = performance.now() - startTime;
-      if (
-        window.performanceMonitor &&
-        typeof window.performanceMonitor.recordResponse === 'function'
-      ) {
-        window.performanceMonitor.recordResponse('addRule', responseTime);
-      }
-    }, 100);
+      // フォールバック: 従来の処理
+      const newRule = {
+        id: `rule-${this.ruleIdCounter++}`,
+        from: '',
+        to: '',
+        enabled: true,
+        description: '',
+      };
 
-    console.log(`➕ Rule added: ${newRule.id}`);
+      this.replacementRules.push(newRule);
+      this.renderRules();
+      this.updateActiveRuleCount();
+
+      // 新しいルールの入力フィールドにフォーカス
+      setTimeout(() => {
+        const newRuleElement = document.querySelector(`[data-rule-id="${newRule.id}"] .rule-from`);
+        if (newRuleElement) {
+          newRuleElement.focus();
+        }
+
+        const responseTime = performance.now() - startTime;
+        if (
+          window.performanceMonitor &&
+          typeof window.performanceMonitor.recordResponse === 'function'
+        ) {
+          window.performanceMonitor.recordResponse('addRule', responseTime);
+        }
+      }, 100);
+
+      console.log(`➕ Rule added (fallback): ${newRule.id}`);
+      return newRule;
+    } catch (error) {
+      console.error('❌ Add rule failed:', error);
+      this.showError('ルール追加失敗', error.message);
+    }
   }
 
   /**
-   * ルール削除処理
+   * ルール削除処理（RuleManager統合版）
    */
   handleDeleteRule(ruleId) {
-    const ruleIndex = this.replacementRules.findIndex(rule => rule.id === ruleId);
-    if (ruleIndex === -1) {
-      return;
-    }
+    try {
+      // RuleManagerが利用可能な場合は委譲
+      if (this.ruleManager) {
+        return this.ruleManager.deleteRule(ruleId);
+      }
 
-    const ruleElement = document.querySelector(`[data-rule-id="${ruleId}"]`);
-    if (ruleElement) {
-      ruleElement.classList.add('removing');
-      setTimeout(() => {
-        this.replacementRules.splice(ruleIndex, 1);
-        this.renderRules();
-        this.updateActiveRuleCount();
-      }, 300);
-    }
+      // フォールバック: 従来の処理
+      const ruleIndex = this.replacementRules.findIndex(rule => rule.id === ruleId);
+      if (ruleIndex === -1) {
+        return;
+      }
 
-    console.log(`🗑️ Rule deleted: ${ruleId}`);
+      const ruleElement = document.querySelector(`[data-rule-id="${ruleId}"]`);
+      if (ruleElement) {
+        ruleElement.classList.add('removing');
+        setTimeout(() => {
+          this.replacementRules.splice(ruleIndex, 1);
+          this.renderRules();
+          this.updateActiveRuleCount();
+        }, 300);
+      }
+
+      console.log(`🗑️ Rule deleted (fallback): ${ruleId}`);
+    } catch (error) {
+      console.error('❌ Delete rule failed:', error);
+      this.showError('ルール削除失敗', error.message);
+    }
   }
 
   /**
-   * ルール有効/無効切り替え
+   * ルール有効/無効切り替え（RuleManager統合版）
    */
   handleToggleRule(ruleId) {
-    const rule = this.replacementRules.find(r => r.id === ruleId);
-    if (rule) {
-      rule.enabled = !rule.enabled;
-      this.updateActiveRuleCount();
-      console.log(`🔄 Rule toggled: ${ruleId} -> ${rule.enabled}`);
+    try {
+      // RuleManagerが利用可能な場合は委譲
+      if (this.ruleManager) {
+        return this.ruleManager.toggleRule(ruleId);
+      }
+
+      // フォールバック: 従来の処理
+      const rule = this.replacementRules.find(r => r.id === ruleId);
+      if (rule) {
+        rule.enabled = !rule.enabled;
+        this.updateActiveRuleCount();
+        console.log(`🔄 Rule toggled (fallback): ${ruleId} -> ${rule.enabled}`);
+      }
+    } catch (error) {
+      console.error('❌ Toggle rule failed:', error);
     }
   }
 
   /**
-   * ルール更新処理
+   * ルール更新処理（RuleManager統合版）
    */
   handleUpdateRule(ruleId, field, value) {
-    const rule = this.replacementRules.find(r => r.id === ruleId);
-    if (rule) {
-      rule[field] = value;
-      console.log(`📝 Rule updated: ${ruleId}.${field} = ${value}`);
+    try {
+      // RuleManagerが利用可能な場合は委譲
+      if (this.ruleManager) {
+        return this.ruleManager.updateRule(ruleId, field, value);
+      }
+
+      // フォールバック: 従来の処理
+      const rule = this.replacementRules.find(r => r.id === ruleId);
+      if (rule) {
+        rule[field] = value;
+        console.log(`📝 Rule updated (fallback): ${ruleId}.${field} = ${value}`);
+      }
+    } catch (error) {
+      console.error('❌ Update rule failed:', error);
     }
   }
 
   /**
-   * ルール描画
+   * ルール描画（RuleManager統合版）
    */
   renderRules() {
-    const rulesList = document.getElementById('rulesList');
-    if (!rulesList) {
-      return;
+    try {
+      // RuleManagerが利用可能な場合は委譲
+      if (this.ruleManager) {
+        return this.ruleManager.rerenderAllRules();
+      }
+
+      // フォールバック: 従来の処理
+      const rulesList = document.getElementById('rulesList');
+      if (!rulesList) {
+        return;
+      }
+
+      rulesList.innerHTML = '';
+
+      this.replacementRules.forEach(rule => {
+        const ruleElement = this.createRuleElement(rule);
+        rulesList.appendChild(ruleElement);
+      });
+
+      console.log('🔄 Rules rendered (fallback)');
+    } catch (error) {
+      console.error('❌ Render rules failed:', error);
     }
-
-    rulesList.innerHTML = '';
-
-    this.replacementRules.forEach(rule => {
-      const ruleElement = this.createRuleElement(rule);
-      rulesList.appendChild(ruleElement);
-    });
   }
 
   /**
@@ -761,36 +866,72 @@ class UIController {
   }
 
   /**
-   * 設定データ読み込み
+   * 設定データ読み込み（TemplateManager統合版）
    */
   loadConfigData(config) {
-    // フォルダパス設定
-    if (config.target_folder) {
-      this.selectedFolder = config.target_folder;
-      this.updateFolderDisplay(config.target_folder);
-    }
+    try {
+      // フォルダパス設定
+      if (config.target_folder) {
+        this.selectedFolder = config.target_folder;
+        this.updateFolderDisplay(config.target_folder);
+      }
 
-    // 拡張子設定
-    const fileExtensions = document.getElementById('fileExtensions');
-    if (fileExtensions && config.target_settings?.file_extensions) {
-      fileExtensions.value = config.target_settings.file_extensions.join(',');
-    }
+      // 拡張子設定
+      const fileExtensions = document.getElementById('fileExtensions');
+      if (fileExtensions && config.target_settings?.file_extensions) {
+        fileExtensions.value = config.target_settings.file_extensions.join(',');
+      }
 
-    // 置換ルール設定
-    if (config.replacements) {
-      this.replacementRules = config.replacements.map((rule, index) => ({
-        id: `rule-${index + 1}`,
-        from: rule.from,
-        to: rule.to,
-        enabled: rule.enabled !== false,
-        description: rule.description || '',
-      }));
-      this.ruleIdCounter = this.replacementRules.length + 1;
-      this.renderRules();
-    }
+      // 置換ルール設定
+      if (config.replacements) {
+        // 既存ルールクリア
+        if (this.ruleManager) {
+          this.ruleManager.clearAllRules();
+        } else {
+          this.replacementRules = [];
+        }
 
-    this.updatePreview();
-    this.updateActiveRuleCount();
+        // 新規ルール追加
+        config.replacements.forEach((rule, index) => {
+          const newRule = {
+            from: rule.from,
+            to: rule.to,
+            enabled: rule.enabled !== false,
+            description: rule.description || '',
+          };
+
+          if (this.ruleManager) {
+            this.ruleManager.addRule(newRule);
+          } else {
+            // フォールバック
+            const ruleWithId = {
+              ...newRule,
+              id: `rule-${index + 1}`,
+            };
+            this.replacementRules.push(ruleWithId);
+          }
+        });
+
+        this.ruleIdCounter = config.replacements.length + 1;
+
+        if (!this.ruleManager) {
+          this.renderRules();
+        }
+      }
+
+      this.updatePreview();
+      this.updateActiveRuleCount();
+
+      // TemplateManagerに履歴追加
+      if (this.templateManager) {
+        this.templateManager.addToRecentConfigs(config);
+      }
+
+      console.log('✅ Configuration loaded successfully');
+    } catch (error) {
+      console.error('❌ Load config data failed:', error);
+      this.showError('設定読み込み失敗', error.message);
+    }
   }
 
   /**
