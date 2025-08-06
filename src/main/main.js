@@ -68,7 +68,7 @@ class MultiGrepReplacerApp {
         height: 700,
         minWidth: 600,
         minHeight: 500,
-        show: false, // 準備完了まで非表示
+        show: true, // パッケージ版での問題を回避するため最初から表示
         title: 'Multi Grep Replacer',
         titleBarStyle: 'default',
         webPreferences: {
@@ -89,7 +89,7 @@ class MultiGrepReplacerApp {
       const securityValid = this.validateSecuritySettings();
       await DebugLogger.info('Security settings validation', { isValid: securityValid });
 
-      // HTMLファイル読み込み (統一アプローチ)
+      // HTMLファイル読み込み
       const htmlPath = path.join(__dirname, '../renderer/index.html');
 
       await DebugLogger.debug('Loading HTML file', {
@@ -99,7 +99,7 @@ class MultiGrepReplacerApp {
         resolvedPath: path.resolve(htmlPath),
       });
 
-      // loadFileを使用（Electronが自動的にパス解決を行う）
+      // loadFileを使用
       try {
         await this.mainWindow.loadFile(htmlPath);
         await DebugLogger.debug('HTML file loaded successfully');
@@ -107,9 +107,19 @@ class MultiGrepReplacerApp {
         await DebugLogger.error('HTML file loading failed', {
           error: loadError.message,
           htmlPath,
-          exists: require('fs').existsSync(htmlPath),
+          stack: loadError.stack,
         });
-        throw loadError;
+
+        // エラー時は最小限のHTMLを表示
+        await this.mainWindow.loadURL(`data:text/html,
+          <html>
+            <body style="font-family: system-ui; padding: 20px;">
+              <h1>Error Loading Application</h1>
+              <p>Failed to load: ${htmlPath}</p>
+              <p>Error: ${loadError.message}</p>
+            </body>
+          </html>
+        `);
       }
 
       // ウィンドウクローズイベント
@@ -118,10 +128,9 @@ class MultiGrepReplacerApp {
         this.mainWindow = null;
       });
 
-      // ウィンドウが準備完了したら表示
+      // ウィンドウが準備完了したらログ記録（既に表示されている）
       this.mainWindow.once('ready-to-show', async () => {
         await DebugLogger.info('Window ready to show');
-        this.mainWindow.show();
 
         // 開発時のみ DevTools を開く
         if (this.isDevelopment) {
@@ -144,13 +153,8 @@ class MultiGrepReplacerApp {
         await DebugLogger.logAppState({ phase: 'startup-complete' });
       });
 
-      // フォールバック: ready-to-showが発火しない場合の保険
-      setTimeout(() => {
-        if (this.mainWindow && !this.mainWindow.isVisible()) {
-          DebugLogger.warn('Window not shown after timeout, forcing show');
-          this.mainWindow.show();
-        }
-      }, 1000);
+      // ウィンドウのフォーカス
+      this.mainWindow.focus();
 
       await DebugLogger.endPerformance('create-main-window');
       await DebugLogger.info('Main window created successfully');
