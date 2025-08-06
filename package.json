@@ -27,7 +27,7 @@
     "test:syntax": "node -c src/main/main.js && node -c src/preload/preload.js",
     "test:single-instance": "DEBUG_SINGLE_INSTANCE=true electron .",
     "test:all": "npm run quality && npm run test:syntax && npm run test -- --passWithNoTests",
-    "logs:analyze": "node scripts/analyze-logs.js",
+    "logs:analyze": "node scripts/logs-analyzer.js",
     "prepare": "npm run quality"
   },
   "dependencies": {

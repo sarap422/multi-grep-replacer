@@ -229,15 +229,12 @@ class ThemeSwitcher {
   /**
    * テーマアイコン更新
    */
-  updateThemeIcon(theme) {
+  updateThemeIcon(_theme) {
     if (!this.themeIconElement) {
       return;
     }
 
-    // アイコン更新
-    const icon = this.THEME_ICONS[theme] || this.THEME_ICONS[this.THEMES.LIGHT];
-    this.themeIconElement.textContent = icon;
-
+    // CSSの::beforeでアイコンが管理されるため、textContentは設定しない
     // アニメーション効果
     this.themeIconElement.classList.add('scale-in');
     setTimeout(() => {
