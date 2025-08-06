@@ -45,8 +45,9 @@ module.exports = {
     // ベストプラクティス
     'eqeqeq': 'error',
     'no-magic-numbers': ['warn', { 
-      'ignore': [-1, 0, 1, 2, 3, 4, 5, 8, 10, 20, 36, 100, 200, 300, 400, 1000, 1024, 30000], 
-      'ignoreArrayIndexes': true 
+      'ignore': [-500, -20, -10, -1, 0, 0.8, 1, 2, 3, 4, 5, 7, 8, 10, 16, 20, 24, 30, 36, 50, 60, 90, 100, 200, 300, 400, 500, 1000, 1024, 2000, 3000, 4000, 5000, 10000, 30000, 60000, 300000], 
+      'ignoreArrayIndexes': true,
+      'ignoreDefaultValues': true
     }],
     'prefer-arrow-callback': 'error',
     'arrow-spacing': 'off', // Prettierに委譲
