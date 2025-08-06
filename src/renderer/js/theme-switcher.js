@@ -430,13 +430,10 @@ class ThemeSwitcher {
   }
 }
 
-// DOM読み込み完了後にThemeSwitcher初期化
-document.addEventListener('DOMContentLoaded', () => {
-  window.themeSwitcher = new ThemeSwitcher();
-  console.log('🎨 Theme Switcher initialized');
+// ThemeSwitcherインスタンス作成（グローバル）
+window.themeSwitcher = new ThemeSwitcher();
 
-  // テーマ変更イベントリスナー（デバッグ用）
-  document.addEventListener('themeChanged', event => {
-    console.log('🎨 Theme changed event:', event.detail);
-  });
+// テーマ変更イベントリスナー（デバッグ用）
+document.addEventListener('themeChanged', event => {
+  console.log('🎨 Theme changed event:', event.detail);
 });
