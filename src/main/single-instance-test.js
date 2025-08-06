@@ -3,10 +3,16 @@
  * シングルインスタンス制御のテストとデバッグ機能
  */
 
+// eslint-disable-next-line no-unused-vars
 const { app, BrowserWindow } = require('electron');
 const DebugLogger = require('./debug-logger');
 
 class SingleInstanceTest {
+  // 定数定義（ESLintのno-magic-numbers対応）
+  // eslint-disable-next-line no-magic-numbers
+  static NANOSECONDS_TO_MILLISECONDS = 1e6;
+  static WARNING_THRESHOLD_MS = 10;
+
   /**
    * シングルインスタンス制御のテスト実行
    */
@@ -30,7 +36,8 @@ class SingleInstanceTest {
     try {
       // シングルインスタンスロック取得テスト
       const gotTheLock = app.requestSingleInstanceLock();
-      results.lockTiming = Number(process.hrtime.bigint() - startTime) / 1e6; // ms
+      results.lockTiming =
+        Number(process.hrtime.bigint() - startTime) / this.NANOSECONDS_TO_MILLISECONDS; // ms
       results.lockAcquired = gotTheLock;
 
       await DebugLogger.debug('Single instance lock acquisition', {
@@ -45,8 +52,12 @@ class SingleInstanceTest {
       }
 
       // タイミングチェック
-      if (results.lockTiming > 10) {
-        results.warnings.push(`Lock acquisition took ${results.lockTiming.toFixed(2)}ms (should be < 10ms)`);
+      if (results.lockTiming > this.WARNING_THRESHOLD_MS) {
+        results.warnings.push(
+          `Lock acquisition took ${results.lockTiming.toFixed(2)}ms (should be < ${
+            this.WARNING_THRESHOLD_MS
+          }ms)`
+        );
       }
 
       // second-instanceイベントハンドラーの存在確認
@@ -88,10 +99,13 @@ class SingleInstanceTest {
         if (line.includes('requestSingleInstanceLock')) {
           lockLineIndex = index;
         }
-        if (line.includes('app.whenReady') || line.includes('app.on(\'ready\'')) {
+        if (line.includes('app.whenReady') || line.includes("app.on('ready'")) {
           appReadyLineIndex = index;
         }
-        if (line.includes('initialize()') && line.includes('function') || line.includes('initialize() {')) {
+        if (
+          (line.includes('initialize()') && line.includes('function')) ||
+          line.includes('initialize() {')
+        ) {
           initializeLineIndex = index;
         }
       });
@@ -124,18 +138,21 @@ class SingleInstanceTest {
           message: 'Missing second-instance event handler',
           severity: 'critical',
         });
-        recommendations.push('Add app.on(\'second-instance\', ...) handler');
+        recommendations.push("Add app.on('second-instance', ...) handler");
       }
 
       // ウィンドウ復元ロジックチェック
-      const hasWindowRestore = mainJsContent.includes('restore()') && mainJsContent.includes('focus()');
+      const hasWindowRestore =
+        mainJsContent.includes('restore()') && mainJsContent.includes('focus()');
       if (!hasWindowRestore) {
         issues.push({
           type: 'INCOMPLETE_HANDLER',
           message: 'Missing window restore/focus logic in second-instance handler',
           severity: 'medium',
         });
-        recommendations.push('Add mainWindow.restore() and mainWindow.focus() in second-instance handler');
+        recommendations.push(
+          'Add mainWindow.restore() and mainWindow.focus() in second-instance handler'
+        );
       }
 
       return {
@@ -149,11 +166,13 @@ class SingleInstanceTest {
       };
     } catch (error) {
       return {
-        issues: [{
-          type: 'VALIDATION_ERROR',
-          message: error.message,
-          severity: 'critical',
-        }],
+        issues: [
+          {
+            type: 'VALIDATION_ERROR',
+            message: error.message,
+            severity: 'critical',
+          },
+        ],
         recommendations: ['Fix file read error before validation'],
         stats: {},
       };
