@@ -127,6 +127,97 @@ class SecurityValidator {
 ✅ 進捗表示の適切な更新間隔
 ```
 
+### 1.5 シングルインスタンス制御問題
+```javascript
+// 予想される問題
+❌ app.requestSingleInstanceLock()のタイミングが遅い
+❌ 初期化処理内でのシングルインスタンス制御実装
+❌ second-instanceイベントハンドラーの未実装
+❌ ウィンドウ復元・フォーカス処理の失敗
+
+// 対策
+✅ アプリケーション最上位でのロック取得
+✅ second-instanceイベントの適切な処理
+✅ ウィンドウ状態チェックと復元ロジック
+✅ デバッグログによるタイミング監視
+```
+
+**シングルインスタンス制御テストコード例**：
+```javascript
+// src/main/single-instance-test.js
+class SingleInstanceTest {
+    static async testSingleInstanceControl() {
+        const results = {
+            lockAcquired: false,
+            lockTiming: 0,
+            secondInstanceHandled: false,
+            windowRestored: false,
+            errors: []
+        };
+        
+        // タイミング測定開始
+        const startTime = process.hrtime.bigint();
+        
+        // シングルインスタンスロック取得テスト
+        const gotTheLock = app.requestSingleInstanceLock();
+        results.lockTiming = Number(process.hrtime.bigint() - startTime) / 1e6; // ms
+        results.lockAcquired = gotTheLock;
+        
+        if (!gotTheLock) {
+            results.errors.push('Failed to acquire single instance lock');
+            console.log('🔒 Single instance lock test failed - another instance is running');
+            app.quit();
+            return results;
+        }
+        
+        // second-instanceイベントハンドラー登録
+        app.on('second-instance', (event, commandLine, workingDirectory) => {
+            results.secondInstanceHandled = true;
+            console.log('🔄 Second instance detected:', {
+                commandLine,
+                workingDirectory,
+                timestamp: new Date().toISOString()
+            });
+            
+            // ウィンドウ復元テスト
+            const mainWindow = BrowserWindow.getAllWindows()[0];
+            if (mainWindow) {
+                if (mainWindow.isMinimized()) mainWindow.restore();
+                mainWindow.focus();
+                results.windowRestored = true;
+            } else {
+                results.errors.push('No window found to restore');
+            }
+        });
+        
+        console.log('✅ Single instance test results:', results);
+        return results;
+    }
+    
+    static validateSingleInstanceImplementation(implementation) {
+        const issues = [];
+        const codeString = implementation.toString();
+        
+        // タイミングチェック
+        if (codeString.includes('initialize()') && codeString.includes('requestSingleInstanceLock')) {
+            issues.push('Single instance lock should be called at top level, not inside initialize()');
+        }
+        
+        // イベントハンドラーチェック
+        if (!codeString.includes('second-instance')) {
+            issues.push('Missing second-instance event handler');
+        }
+        
+        // ウィンドウ復元チェック
+        if (!codeString.includes('restore()') || !codeString.includes('focus()')) {
+            issues.push('Missing window restore/focus logic in second-instance handler');
+        }
+        
+        return issues;
+    }
+}
+```
+
 ## 🧪 2. 段階的テスト環境の設計
 
 ### 2.1 Task完了時テストフレームワーク
@@ -407,6 +498,20 @@ class ErrorDisplay {
                 'アプリケーションを再起動',
                 '他のアプリケーションを終了してメモリを開放'
             ]
+        },
+        
+        'SINGLE_INSTANCE_LOCK_FAILED': {
+            message: 'アプリケーションの起動に失敗しました',
+            causes: [
+                'すでに別のインスタンスが起動中',
+                'シングルインスタンス制御の実装タイミング不良',
+                '前回の異常終了によるロック残存'
+            ],
+            solutions: [
+                '起動中のアプリケーションを確認してフォーカス',
+                'すべてのアプリケーションインスタンスを終了して再起動',
+                'タスクマネージャー/アクティビティモニタでプロセスを確認'
+            ]
         }
     };
     
@@ -545,6 +650,44 @@ Task完了時間目標：
 問題: contextBridge経由のAPI呼び出し失敗
 原因: preload.jsでのAPI公開設定ミス
 解決: exposeInMainWorld()構文確認、セキュリティ設定確認
+```
+
+#### シングルインスタンス制御問題
+```markdown
+問題: アプリが起動してすぐ終了する
+原因: app.requestSingleInstanceLock()がfalseを返し、app.quit()が実行される
+解決: 
+1. ロック取得をアプリケーション最上位に移動
+2. second-instanceイベントハンドラーを適切に実装
+3. 既存ウィンドウの復元・フォーカス処理を追加
+
+問題: 2回目の起動時にウィンドウが表示されない
+原因: second-instanceイベントでウィンドウ復元処理が不完全
+解決:
+1. isMinimized()チェックとrestore()呼び出し
+2. show()とfocus()の確実な実行
+3. ウィンドウ状態の適切な管理
+
+実装パターン:
+```javascript
+// ✅ 正しい実装
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // 既存のウィンドウがある場合は表示・フォーカス
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+  
+  app.whenReady().then(createWindow);
+}
+```
 ```
 
 #### ファイル操作問題

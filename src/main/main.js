@@ -826,7 +826,18 @@ class MultiGrepReplacerApp {
   }
 }
 
+// シングルインスタンス制御のデバッグ機能付き実装
+const SingleInstanceTest = require('./single-instance-test');
+
+// デバッグモードでのシングルインスタンステスト実行
+if (process.env.DEBUG_SINGLE_INSTANCE === 'true') {
+  SingleInstanceTest.generateDebugReport().then(report => {
+    console.log('📊 Single Instance Debug Report:', report);
+  });
+}
+
 // アプリケーション実行（シングルインスタンス制御は一時的に無効化）
+// TODO: SingleInstanceTest.getRecommendedPattern() を参考に実装予定
 const multiGrepReplacer = new MultiGrepReplacerApp();
 multiGrepReplacer.initialize();
 
