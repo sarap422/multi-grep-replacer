@@ -98,7 +98,7 @@ ipcMain.handle('vibe-log', async (event, level, operation, message, options) => 
 
 #### 📁 ログファイルの場所
 ```
-./logs/multi-grep-replacer/
+./logs/vibe/
 ├── vibe_20250806_173000.log    # タイムスタンプ付きログファイル
 ├── vibe_20250806_180000.log    # 自動ローテーション
 └── vibe_20250806_183000.log
@@ -107,13 +107,13 @@ ipcMain.handle('vibe-log', async (event, level, operation, message, options) => 
 #### 🔍 ログ確認コマンド
 ```bash
 # 最新ログを確認
-tail -n 50 logs/multi-grep-replacer/vibe_*.log
+tail -n 50 logs/vibe/vibe_*.log
 
 # 特定の操作を検索
-grep "operation_name" logs/multi-grep-replacer/vibe_*.log
+grep "operation_name" logs/vibe/vibe_*.log
 
 # JSON形式で整形表示
-cat logs/multi-grep-replacer/vibe_*.log | jq '.'
+cat logs/vibe/vibe_*.log | jq '.'
 ```
 
 ### 1.3 実装パターン例
@@ -683,24 +683,24 @@ module.exports = EnhancedTestRunner;
 npm start
 
 # 別ターミナルでログ監視
-watch -n 1 "ls -la logs/multi-grep-replacer/"
-tail -f logs/multi-grep-replacer/vibe_*.log
+watch -n 1 "ls -la logs/vibe/"
+tail -f logs/vibe/vibe_*.log
 ```
 
 ### Step 2: 問題分析
 ```bash
 # エラーログ抽出
-grep '"level":"ERROR"' logs/multi-grep-replacer/vibe_*.log | jq '.'
+grep '"level":"ERROR"' logs/vibe/vibe_*.log | jq '.'
 
 # パフォーマンス問題抽出
-grep '"targetAchieved":false' logs/multi-grep-replacer/vibe_*.log | jq '.'
+grep '"targetAchieved":false' logs/vibe/vibe_*.log | jq '.'
 ```
 
 ### Step 3: AI分析用データ取得
 ```javascript
 // コンソールで実行
 const { readFileSync } = require('fs');
-const logs = readFileSync('logs/multi-grep-replacer/vibe_latest.log', 'utf8')
+const logs = readFileSync('logs/vibe/vibe_latest.log', 'utf8')
     .split('\n')
     .filter(line => line)
     .map(line => JSON.parse(line));

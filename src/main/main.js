@@ -1,10 +1,15 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+// VibeLogger (ES Module) - 動的importで読み込み
+let vibeLoggerModule = null;
 const ConfigManager = require('./config-manager');
 const FileOperations = require('./file-operations');
 const FileSearchEngine = require('./file-search-engine');
 const ReplacementEngine = require('./replacement-engine');
 const DebugLogger = require('./debug-logger');
+
+// Vibe Logger初期化（グローバル） - 動的import後に初期化
+global.vibeLogger = null;
 
 /**
  * Multi Grep Replacer - Main Process
@@ -18,6 +23,8 @@ class MultiGrepReplacerApp {
     this.initializationTracker = 'app-initialization';
     this.fileSearchEngine = new FileSearchEngine();
     this.replacementEngine = new ReplacementEngine();
+
+    // Vibe Logger初期化（非同期処理のため、initializeメソッドで行う）
   }
 
   /**
@@ -27,6 +34,35 @@ class MultiGrepReplacerApp {
     // デバッグロガー初期化（最優先）
     await DebugLogger.initialize();
     DebugLogger.startPerformance(this.initializationTracker);
+
+    // Vibe Logger初期化
+    try {
+      vibeLoggerModule = await import('vibelogger');
+
+      // プロジェクトのlogsディレクトリに出力するようにパスを設定
+      const logsDir = path.join(__dirname, '../../logs/vibe');
+
+      global.vibeLogger = vibeLoggerModule.createFileLogger('multi-grep-replacer', {
+        logDir: logsDir,
+      });
+      console.log('✅ Vibe Logger initialized successfully at:', logsDir);
+
+      // 初期化ログ
+      global.vibeLogger.info('app_startup', 'Multi Grep Replacer starting', {
+        context: {
+          version: '1.0.0',
+          platform: process.platform,
+          nodeVersion: process.version,
+          electronVersion: process.versions.electron,
+          isDevelopment: this.isDevelopment,
+        },
+        humanNote: 'アプリケーション起動時の環境情報',
+        aiTodo: 'パフォーマンス改善の提案があれば記録',
+      });
+    } catch (error) {
+      console.warn('⚠️ Vibe Logger initialization failed:', error.message);
+      global.vibeLogger = null;
+    }
 
     await DebugLogger.info('Multi Grep Replacer starting...', {
       isDevelopment: this.isDevelopment,
@@ -227,6 +263,22 @@ class MultiGrepReplacerApp {
    */
   setupIpcHandlers() {
     DebugLogger.debug('Setting up IPC handlers');
+
+    // Vibe Logger IPC ハンドラー
+    ipcMain.handle('vibe-log', async (event, level, operation, message, options) => {
+      try {
+        if (global.vibeLogger && global.vibeLogger[level]) {
+          await global.vibeLogger[level](operation, message, options);
+          return { success: true };
+        } else {
+          console.warn(`Vibe Logger: ${level} method not available`);
+          return { success: false, error: `${level} method not available` };
+        }
+      } catch (error) {
+        console.error(`Vibe Logger IPC error: ${error.message}`);
+        return { success: false, error: error.message };
+      }
+    });
 
     // 基本通信テスト（ping-pong）
     ipcMain.handle('ping', async () => {

@@ -20,6 +20,7 @@ class UIController {
     // モジュール統合準備
     this.ruleManager = null;
     this.templateManager = null;
+    this.executionController = null;
 
     console.log('🎮 UI Controller initializing...');
     this.initialize();
@@ -86,11 +87,20 @@ class UIController {
         console.warn('⚠️ TemplateManager not available, using fallback functionality');
       }
 
+      // ExecutionController初期化
+      if (window.ExecutionController) {
+        this.executionController = new window.ExecutionController();
+        console.log('🚀 ExecutionController initialized');
+      } else {
+        console.warn('⚠️ ExecutionController not available, using fallback functionality');
+      }
+
       // Vibe Logger統合
       if (window.vibeLogger) {
         window.vibeLogger.logUIOperation('モジュール統合初期化', true, {
           ruleManagerAvailable: !!this.ruleManager,
           templateManagerAvailable: !!this.templateManager,
+          executionControllerAvailable: !!this.executionController,
           timestamp: new Date().toISOString(),
         });
       }
@@ -718,65 +728,48 @@ class UIController {
   /**
    * 置換実行処理
    */
+  /**
+   * 実行ボタンハンドラー - ExecutionControllerに委譲
+   */
   async handleExecuteReplacement() {
-    if (this.isProcessing) {
-      console.log('⚠️ Replacement already in progress');
-      return;
-    }
-
-    // バリデーション
-    if (!this.selectedFolder) {
-      this.showError('エラー', 'フォルダを選択してください');
-      return;
-    }
-
-    const activeRules = this.replacementRules.filter(rule => rule.enabled && rule.from && rule.to);
-    if (activeRules.length === 0) {
-      this.showError('エラー', '有効な置換ルールがありません');
-      return;
-    }
-
-    if (this.foundFiles.length === 0) {
-      this.showError('エラー', '対象ファイルが見つかりません');
-      return;
-    }
-
     try {
-      console.log('🚀 Starting replacement execution...');
-      this.isProcessing = true;
-      this.showProgressModal();
-
-      // 進捗監視設定
-      window.electronAPI.onReplacementProgress(progress => {
-        this.updateProgress(progress);
-      });
-
-      // 置換実行
-      const result = await window.electronAPI.processFiles(
-        this.foundFiles.map(f => f.path),
-        activeRules,
-        {
-          caseSensitive: true,
-          wholeWord: false,
-          dryRun: false,
-        }
-      );
-
-      this.hideProgressModal();
-
-      if (result.success) {
-        this.showResultModal(result.results);
-        console.log('✅ Replacement completed successfully');
-      } else {
-        this.showError('置換実行エラー', result.error);
+      // ExecutionControllerが利用可能な場合は委譲
+      if (this.executionController) {
+        // ExecutionControllerのhandleExecuteClickメソッドを呼び出し
+        await this.executionController.handleExecuteClick({
+          preventDefault: () => {
+            // Empty function for compatibility
+          },
+        });
+        return;
       }
+
+      // フォールバック処理：従来の実装（ExecutionControllerが無い場合）
+      console.warn('⚠️ ExecutionController not available, using fallback');
+
+      if (this.isProcessing) {
+        console.log('⚠️ Replacement already in progress');
+        return;
+      }
+
+      // 基本バリデーション
+      if (!this.selectedFolder) {
+        this.showError('エラー', 'フォルダを選択してください');
+        return;
+      }
+
+      const activeRules = this.replacementRules.filter(
+        rule => rule.enabled && rule.from && rule.to
+      );
+      if (activeRules.length === 0) {
+        this.showError('エラー', '有効な置換ルールがありません');
+        return;
+      }
+
+      this.showError('実装待ち', 'ExecutionController実装待ち - フォールバック処理');
     } catch (error) {
-      console.error('❌ Replacement execution failed:', error);
-      this.showError('置換実行失敗', error.message);
-      this.hideProgressModal();
-    } finally {
-      this.isProcessing = false;
-      window.electronAPI.removeReplacementProgressListener();
+      console.error('❌ Execute replacement handler failed:', error);
+      this.showError('実行エラー', error.message);
     }
   }
 
