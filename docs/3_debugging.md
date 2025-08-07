@@ -9,16 +9,13 @@
 - 「エラーが発生しました」→ 原因不明
 - デバッグをClaude Codeに任せきり
 - 段階的動作確認の欠如
-- シングルインスタンス制御エラーの頻発
-- データ型変更時のテスト同期漏れ
 
 ✅ 今回の改善：
 - 各Task完了時の即座動作確認
 - 詳細なエラー情報と解決方法提示
 - 早期実行ファイル（.app）作成
 - 段階的テスト環境の構築
-- シングルインスタンス制御の標準化
-- データ型安全性の強化
+- ログファイルによる問題追跡可能
 ```
 
 ### 目標設定
@@ -29,453 +26,199 @@
 - **型安全性**: データ型変更時の影響範囲の完全把握
 - **起動安定性**: シングルインスタンス制御の確実な動作
 
-## 🚨 1. 頻発問題の予防システム
 
-### 1.1 シングルインスタンス制御の標準化
+## 🚀 1. Vibe Logger統合システム（**重要**）
 
-#### 🔴 頻発する問題パターン
+### 1.1 Vibe Logger とは？
+- ライブラリ: vibelogger
+- 使い方: https://github.com/fladdict/vibe-logger
+- vibeloggerはコーディングエージェント用に高度な構造化データを出力するロガーです。
+- ログにはvibeloggerを可能な限り利用し、ログからAIが自律的に何が起きてるかを把握できるようにする
+- vibeloggerにはステップ、プロセス、コンテキスト情報、TODOなど様々な情報を構造化して記録できます。
+- デバッグ時には./logsの出力を参照する
+
+### 1.2 Vibe Logger初期化（**必須実装**）
+
+#### ✅ メインプロセスでの初期化
 ```javascript
-// ❌ 危険パターン1: 初期化内での制御（即座終了）
-class App {
-    async initialize() {
-        const gotTheLock = app.requestSingleInstanceLock(); // ⚠️ タイミング不良
-        if (!gotTheLock) {
-            app.quit();
-            return; // ⚠️ 初期化中断
-        }
-    }
-}
+// src/main/main.js の最上部で実装
+const { createFileLogger } = require('vibelogger');
 
-// ❌ 危険パターン2: トップレベルreturn（スクリプト終了）
-const gotTheLock = app.requestSingleInstanceLock();
-if (!gotTheLock) {
-    app.quit();
-    return; // ⚠️ モジュール読み込み中断
-}
+// プロジェクト用ロガーの作成（グローバル）
+global.vibeLogger = createFileLogger('multi-grep-replacer');
 
-// ❌ 危険パターン3: second-instanceハンドラー未実装
-app.on('second-instance', () => {
-    // 空実装 → ウィンドウが表示されない
+// アプリケーション起動ログ
+global.vibeLogger.info('app_startup', 'Multi Grep Replacer starting', {
+    context: {
+        version: '1.0.0',
+        platform: process.platform,
+        nodeVersion: process.version,
+        electronVersion: process.versions.electron
+    },
+    humanNote: 'アプリケーション起動時の環境情報',
+    aiTodo: 'パフォーマンス改善の提案があれば記録'
 });
 ```
 
-#### ✅ 標準実装パターン（強制）
+#### ✅ レンダラープロセスへの公開
 ```javascript
-// ✅ 正解: main.jsの最上位で実装
-// src/main/main.js
+// src/preload/preload.js に追加
+const { contextBridge, ipcRenderer } = require('electron');
 
-// 必須: シングルインスタンス制御（最優先）
-const gotTheLock = app.requestSingleInstanceLock();
+contextBridge.exposeInMainWorld('vibeLogger', {
+    info: (operation, message, options) => 
+        ipcRenderer.invoke('vibe-log', 'info', operation, message, options),
+    error: (operation, message, options) => 
+        ipcRenderer.invoke('vibe-log', 'error', operation, message, options),
+    warning: (operation, message, options) => 
+        ipcRenderer.invoke('vibe-log', 'warning', operation, message, options),
+    debug: (operation, message, options) => 
+        ipcRenderer.invoke('vibe-log', 'debug', operation, message, options)
+});
+```
 
-if (!gotTheLock) {
-    console.log('🔒 Another instance is already running, exiting gracefully...');
-    app.quit();
-    process.exit(0); // 確実な終了
-} else {
-    console.log('✅ Single instance lock acquired successfully');
+#### ✅ IPCハンドラー実装
+```javascript
+// src/main/main.js に追加
+const { ipcMain } = require('electron');
+
+// Vibe Logger IPC ハンドラー
+ipcMain.handle('vibe-log', async (event, level, operation, message, options) => {
+    try {
+        await global.vibeLogger[level](operation, message, options);
+        return { success: true };
+    } catch (error) {
+        console.error(`Vibe Logger error: ${error.message}`);
+        return { success: false, error: error.message };
+    }
+});
+```
+
+### 1.2 ログ出力先と確認方法
+
+#### 📁 ログファイルの場所
+```
+./logs/multi-grep-replacer/
+├── vibe_20250806_173000.log    # タイムスタンプ付きログファイル
+├── vibe_20250806_180000.log    # 自動ローテーション
+└── vibe_20250806_183000.log
+```
+
+#### 🔍 ログ確認コマンド
+```bash
+# 最新ログを確認
+tail -n 50 logs/multi-grep-replacer/vibe_*.log
+
+# 特定の操作を検索
+grep "operation_name" logs/multi-grep-replacer/vibe_*.log
+
+# JSON形式で整形表示
+cat logs/multi-grep-replacer/vibe_*.log | jq '.'
+```
+
+### 1.3 実装パターン例
+
+#### UI操作のログ記録
+```javascript
+// src/renderer/js/ui-controller.js
+handleAddRule() {
+    const startTime = performance.now();
     
-    // アプリケーション本体の実行
-    const multiGrepReplacer = new MultiGrepReplacerApp();
-    
-    // 必須: second-instanceイベントハンドラー
-    app.on('second-instance', async (event, commandLine, workingDirectory) => {
-        console.log('🔄 Second instance detected, focusing existing window');
-        console.log('📋 Command line:', commandLine);
-        console.log('📂 Working directory:', workingDirectory);
-        
-        // 既存ウィンドウの復元・フォーカス（必須）
-        if (multiGrepReplacer.mainWindow) {
-            try {
-                // 最小化されている場合は復元
-                if (multiGrepReplacer.mainWindow.isMinimized()) {
-                    multiGrepReplacer.mainWindow.restore();
-                    console.log('🔓 Window restored from minimized state');
-                }
-                
-                // ウィンドウを表示・フォーカス
-                multiGrepReplacer.mainWindow.show();
-                multiGrepReplacer.mainWindow.focus();
-                console.log('👁️ Window focused successfully');
-                
-                // macOS対応: アプリケーションをアクティブ化
-                if (process.platform === 'darwin') {
-                    app.focus();
-                }
-                
-            } catch (error) {
-                console.error('❌ Failed to focus window:', error);
-            }
-        } else {
-            console.warn('⚠️ No main window found to focus');
-            
-            // フォールバック: 新しいウィンドウを作成
-            try {
-                await multiGrepReplacer.createMainWindow();
-                console.log('🆕 Created new window as fallback');
-            } catch (createError) {
-                console.error('❌ Failed to create fallback window:', createError);
-            }
+    // Vibe Logger記録
+    window.vibeLogger.info('rule_add_start', 'ルール追加開始', {
+        context: {
+            timestamp: new Date().toISOString(),
+            component: 'RuleManager'
         }
     });
     
-    // アプリケーション初期化
-    multiGrepReplacer.initialize();
+    try {
+        const rule = this.ruleManager.addRule();
+        const responseTime = performance.now() - startTime;
+        
+        // 成功ログ
+        window.vibeLogger.info('rule_add_success', 'ルール追加成功', {
+            context: {
+                ruleId: rule.id,
+                responseTime: responseTime,
+                targetAchieved: responseTime <= 100
+            },
+            aiTodo: responseTime > 100 ? 'パフォーマンス改善が必要' : null
+        });
+        
+    } catch (error) {
+        // エラーログ
+        window.vibeLogger.error('rule_add_error', 'ルール追加失敗', {
+            context: {
+                error: error.message,
+                stack: error.stack
+            },
+            aiTodo: 'エラーハンドリングの改善提案'
+        });
+    }
 }
 ```
 
-#### 🧪 シングルインスタンス制御テスト
+
+
+
+## 🚨 2. 頻発問題の予防システム（Vibe Logger活用）
+
+### 2.1 シングルインスタンス制御（ログ付き）
+
 ```javascript
-// scripts/test-single-instance.js
-class SingleInstanceValidator {
-    static validateImplementation(filePath) {
-        const fs = require('fs');
-        const content = fs.readFileSync(filePath, 'utf8');
-        const issues = [];
-        
-        // 必須チェック項目
-        const checks = [
-            {
-                pattern: /app\.requestSingleInstanceLock\(\)/,
-                message: 'requestSingleInstanceLock() call is required'
-            },
-            {
-                pattern: /app\.on\(['"`]second-instance['"`]/,
-                message: 'second-instance event handler is required'
-            },
-            {
-                pattern: /mainWindow\.restore\(\)/,
-                message: 'Window restore() call is required in second-instance handler'
-            },
-            {
-                pattern: /mainWindow\.show\(\)/,
-                message: 'Window show() call is required in second-instance handler'
-            },
-            {
-                pattern: /mainWindow\.focus\(\)/,
-                message: 'Window focus() call is required in second-instance handler'
-            }
-        ];
-        
-        checks.forEach(check => {
-            if (!check.pattern.test(content)) {
-                issues.push(`❌ ${check.message}`);
-            }
-        });
-        
-        // アンチパターンチェック
-        const antiPatterns = [
-            {
-                pattern: /initialize\(\)[\s\S]*requestSingleInstanceLock/,
-                message: 'Single instance lock should not be inside initialize() method'
-            },
-            {
-                pattern: /if\s*\(\s*!gotTheLock\s*\)\s*{[\s\S]*return[\s\S]*}/,
-                message: 'Avoid return statement after app.quit() in top-level scope'
-            }
-        ];
-        
-        antiPatterns.forEach(antiPattern => {
-            if (antiPattern.pattern.test(content)) {
-                issues.push(`⚠️ Anti-pattern detected: ${antiPattern.message}`);
-            }
-        });
-        
-        return {
-            isValid: issues.length === 0,
-            issues: issues
-        };
-    }
+// src/main/main.js
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+    // Vibe Loggerに記録
+    global.vibeLogger.warning('single_instance_blocked', '既存インスタンスが起動中', {
+        context: {
+            timestamp: new Date().toISOString(),
+            pid: process.pid
+        },
+        humanNote: '2つ目のインスタンスが起動を試みました'
+    });
     
-    static async testInstanceBehavior() {
-        const { spawn } = require('child_process');
+    app.quit();
+    process.exit(0);
+} else {
+    // 成功ログ
+    global.vibeLogger.info('single_instance_acquired', 'インスタンスロック取得成功', {
+        context: {
+            timestamp: new Date().toISOString(),
+            pid: process.pid
+        }
+    });
+}
+```
+
+### 2.2 パフォーマンス監視（Vibe Logger活用）
+
+```javascript
+// src/renderer/js/performance-monitor.js
+class PerformanceMonitor {
+    recordResponse(operation, responseTime) {
+        const targetAchieved = responseTime <= this.UI_RESPONSE_TARGET;
         
-        console.log('🧪 Testing single instance behavior...');
-        
-        // 1回目の起動
-        const firstInstance = spawn('npm', ['start'], {
-            stdio: 'pipe',
-            cwd: process.cwd()
+        // Vibe Loggerに記録
+        window.vibeLogger.info('performance_measurement', `${operation}のパフォーマンス`, {
+            context: {
+                operation: operation,
+                responseTime: responseTime,
+                target: this.UI_RESPONSE_TARGET,
+                targetAchieved: targetAchieved,
+                level: this.getPerformanceLevel(responseTime)
+            },
+            aiTodo: !targetAchieved ? `${operation}の処理を最適化してください` : null
         });
-        
-        let firstInstanceOutput = '';
-        firstInstance.stdout.on('data', (data) => {
-            firstInstanceOutput += data.toString();
-        });
-        
-        // 3秒待機
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        // 2回目の起動（即座終了するはず）
-        const secondInstance = spawn('npm', ['start'], {
-            stdio: 'pipe',
-            cwd: process.cwd()
-        });
-        
-        let secondInstanceOutput = '';
-        secondInstance.stdout.on('data', (data) => {
-            secondInstanceOutput += data.toString();
-        });
-        
-        // 2秒待機して結果確認
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        firstInstance.kill();
-        secondInstance.kill();
-        
-        const results = {
-            firstInstanceStarted: firstInstanceOutput.includes('App ready') || firstInstanceOutput.includes('initialized'),
-            secondInstanceDetected: secondInstanceOutput.includes('Another instance') || secondInstanceOutput.includes('already running'),
-            windowFocused: firstInstanceOutput.includes('focusing existing window') || firstInstanceOutput.includes('Second instance detected')
-        };
-        
-        console.log('📊 Single instance test results:', results);
-        return results;
     }
 }
-
-module.exports = SingleInstanceValidator;
 ```
 
-### 1.2 データ型安全性の強化
+## 🔧 3. Electron特有エラーの予測と対策（強化版）
 
-#### 🔴 頻発するデータ型エラーパターン
-```javascript
-// ❌ 危険パターン1: 配列期待→数値受信
-expect(result.changes).toHaveLength(1);
-// Error: received value must have a length property
-// Received has type: number, Received has value: 2
-
-// ❌ 危険パターン2: 実装変更時のテスト同期漏れ
-// 実装側: changes プロパティを配列→数値に変更
-// テスト側: 古い期待値のまま残存
-```
-
-#### ✅ データ型安全性確保システム
-```javascript
-// src/types/interfaces.js - 型定義の明文化
-/**
- * 置換処理結果の型定義
- * ⚠️ 重要: この型定義を変更する場合は、必ず関連テストも更新すること
- */
-const ReplacementResultSchema = {
-    modified: 'boolean',     // 置換が実行されたかどうか
-    replacements: 'number',  // 置換された箇所の総数
-    changes: 'number',       // 🔄 変更: 配列から数値に変更（2025-08-05）
-    files: 'array',          // 処理されたファイルの配列
-    errors: 'array',         // エラーが発生したファイルの配列
-    duration: 'number',      // 処理時間（ミリ秒）
-    timestamp: 'string'      // 処理開始時刻のISO文字列
-};
-
-/**
- * 型検証ヘルパークラス
- */
-class TypeValidator {
-    static validateReplacementResult(result) {
-        const errors = [];
-        
-        // 必須プロパティの存在確認
-        const requiredProps = ['modified', 'replacements', 'changes', 'files', 'errors'];
-        requiredProps.forEach(prop => {
-            if (!(prop in result)) {
-                errors.push(`Missing required property: ${prop}`);
-            }
-        });
-        
-        // 型検証
-        if (typeof result.modified !== 'boolean') {
-            errors.push(`Property 'modified' must be boolean, got: ${typeof result.modified}`);
-        }
-        
-        if (typeof result.replacements !== 'number') {
-            errors.push(`Property 'replacements' must be number, got: ${typeof result.replacements}`);
-        }
-        
-        // 🔥 重要: changes プロパティの型検証
-        if (typeof result.changes !== 'number') {
-            errors.push(`Property 'changes' must be number, got: ${typeof result.changes} (Was this changed from array?)`);
-        }
-        
-        if (!Array.isArray(result.files)) {
-            errors.push(`Property 'files' must be array, got: ${typeof result.files}`);
-        }
-        
-        if (!Array.isArray(result.errors)) {
-            errors.push(`Property 'errors' must be array, got: ${typeof result.errors}`);
-        }
-        
-        return {
-            isValid: errors.length === 0,
-            errors: errors,
-            schema: ReplacementResultSchema
-        };
-    }
-    
-    /**
-     * テスト用のモックデータ生成
-     * 🎯 テストで使用する標準的なデータ構造を提供
-     */
-    static createMockReplacementResult(overrides = {}) {
-        const defaultResult = {
-            modified: true,
-            replacements: 2,
-            changes: 2,        // 🔄 数値型（配列ではない）
-            files: ['file1.js', 'file2.js'],
-            errors: [],
-            duration: 123,
-            timestamp: new Date().toISOString()
-        };
-        
-        return { ...defaultResult, ...overrides };
-    }
-}
-
-module.exports = { ReplacementResultSchema, TypeValidator };
-```
-
-#### 🧪 テスト同期確保システム
-```javascript
-// tests/helpers/type-sync-validator.js
-class TestTypeSyncValidator {
-    /**
-     * 実装とテストの型整合性を確認
-     */
-    static validateTestSync() {
-        const issues = [];
-        
-        // 1. ReplacementResult関連のテストを検索
-        const testFiles = this.findTestFiles('replacement');
-        
-        testFiles.forEach(testFile => {
-            const testContent = require('fs').readFileSync(testFile, 'utf8');
-            
-            // 危険なパターンを検出
-            const dangerousPatterns = [
-                {
-                    pattern: /expect\(.*\.changes\)\.toHaveLength/,
-                    message: `${testFile}: changes プロパティに toHaveLength() を使用（数値型なので toBe() を使用すべき）`,
-                    fix: 'expect(result.changes).toBe(expected_number)'
-                },
-                {
-                    pattern: /expect\(.*\.changes\[0\]\)/,
-                    message: `${testFile}: changes プロパティを配列として扱っている（数値型に変更済み）`,
-                    fix: 'changes は数値なので配列アクセスは不可'
-                },
-                {
-                    pattern: /result\.changes\.forEach/,
-                    message: `${testFile}: changes プロパティに forEach() を使用（数値型なので不可）`,
-                    fix: 'changes は数値なので反復処理は不可'
-                }
-            ];
-            
-            dangerousPatterns.forEach(pattern => {
-                if (pattern.pattern.test(testContent)) {
-                    issues.push({
-                        type: 'TYPE_MISMATCH',
-                        file: testFile,
-                        message: pattern.message,
-                        fix: pattern.fix,
-                        severity: 'HIGH'
-                    });
-                }
-            });
-        });
-        
-        return {
-            isValid: issues.length === 0,
-            issues: issues
-        };
-    }
-    
-    /**
-     * 自動修正提案の生成
-     */
-    static generateAutoFix(testFile) {
-        const fs = require('fs');
-        let content = fs.readFileSync(testFile, 'utf8');
-        let fixCount = 0;
-        
-        // 自動修正パターン
-        const fixes = [
-            {
-                from: /expect\((.*\.changes)\)\.toHaveLength\((\d+)\)/g,
-                to: 'expect($1).toBe($2)',
-                description: 'toHaveLength() → toBe() 修正'
-            },
-            {
-                from: /expect\((.*\.changes)\[0\]\.count\)\.toBe\((\d+)\)/g,
-                to: '// expect($1[0].count).toBe($2); // ❌ changes は数値型なので配列アクセス不可',
-                description: '配列アクセス無効化'
-            }
-        ];
-        
-        fixes.forEach(fix => {
-            const matches = content.match(fix.from);
-            if (matches) {
-                content = content.replace(fix.from, fix.to);
-                fixCount += matches.length;
-                console.log(`✅ Applied ${fix.description}: ${matches.length} occurrences`);
-            }
-        });
-        
-        if (fixCount > 0) {
-            // バックアップ作成
-            fs.writeFileSync(`${testFile}.backup`, fs.readFileSync(testFile));
-            
-            // 修正版を書き込み
-            fs.writeFileSync(testFile, content);
-            
-            console.log(`🔧 Auto-fixed ${fixCount} issues in ${testFile}`);
-            console.log(`💾 Backup created: ${testFile}.backup`);
-        }
-        
-        return { fixCount, backupCreated: fixCount > 0 };
-    }
-    
-    static findTestFiles(keyword) {
-        const glob = require('glob');
-        return glob.sync(`tests/**/*${keyword}*.test.js`);
-    }
-}
-
-module.exports = TestTypeSyncValidator;
-```
-
-#### 📋 実装変更時の必須チェックリスト
-```markdown
-## データ型変更時の必須作業
-
-### Step 1: 変更内容の文書化
-- [ ] src/types/interfaces.js に型定義を更新
-- [ ] 変更理由と変更日をコメントに記載
-- [ ] 影響を受けるファイルをリストアップ
-
-### Step 2: テスト同期確認
-- [ ] npm run test:type-sync でテスト整合性確認
-- [ ] 型関連のテスト失敗をすべて修正
-- [ ] TypeValidator.createMockReplacementResult() を更新
-
-### Step 3: 自動検証
-- [ ] TestTypeSyncValidator.validateTestSync() 実行
-- [ ] 危険パターンの検出・修正
-- [ ] 自動修正提案の適用
-
-### Step 4: 手動確認
-- [ ] 変更されたプロパティを使用しているテストを全て確認
-- [ ] expect() の期待値が正しい型になっているか確認
-- [ ] モックデータが新しい型構造に対応しているか確認
-
-### Step 5: 回帰テスト
-- [ ] npm test で全テスト通過確認
-- [ ] 実際のアプリケーションで機能動作確認
-- [ ] パッケージ版での動作確認
-
-⚠️ 注意: この手順を省略すると、必ずテスト失敗やデータ型エラーが発生します
-```
-
-## 🔧 2. Electron特有エラーの予測と対策（強化版）
-
-### 2.1 IPC通信エラー（型安全性追加）
+### 3.1 IPC通信エラー（型安全性追加）
 ```javascript
 // src/main/ipc-type-safe.js
 class IPCTypeSafeHandler {
@@ -560,7 +303,7 @@ class IPCTypeSafeHandler {
 }
 ```
 
-### 2.2 Context Isolation設定問題（セキュリティ強化）
+### 3.2 Context Isolation設定問題（セキュリティ強化）
 ```javascript
 // src/main/security-validator-enhanced.js
 class SecurityValidatorEnhanced {
@@ -680,9 +423,10 @@ class SecurityValidatorEnhanced {
 }
 ```
 
-## 🧪 3. 段階的テスト環境の設計（強化版）
 
-### 3.1 Task完了時テストフレームワーク（型安全性追加）
+## 🧪 4. 段階的テスト環境の設計（強化版）
+
+### 4.1 Task完了時テストフレームワーク（型安全性追加）
 
 #### 強化されたテスト実行スクリプト
 ```javascript
@@ -844,207 +588,10 @@ class EnhancedTestRunner {
 module.exports = EnhancedTestRunner;
 ```
 
-### 3.2 デバッグツール設計（Vibe Logger統合）
 
-#### 構造化ログシステム（AI分析対応）
-```javascript
-// src/main/vibe-debug-logger.js
-class VibeDebugLogger {
-    static LOG_CONTEXT = {
-        SINGLE_INSTANCE: 'single_instance_control',
-        TYPE_SAFETY: 'type_safety_validation',
-        IPC_COMMUNICATION: 'ipc_communication',
-        SECURITY: 'security_validation',
-        PERFORMANCE: 'performance_monitoring',
-        ERROR_HANDLING: 'error_handling'
-    };
-    
-    /**
-     * AI向け構造化ログ
-     * Claude Code が理解しやすい形式でログを出力
-     */
-    static vibeLog(context, operation, data = {}) {
-        const vibeEntry = {
-            timestamp: new Date().toISOString(),
-            context: context,
-            operation: operation,
-            
-            // 人間向け情報
-            human_readable: data.message || operation,
-            severity: data.severity || 'INFO',
-            
-            // AI向け構造化データ
-            ai_context: {
-                operation_type: operation,
-                context_category: context,
-                success: data.success !== undefined ? data.success : null,
-                error_code: data.error_code || null,
-                duration_ms: data.duration_ms || null,
-                memory_usage: process.memoryUsage(),
-                
-                // 特定のコンテキスト向けデータ
-                ...this.getContextSpecificData(context, data)
-            },
-            
-            // AI分析・改善提案向け
-            ai_todo: data.ai_todo || null,
-            patterns: data.patterns || [],
-            metrics: data.metrics || {},
-            
-            // デバッグ用生データ
-            raw_data: data.raw_data || {}
-        };
-        
-        // コンソール出力（開発時）
-        if (process.env.NODE_ENV === 'development') {
-            console.log('🤖 VIBE LOG:', JSON.stringify(vibeEntry, null, 2));
-        }
-        
-        // ファイル出力（AI分析用）
-        this.writeVibeLog(vibeEntry);
-        
-        return vibeEntry;
-    }
-    
-    static getContextSpecificData(context, data) {
-        switch (context) {
-            case this.LOG_CONTEXT.SINGLE_INSTANCE:
-                return {
-                    lock_acquired: data.lock_acquired,
-                    second_instance_detected: data.second_instance_detected,
-                    window_focused: data.window_focused,
-                    platform: process.platform
-                };
-                
-            case this.LOG_CONTEXT.TYPE_SAFETY:
-                return {
-                    expected_type: data.expected_type,
-                    actual_type: data.actual_type,
-                    property_name: data.property_name,
-                    validation_errors: data.validation_errors || []
-                };
-                
-            case this.LOG_CONTEXT.IPC_COMMUNICATION:
-                return {
-                    channel: data.channel,
-                    args_type: typeof data.args,
-                    response_type: typeof data.response,
-                    timeout_ms: data.timeout_ms,
-                    retry_count: data.retry_count || 0
-                };
-                
-            case this.LOG_CONTEXT.PERFORMANCE:
-                return {
-                    target_ms: data.target_ms,
-                    actual_ms: data.actual_ms,
-                    performance_ratio: data.actual_ms / data.target_ms,
-                    component: data.component
-                };
-                
-            default:
-                return {};
-        }
-    }
-    
-    /**
-     * シングルインスタンス制御専用ログ
-     */
-    static logSingleInstance(operation, success, details = {}) {
-        return this.vibeLog(
-            this.LOG_CONTEXT.SINGLE_INSTANCE,
-            operation,
-            {
-                success: success,
-                severity: success ? 'INFO' : 'ERROR',
-                message: `Single instance ${operation}: ${success ? 'SUCCESS' : 'FAILED'}`,
-                lock_acquired: details.lock_acquired,
-                second_instance_detected: details.second_instance_detected,
-                window_focused: details.window_focused,
-                ai_todo: success ? null : 'Analyze single instance control implementation for timing issues',
-                patterns: success ? ['single_instance_success'] : ['single_instance_failure'],
-                raw_data: details
-            }
-        );
-    }
-    
-    /**
-     * 型安全性検証専用ログ
-     */
-    static logTypeSafety(property, expectedType, actualType, isValid, context = {}) {
-        return this.vibeLog(
-            this.LOG_CONTEXT.TYPE_SAFETY,
-            'type_validation',
-            {
-                success: isValid,
-                severity: isValid ? 'INFO' : 'ERROR',
-                message: `Type validation for ${property}: ${isValid ? 'VALID' : 'INVALID'}`,
-                expected_type: expectedType,
-                actual_type: actualType,
-                property_name: property,
-                validation_errors: context.errors || [],
-                ai_todo: isValid ? null : `Fix type mismatch for ${property}: expected ${expectedType}, got ${actualType}`,
-                patterns: isValid ? ['type_safety_valid'] : ['type_safety_invalid', `type_mismatch_${expectedType}_to_${actualType}`],
-                raw_data: context
-            }
-        );
-    }
-    
-    /**
-     * パフォーマンス監視専用ログ
-     */
-    static logPerformance(component, operation, targetMs, actualMs, context = {}) {
-        const success = actualMs <= targetMs;
-        const ratio = actualMs / targetMs;
-        
-        return this.vibeLog(
-            this.LOG_CONTEXT.PERFORMANCE,
-            'performance_measurement',
-            {
-                success: success,
-                severity: success ? 'INFO' : (ratio > 2 ? 'ERROR' : 'WARN'),
-                message: `${component} ${operation}: ${actualMs}ms (target: ${targetMs}ms)`,
-                target_ms: targetMs,
-                actual_ms: actualMs,
-                performance_ratio: ratio,
-                component: component,
-                ai_todo: success ? null : `Optimize ${component} ${operation} performance (${ratio.toFixed(2)}x slower than target)`,
-                patterns: success ? ['performance_good'] : ['performance_issue', `performance_slow_${component}`],
-                metrics: {
-                    target_ms: targetMs,
-                    actual_ms: actualMs,
-                    ratio: ratio,
-                    overhead_ms: actualMs - targetMs
-                },
-                raw_data: context
-            }
-        );
-    }
-    
-    static writeVibeLog(vibeEntry) {
-        const fs = require('fs').promises;
-        const path = require('path');
-        const os = require('os');
-        
-        const logDir = path.join(os.homedir(), 'Library', 'Application Support', 'multi-grep-replacer', 'logs', 'vibe');
-        const logFile = path.join(logDir, `vibe_${new Date().toISOString().split('T')[0]}.jsonl`);
-        
-        // ディレクトリ作成
-        fs.mkdir(logDir, { recursive: true }).then(() => {
-            // JSONL形式で追記（AI分析しやすい形式）
-            const logLine = JSON.stringify(vibeEntry) + '\n';
-            return fs.appendFile(logFile, logLine);
-        }).catch(error => {
-            console.error('Failed to write vibe log:', error);
-        });
-    }
-}
+## 📋 5. 継続的品質保証プロセス（強化版）
 
-module.exports = VibeDebugLogger;
-```
-
-## 📋 4. 継続的品質保証プロセス（強化版）
-
-### 4.1 Task完了チェックリスト（必須項目追加）
+### 5.1 Task完了チェックリスト
 ```markdown
 各Task完了時の必須確認項目：
 
@@ -1094,7 +641,7 @@ module.exports = VibeDebugLogger;
 - [ ] Claude Code 向け改善提案生成
 ```
 
-### 4.2 問題発生時のトリアージ（強化版）
+### 5.2 問題発生時のトリアージ
 
 #### 重要度レベル定義（シングルインスタンス・型安全性追加）
 ```markdown
@@ -1128,7 +675,41 @@ module.exports = VibeDebugLogger;
 - VibeLogger出力の最適化
 ```
 
-## 🎯 5. まとめ：期待される成果
+## 🔧 5.3. デバッグ手順（Vibe Logger活用）
+
+### Step 1: ログ生成確認
+```bash
+# アプリ起動
+npm start
+
+# 別ターミナルでログ監視
+watch -n 1 "ls -la logs/multi-grep-replacer/"
+tail -f logs/multi-grep-replacer/vibe_*.log
+```
+
+### Step 2: 問題分析
+```bash
+# エラーログ抽出
+grep '"level":"ERROR"' logs/multi-grep-replacer/vibe_*.log | jq '.'
+
+# パフォーマンス問題抽出
+grep '"targetAchieved":false' logs/multi-grep-replacer/vibe_*.log | jq '.'
+```
+
+### Step 3: AI分析用データ取得
+```javascript
+// コンソールで実行
+const { readFileSync } = require('fs');
+const logs = readFileSync('logs/multi-grep-replacer/vibe_latest.log', 'utf8')
+    .split('\n')
+    .filter(line => line)
+    .map(line => JSON.parse(line));
+
+// Claude/ChatGPTに提供
+console.log(JSON.stringify(logs, null, 2));
+```
+
+## 🎯 6. まとめ：期待される成果
 
 ### Before（問題頻発）
 ```
@@ -1149,8 +730,8 @@ module.exports = VibeDebugLogger;
 ### 期待される具体的成果
 1. **シングルインスタンス制御エラー**: 100%予防（検証・テストの標準化）
 2. **データ型エラー**: 80%削減（自動検証・自動修正システム）
-3. **開発効率**: 問題解決時間70%短縮（予防的アプローチ）
-4. **品質向上**: Critical問題0件、UI応答性100%達成
-5. **AI支援強化**: Claude Code による自動分析・改善提案の精度向上
+3. **問題追跡**: すべての操作が記録され、問題の原因特定が容易
+4. **AI支援**: 構造化ログによりClaude/ChatGPTが的確な改善提案
+5. **知識蓄積**: aiTodoフィールドに改善アイデアが蓄積
 
-この強化されたデバッグ環境により、頻発する問題パターンを根本的に解決し、Python版を大幅に上回る安定したElectronアプリケーションを確実に開発できます。
+この強化されたデバッグ環境により、頻発する問題パターンを根本的に解決し、安定したElectronアプリケーションを確実に開発できます。

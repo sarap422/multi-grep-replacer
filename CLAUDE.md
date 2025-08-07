@@ -134,39 +134,41 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 ## プロジェクト構造
 
-**重要**: Electronアプリケーションの標準構造に従い、セキュリティを最優先に設計します。
-
 ```
 multi-grep-replacer/                       # GitHubリポジトリルート
 ├── docs/                                  # プロジェクトドキュメント
-│   ├── 1_requirements.md                  # 要件定義書
-│   ├── 2_architecture.md                  # システム設計書
-│   ├── 3_debugging.md                     # デバッグ環境整備
-│   └── 4_tasks.md                         # 開発タスク一覧
+│   ├── 1_requirements.md                 # 要件定義書
+│   ├── 2_architecture.md                 # システム設計書
+│   ├── 3_debugging.md                    # デバッグ環境整備
+│   └── 4_tasks.md                        # 開発タスク一覧
 ├── logs/                                  # デバッグ・ログディレクトリ
-│   ├── CHANGELOG.md                       # 実装記録（開発中更新）
+│   ├── CHANGELOG.md                      # 実装記録（開発中更新）
 │   ├── ERRORLOG.md                       # エラー内容の記録（問題があった場合）
-│   └── PATTERNS.md                        # Electronパターン集（開発中更新）
+│   ├── PATTERNS.md                       # コーディングパターン集（開発中更新）
+│   └── vibe/                             # Vibe Logger出力
+│           ├── vibe_20250806_173000.log  # タイムスタンプ付きログファイル
+│           ├── vibe_20250806_180000.log  # 自動ローテーション
+│           └── vibe_20250806_183000.log
 ├── src/                                   # アプリケーションソースコード
-│   ├── main/                              # Electronメインプロセス
-│   │   ├── main.js                        # アプリケーションエントリーポイント
-│   │   ├── file-operations.js             # ファイル操作API
-│   │   ├── replacement-engine.js          # 置換処理エンジン
-│   │   ├── ipc-handlers.js                # IPC通信ハンドラー
-│   │   └── debug-logger.js                # デバッグログシステム
-│   ├── renderer/                          # レンダラープロセス（UI）
-│   │   ├── index.html                     # メインUIレイアウト
-│   │   ├── css/                           # スタイルシート
-│   │   │   ├── main.css                   # メインスタイル
-│   │   │   ├── components.css             # UIコンポーネントスタイル
-│   │   │   └── themes.css                 # テーマ（ライト/ダークモード）
-│   │   └── js/                            # JavaScriptモジュール
-│   │       ├── app.js                     # アプリケーション初期化
-│   │       ├── ui-controller.js           # UI制御・イベントハンドリング
-│   │       ├── config-manager.js          # 設定管理
-│   │       └── performance-monitor.js     # UI応答性監視
-│   └── preload/                           # Preloadスクリプト
-│       └── preload.js                     # セキュアなAPI公開
+│   ├── main/                             # Electronメインプロセス
+│   │   ├── main.js                      # アプリケーションエントリーポイント
+│   │   ├── file-operations.js           # ファイル操作API
+│   │   ├── replacement-engine.js        # 置換処理エンジン
+│   │   ├── ipc-handlers.js              # IPC通信ハンドラー
+│   │   └── debug-logger.js              # デバッグログシステム
+│   ├── renderer/                         # レンダラープロセス（UI）
+│   │   ├── index.html                   # メインUIレイアウト
+│   │   ├── css/                         # スタイルシート
+│   │   │   ├── main.css                # メインスタイル
+│   │   │   ├── components.css          # UIコンポーネントスタイル
+│   │   │   └── themes.css              # テーマ（ライト/ダークモード）
+│   │   └── js/                          # JavaScriptモジュール
+│   │       ├── app.js                   # アプリケーション初期化
+│   │       ├── ui-controller.js         # UI制御・イベントハンドリング
+│   │       ├── config-manager.js        # 設定管理
+│   │       └── performance-monitor.js   # UI応答性監視
+│   └── preload/                          # Preloadスクリプト
+│       └── preload.js                    # セキュアなAPI公開
 ├── TESTs/                                 # テストスイート
 ├── config/                                # 設定ファイルディレクトリ
 ├── build/                                 # ビルド設定・リソース
@@ -338,10 +340,8 @@ npm run build:production    # 完全版.app作成
 ## Electron[機能名]パターン
 
 ### 実装パターン
-```javascript
-// 効果的な実装例
-// 避けるべき実装例
-```
+- 効果的な実装例
+- 避けるべき実装例
 
 ### ベストプラクティス
 - 学んだ最適な手法
@@ -352,96 +352,150 @@ npm run build:production    # 完全版.app作成
 - デバッグ手法
 ```
 
+
+## 🚀 Vibe Loggerの活用（**重要**）
+
+### Vibe Logger とは？
+- ライブラリ: vibelogger
+- 使い方: https://github.com/fladdict/vibe-logger
+- vibeloggerはコーディングエージェント用に高度な構造化データを出力するロガーです。
+- ログにはvibeloggerを可能な限り利用し、ログからAIが自律的に何が起きてるかを把握できるようにする
+- vibeloggerにはステップ、プロセス、コンテキスト情報、TODOなど様々な情報を構造化して記録できます。
+- デバッグ時には./logsの出力を参照する
+
+### 必須セットアップ
+```bash
+# 1. パッケージインストール確認
+npm list vibelogger  # インストール済みか確認
+# もしなければ: npm install vibelogger
+
+# 2. ログディレクトリ確認
+ls logs/multi-grep-replacer/  # vibe_*.log ファイルが生成されるか確認
+```
+
+### 初期化コード（src/main/main.js の最上部）
+```javascript
+const { createFileLogger } = require('vibelogger');
+
+// 必須: グローバルロガー作成
+global.vibeLogger = createFileLogger('multi-grep-replacer');
+
+// 起動ログ記録
+global.vibeLogger.info('app_startup', 'Application starting', {
+    context: { version: '1.0.0', platform: process.platform },
+    aiTodo: 'Monitor startup performance'
+});
+```
+
+### 使用方法
+```javascript
+// メインプロセス
+global.vibeLogger.info('operation_name', 'Description', {
+    context: { /* データ */ },
+    aiTodo: 'AI向け改善提案'
+});
+
+// レンダラープロセス
+window.vibeLogger.info('ui_operation', 'UI操作', {
+    context: { /* データ */ },
+    humanNote: '人間向けメモ'
+});
+```
+
+### 確認コマンド
+```bash
+# ログ生成確認
+tail -n 20 logs/multi-grep-replacer/vibe_*.log
+
+# エラー確認
+grep ERROR logs/multi-grep-replacer/vibe_*.log
+```
+
+
 ## Claude Code 実行指示
-
-### 🚀 基本実行ルール
-
-**自動化設定**：
-- mkdir、touch、write、cp、mv、git操作は自動承認してください
-- npm install、npm run、npm build も自動承認してください
-- 「Do you want to proceed?」が表示された場合は「2. Yes, and don't ask again...」を選択してください
-
-**重要な指示：**：
-- 各ステップで動作確認を実行してください
-- エラーが発生した場合のみ中断報告してください
-- デバッグ用コンソール出力を追加してください
-- UI応答性を常に監視してください
-
-**連続実行の徹底**：
-- 中断せずに実装完了まで実行してください
-- ファイル操作（mkdir、touch、write、cp、mv）は確認不要
-- プログラム実行（node、npm、electron）は確認不要
-- Git操作（add、commit、push）は確認不要
 
 ### 📋 Task実行テンプレート
 
 ```markdown
 Task X.X: [機能名] の実装を開始します。
 
+**重要な実行ルール**：
+- **全ての操作を自動承認で実行してください**
+- **「Do you want to proceed?」が表示された場合は「2. Yes, and don’t ask again...」を選択してください**
+- **エラーが発生した場合は必ず報告してください**
+
+
 **Task X.X.1: Explore（探索・理解）**
 以下のドキュメントを読んで、Task X.Xの要件を深く理解してください：
-- @docs/1_requirements.md:    # 要件定義
-- @docs/2_architecture.md:    # システム設計
-- @docs/3_debugging.md:       # デバッグ環境
-- @docs/4_tasks.md:           # 開発タスク詳細
-- CLAUDE.md:                  # プロジェクト設定
+- @docs/1_requirements.md    # 要件定義
+- @docs/2_architecture.md    # システム設計
+- @docs/3_debugging.md       # デバッグ環境
+- @docs/4_tasks.md           # 開発タスク詳細
+- @CLAUDE.md                 # プロジェクト設定
 
 **重要**: この段階ではコードは書かないでください。理解に専念してください。
-完了後、Task X.X.2: Plan（計画・設計）に進んでください。
+完了後、Task X.X.2に進んでください。
+
 
 **Task X.X.2: Plan（計画・設計）**
 ultrathink を使って Task X.Xの詳細実装計画を策定してください：
 - 実装手順の詳細化
 - 必要なファイル・クラス設計
 - テスト方法の計画
-- UI応答性確保の方法
-- Vibe Logger統合計画
+- Vibe Logger統合箇所の特定
 
-完了後、Task X.X.3: Code & Test（実装・テスト）に進んでください。
+完了後、Task X.X.3に進んでください。
 
-**Task X.X.3: Code & Test（実装・テスト）**
+
+**Task X.X.3: Code & Test（実装・テスト・ビルド）**
 計画に従って実装と動作確認を行ってください：
 
-**AI支援統合**：
-- 全ファイルにVibe Logger統合を実装
-- 構造化ログによる詳細な動作記録
-- パフォーマンス監視の実装
-- UI応答性100ms以内を確認
-
-**Task X.X.4: Build & Test（実行ファイル確認）**
-```bash
-npm run build:dev
-# → .appファイル作成・起動・機能動作確認
+**実装**：
+- 機能コードの実装
+- Vibe Logger統合（**必須**）
+```javascript
+vibeLogger.info('operation_name', 'Operation description', {
+  context: { /* relevant data */ },
+  aiTodo: 'Suggestions for improvement'
+});
 ```
 
-**Task X.X.5: AI Analysis（AI分析）**
+**テスト（ビルド前）**：
 ```bash
-npm run logs:analyze
-# → Claude Code によるログ分析実行
-# → 自動改善提案の生成・適用
+npm start  # 開発モードで動作確認
+ls logs/multi-grep-replacer/  # Vibe Loggerのログ出力確認
 ```
 
-**Task X.X.6: Record（記録）**
-- logs/CHANGELOG.md更新
-- logs/ERRORLOG.md更新（問題があった場合）
-- logs/PATTERNS.md更新（新しい知見）
-- **Git commit実行**：
+**ビルド&テスト（ビルド後）**：
+```bash
+npm run build:dev  # .appファイル作成
+# .appファイルを起動して機能動作確認
+ls logs/multi-grep-replacer/  # パッケージ版でもログ出力確認
+```
+
+完了後、Task X.X.4に進んでください。
+
+
+**Task X.X.4: Record & Commit（記録・コミット）**
+
+**ログ確認**：
+```bash
+# Vibe Loggerの出力確認
+tail -n 50 logs/multi-grep-replacer/vibe_*.log
+# 構造化ログが正しく記録されているか確認
+```
+
+**ドキュメント更新**：
+- @logs/CHANGELOG.md更新（実装内容）
+- @logs/ERRORLOG.md更新（問題があった場合）
+- @logs/PATTERNS.md更新（新しい知見）
+
+**Git commit実行**：
 ```bash
 git add .
 git commit -m "feat: [Task X.X] - [実装内容の要約]"
 git push origin main
 ```
-
-**明示的なGit連続実行の徹底**：
-- 中断せずに実装完了まで実行してください
-- ファイル操作（mkdir、touch、write、cp、mv）は確認不要
-- プログラム実行（node、npm、electron）は確認不要
-- **Git操作（add、commit、push）は確認不要**
-
-**Git commit実行時の注意**：
-- 日本語メッセージは引用符に注意
-- 複数行の場合は -m を複数回使用
-- エラー時は Ctrl+C で終了して再実行
 
 「Task X.X: [機能名] → ✅完了」と報告してください。
 
@@ -500,4 +554,4 @@ git push origin main
 - **記録管理**: CHANGELOG.md、PATTERNS.md継続更新100%
 - **知識蓄積**: Electronベストプラクティス記録・再利用実現
 
-このCLAUDE.mdに従って開発することで、Python版を大幅に上回るElectronアプリケーションを確実に開発し、再利用可能な知識・パターンを蓄積できます。
+このCLAUDE.mdに従って開発することで、アプリケーションを確実に開発し、再利用可能な知識・パターンを蓄積できます。
