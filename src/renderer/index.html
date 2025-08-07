@@ -121,34 +121,94 @@
           <div class="rules-container" id="rulesContainer">
             <div class="rules-list" id="rulesList">
               <!-- 初期ルール -->
-              <div class="rule-item" data-rule-id="rule-1">
-                <input type="checkbox" class="rule-checkbox" checked aria-label="Enable rule" />
-                <span class="rule-from-label">From:</span>
-                <input type="text" class="rule-from" placeholder="old-class" value="old-class" />
-                <span class="rule-arrow">→</span>
-                <span class="rule-to-label">To:</span>
-                <input type="text" class="rule-to" placeholder="new-class" value="new-class" />
-                <button class="icon-button rule-delete" title="Delete rule" aria-label="Delete rule">
-                  <span>🗑️</span>
-                </button>
-                <button class="icon-button rule-drag" title="Drag to reorder" aria-label="Reorder rule">
-                  <span>↕️</span>
-                </button>
+              <div class="rule-item" data-rule-id="rule-1" draggable="true">
+                <div class="rule-controls">
+                  <input
+                    type="checkbox"
+                    class="rule-checkbox"
+                    checked
+                    aria-label="Enable rule"
+                    title="ルールを有効/無効切り替え"
+                  />
+                </div>
+                <div class="rule-fields">
+                  <div class="rule-field-group">
+                    <label class="rule-label">From:</label>
+                    <input
+                      type="text"
+                      class="rule-from"
+                      placeholder="検索文字列"
+                      value="old-class"
+                      aria-label="Search text"
+                      title="置換前の文字列を入力"
+                    />
+                  </div>
+                  <div class="rule-arrow">→</div>
+                  <div class="rule-field-group">
+                    <label class="rule-label">To:</label>
+                    <input
+                      type="text"
+                      class="rule-to"
+                      placeholder="置換文字列"
+                      value="new-class"
+                      aria-label="Replace text"
+                      title="置換後の文字列を入力"
+                    />
+                  </div>
+                </div>
+                <div class="rule-actions">
+                  <button class="icon-button rule-delete" title="ルールを削除" aria-label="Delete rule">
+                    <span>🗑️</span>
+                  </button>
+                  <button class="icon-button rule-drag" title="ドラッグして並び替え" aria-label="Reorder rule">
+                    <span>↕️</span>
+                  </button>
+                </div>
               </div>
 
-              <div class="rule-item" data-rule-id="rule-2">
-                <input type="checkbox" class="rule-checkbox" checked aria-label="Enable rule" />
-                <span class="rule-from-label">From:</span>
-                <input type="text" class="rule-from" placeholder="oldVariable" value="oldVariable" />
-                <span class="rule-arrow">→</span>
-                <span class="rule-to-label">To:</span>
-                <input type="text" class="rule-to" placeholder="newVariable" value="newVariable" />
-                <button class="icon-button rule-delete" title="Delete rule" aria-label="Delete rule">
-                  <span>🗑️</span>
-                </button>
-                <button class="icon-button rule-drag" title="Drag to reorder" aria-label="Reorder rule">
-                  <span>↕️</span>
-                </button>
+              <div class="rule-item" data-rule-id="rule-2" draggable="true">
+                <div class="rule-controls">
+                  <input
+                    type="checkbox"
+                    class="rule-checkbox"
+                    checked
+                    aria-label="Enable rule"
+                    title="ルールを有効/無効切り替え"
+                  />
+                </div>
+                <div class="rule-fields">
+                  <div class="rule-field-group">
+                    <label class="rule-label">From:</label>
+                    <input
+                      type="text"
+                      class="rule-from"
+                      placeholder="検索文字列"
+                      value="oldVariable"
+                      aria-label="Search text"
+                      title="置換前の文字列を入力"
+                    />
+                  </div>
+                  <div class="rule-arrow">→</div>
+                  <div class="rule-field-group">
+                    <label class="rule-label">To:</label>
+                    <input
+                      type="text"
+                      class="rule-to"
+                      placeholder="置換文字列"
+                      value="newVariable"
+                      aria-label="Replace text"
+                      title="置換後の文字列を入力"
+                    />
+                  </div>
+                </div>
+                <div class="rule-actions">
+                  <button class="icon-button rule-delete" title="ルールを削除" aria-label="Delete rule">
+                    <span>🗑️</span>
+                  </button>
+                  <button class="icon-button rule-drag" title="ドラッグして並び替え" aria-label="Reorder rule">
+                    <span>↕️</span>
+                  </button>
+                </div>
               </div>
             </div>
 

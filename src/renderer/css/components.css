@@ -111,14 +111,40 @@
   gap: 12px;
 }
 
-/* ルールラベル */
-.rule-from-label,
-.rule-to-label {
+/* ルール構造レイアウト */
+.rule-controls {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.rule-fields {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.rule-field-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.rule-label {
   font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary);
   flex-shrink: 0;
   min-width: 35px;
+}
+
+.rule-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
 .rule-arrow {

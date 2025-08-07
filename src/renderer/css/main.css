@@ -29,6 +29,7 @@ body {
   --background-secondary: #f8fafc;
   --background-tertiary: #f1f5f9;
   --background-accent: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --color-primary: #4f46e5;
 
   --text-primary: #1e293b;
   --text-secondary: #475569;
