@@ -14,7 +14,6 @@
 class RuleManager {
   constructor(uiController) {
     this.uiController = uiController;
-    this.draggedElement = null;
     this.dragOverElement = null;
 
     // パフォーマンス監視
@@ -265,198 +264,12 @@ class RuleManager {
   }
 
   /**
-   * ドラッグ&ドロップ並び替えシステム
-   * HTML5 Drag and Drop API使用
-   */
-  setupDragAndDrop(ruleElement, rule) {
-    const dragHandle = ruleElement.querySelector('.rule-drag');
-
-    if (!dragHandle) {
-      console.warn('⚠️ Drag handle not found for rule:', rule.id);
-      return;
-    }
-
-    // ドラッグ可能にする
-    ruleElement.setAttribute('draggable', 'true');
-
-    // ドラッグ開始
-    ruleElement.addEventListener('dragstart', e => {
-      this.handleDragStart(e, rule);
-    });
-
-    // ドラッグオーバー
-    ruleElement.addEventListener('dragover', e => {
-      this.handleDragOver(e);
-    });
-
-    // ドロップ
-    ruleElement.addEventListener('drop', e => {
-      this.handleDrop(e, rule);
-    });
-
-    // ドラッグ終了
-    ruleElement.addEventListener('dragend', e => {
-      this.handleDragEnd(e);
-    });
-
-    // ドラッグハンドルの視覚的フィードバック
-    dragHandle.addEventListener('mousedown', () => {
-      ruleElement.classList.add('drag-ready');
-    });
-
-    dragHandle.addEventListener('mouseup', () => {
-      ruleElement.classList.remove('drag-ready');
-    });
-
-    console.log(`↕️ Drag & Drop enabled for rule: ${rule.id}`);
-  }
-
-  /**
-   * ドラッグ開始処理
-   */
-  handleDragStart(e, rule) {
-    const startTime = performance.now();
-
-    this.draggedElement = e.currentTarget;
-    this.draggedRule = rule;
-
-    e.currentTarget.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', e.currentTarget.outerHTML);
-    e.dataTransfer.setData('text/plain', rule.id);
-
-    this.logOperation('ドラッグ開始', true, {
-      ruleId: rule.id,
-      startTime: performance.now() - startTime,
-    });
-  }
-
-  /**
-   * ドラッグオーバー処理
-   */
-  handleDragOver(e) {
-    if (e.preventDefault) {
-      e.preventDefault();
-    }
-
-    e.dataTransfer.dropEffect = 'move';
-
-    const ruleElement = e.currentTarget;
-    if (ruleElement !== this.draggedElement) {
-      ruleElement.classList.add('drag-over');
-      this.dragOverElement = ruleElement;
-    }
-
-    return false;
-  }
-
-  /**
-   * ドロップ処理
-   */
-  handleDrop(e, targetRule) {
-    const startTime = performance.now();
-
-    if (e.stopPropagation) {
-      e.stopPropagation();
-    }
-
-    if (this.draggedRule && targetRule && this.draggedRule.id !== targetRule.id) {
-      try {
-        // ルール順序を交換
-        this.reorderRules(this.draggedRule, targetRule);
-
-        const responseTime = performance.now() - startTime;
-        this.recordPerformance('dropRule', responseTime);
-
-        this.logOperation('ドラッグ&ドロップ並び替え', true, {
-          draggedRuleId: this.draggedRule.id,
-          targetRuleId: targetRule.id,
-          responseTime: `${responseTime.toFixed(2)}ms`,
-          target_achieved: responseTime <= this.UI_RESPONSE_TARGET,
-        });
-      } catch (error) {
-        this.logOperation('ドラッグ&ドロップ並び替え', false, {
-          error: error.message,
-        });
-        console.error('❌ Rule reordering failed:', error);
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * ドラッグ終了処理
-   */
-  handleDragEnd(_e) {
-    // クリーンアップ
-    if (this.draggedElement) {
-      this.draggedElement.classList.remove('dragging');
-    }
-
-    if (this.dragOverElement) {
-      this.dragOverElement.classList.remove('drag-over');
-    }
-
-    // 全ルール要素のクリーンアップ
-    document.querySelectorAll('.rule-item').forEach(el => {
-      el.classList.remove('dragging', 'drag-over');
-    });
-
-    this.draggedElement = null;
-    this.draggedRule = null;
-    this.dragOverElement = null;
-  }
-
-  /**
-   * ルール順序変更処理
-   */
-  reorderRules(draggedRule, targetRule) {
-    const rules = this.uiController.replacementRules;
-    const draggedIndex = rules.findIndex(r => r.id === draggedRule.id);
-    const targetIndex = rules.findIndex(r => r.id === targetRule.id);
-
-    if (draggedIndex === -1 || targetIndex === -1) {
-      throw new Error('Rule not found in reorderRules');
-    }
-
-    // 配列の要素を入れ替え
-    const [draggedRuleData] = rules.splice(draggedIndex, 1);
-    rules.splice(targetIndex, 0, draggedRuleData);
-
-    // UI再描画
-    this.rerenderAllRules();
-  }
-
-  /**
-   * 全ルール再描画（並び替え後）
-   */
-  rerenderAllRules() {
-    const rulesList = document.getElementById('rulesList');
-    if (!rulesList) {
-      return;
-    }
-
-    // 既存の要素をクリア
-    rulesList.innerHTML = '';
-
-    // 新しい順序で再描画
-    this.uiController.replacementRules.forEach(rule => {
-      const ruleElement = this.createRuleElement(rule);
-      rulesList.appendChild(ruleElement);
-    });
-
-    console.log('🔄 Rules rerendered after reordering');
-  }
-
-  /**
    * ルール要素作成（拡張版）
    */
   createRuleElement(rule) {
     const ruleDiv = document.createElement('div');
     ruleDiv.className = 'rule-item';
     ruleDiv.setAttribute('data-rule-id', rule.id);
-    ruleDiv.setAttribute('draggable', 'true');
 
     ruleDiv.innerHTML = `
       <div class="rule-controls">
@@ -482,17 +295,11 @@ class RuleManager {
         <button class="icon-button rule-delete" title="ルールを削除" aria-label="Delete rule">
           <span>🗑️</span>
         </button>
-        <button class="icon-button rule-drag" title="ドラッグして並び替え" aria-label="Reorder rule">
-          <span>↕️</span>
-        </button>
       </div>
     `;
 
     // イベントリスナー設定
     this.setupRuleEventListeners(ruleDiv, rule);
-
-    // ドラッグ&ドロップ設定
-    this.setupDragAndDrop(ruleDiv, rule);
 
     return ruleDiv;
   }

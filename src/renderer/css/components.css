@@ -19,24 +19,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-.rule-item.dragging {
-  opacity: 0.5;
-  transform: scale(1.05) rotate(2deg);
-  box-shadow: var(--shadow-lg);
-  z-index: 1000;
-}
-
-.rule-item.drag-over {
-  border-color: var(--border-focus);
-  background: rgba(79, 70, 229, 0.05);
-  transform: translateY(-2px);
-}
-
-.rule-item.drag-ready {
-  cursor: move;
-  border-color: var(--border-focus);
-}
-
 /* ルール追加・削除アニメーション */
 .rule-item.rule-appear {
   animation: ruleAppear 0.3s ease-out;
@@ -182,8 +164,7 @@
 }
 
 /* ルールアクションボタン */
-.rule-delete,
-.rule-drag {
+.rule-delete {
   width: 32px;
   height: 32px;
   border: none;
@@ -201,15 +182,6 @@
 .rule-delete:hover {
   background: rgba(239, 68, 68, 0.1);
   color: var(--error-color);
-}
-
-.rule-drag:hover {
-  background: var(--background-tertiary);
-  color: var(--text-secondary);
-}
-
-.rule-drag:active {
-  cursor: grabbing;
 }
 
 /* 新しいルール追加ボタン */
