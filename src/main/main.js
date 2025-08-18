@@ -849,6 +849,87 @@ class MultiGrepReplacerApp {
       }
     });
 
+    // 包括的な置換実行ハンドラー
+    ipcMain.handle('executeReplacement', async (event, config) => {
+      const operationId = 'ipc-execute-replacement';
+      await DebugLogger.startPerformance(operationId);
+
+      try {
+        await DebugLogger.info('Starting replacement execution', {
+          targetFolder: config.targetFolder,
+          extensions: config.extensions,
+          rulesCount: config.rules?.length || 0,
+        });
+
+        console.log('🔍 Debug - executeReplacement called with config:', {
+          targetFolder: config.targetFolder,
+          extensions: config.extensions,
+          rules: config.rules,
+        });
+
+        // 1. ファイル検索
+        console.log('🔍 Debug - Calling fileSearchEngine.searchFiles...');
+        const searchResult = await this.fileSearchEngine.searchFiles(
+          config.targetFolder,
+          config.extensions ? config.extensions.split(',').map(ext => ext.trim()) : [],
+          {
+            excludePatterns: ['node_modules/**', '.git/**', 'dist/**', 'build/**'],
+            ...config.options,
+          }
+        );
+
+        console.log('🔍 Debug - Search result:', {
+          success: !!searchResult,
+          filesCount: searchResult?.files?.length || 0,
+          files: searchResult?.files?.slice(0, 3) || [],
+        });
+
+        await DebugLogger.info('Files found', {
+          count: searchResult.files?.length || 0,
+        });
+
+        // 2. 進捗通知のセットアップ
+        this.replacementEngine.removeAllListeners('progress');
+        this.replacementEngine.on('progress', progressData => {
+          event.sender.send('replacement-progress', progressData);
+        });
+
+        // 3. ファイル置換処理
+        // FileSearchEngineから返されるファイルオブジェクトのpathプロパティを抽出
+        const filePaths = searchResult.files.map(file => file.path || file);
+        console.log('🔍 Debug - Extracted file paths:', filePaths);
+
+        const replacementResult = await this.replacementEngine.processFiles(
+          filePaths,
+          config.rules
+        );
+
+        const result = {
+          success: true,
+          stats: {
+            totalFiles: searchResult.files?.length || 0,
+            processedFiles: replacementResult.stats?.processedFiles || 0,
+            changedFiles: replacementResult.stats?.modifiedFiles || 0,
+            totalChanges: replacementResult.stats?.totalReplacements || 0,
+            errors: replacementResult.stats?.errors?.length || 0,
+          },
+          results: replacementResult.results || [],
+        };
+
+        await DebugLogger.info('Replacement completed successfully', result.stats);
+        await DebugLogger.endPerformance(operationId, { success: true });
+        return result;
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'execute-replacement',
+          component: 'IPC-Handler',
+          config,
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        return { success: false, error: error.message };
+      }
+    });
+
     DebugLogger.info('IPC handlers registered successfully');
   }
 

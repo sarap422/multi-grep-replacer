@@ -400,6 +400,23 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   /**
+   * 置換実行
+   * @param {Object} config - 置換設定
+   * @returns {Promise<Object>} 実行結果
+   */
+  executeReplacement: async config => {
+    console.log('🚀 Executing replacement...', config);
+    try {
+      const result = await ipcRenderer.invoke('executeReplacement', config);
+      console.log('🚀 Replacement execution result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Replacement execution failed:', error);
+      throw error;
+    }
+  },
+
+  /**
    * 置換処理キャンセル
    * @returns {Promise<Object>} キャンセル結果
    */

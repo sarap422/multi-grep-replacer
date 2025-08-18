@@ -28,6 +28,9 @@ body {
   --background-primary: #ffffff;
   --background-secondary: #f8fafc;
   --background-tertiary: #f1f5f9;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
   --background-accent: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   --color-primary: #4f46e5;
 
@@ -550,6 +553,43 @@ body {
   border: 0;
 }
 
+/* キーボードショートカット表示 */
+kbd {
+  display: inline-block;
+  padding: 3px 6px;
+  margin: 0 2px;
+  font-size: 0.85em;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+  line-height: 1;
+  color: var(--text-primary);
+  background-color: var(--background-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* ヘルプモーダルスタイル */
+#helpModal h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: var(--text-primary);
+}
+
+#helpModal h3:first-child {
+  margin-top: 0;
+}
+
+#helpModal ul,
+#helpModal ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+#helpModal li {
+  margin: 0.3em 0;
+  line-height: 1.6;
+}
+
 /* レスポンシブデザイン */
 @media (max-width: 768px) {
   .app-header {
@@ -620,4 +660,21 @@ body {
     padding: 4px 8px;
     font-size: 11px;
   }
+}
+
+/* ダークテーマ対応 */
+[data-theme='dark'] {
+  --background-primary: #1e293b;
+  --background-secondary: #334155;
+  --background-tertiary: #475569;
+  --bg-primary: #1e293b;
+  --bg-secondary: #334155;
+  --bg-tertiary: #475569;
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+
+  --border-primary: #475569;
+  --border-secondary: #64748b;
 }

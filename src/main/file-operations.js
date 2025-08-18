@@ -266,12 +266,7 @@ class FileOperations {
             // ファイルサイズチェック
             const stats = await fs.stat(fullPath);
             if (stats.size <= this.MAX_FILE_SIZE) {
-              fileList.push({
-                path: fullPath,
-                name: entry.name,
-                size: stats.size,
-                modified: stats.mtime,
-              });
+              fileList.push(fullPath);
             }
           }
         }
