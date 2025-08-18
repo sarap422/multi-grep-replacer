@@ -7,6 +7,8 @@ const FileOperations = require('./file-operations');
 const FileSearchEngine = require('./file-search-engine');
 const ReplacementEngine = require('./replacement-engine');
 const DebugLogger = require('./debug-logger');
+const PerformanceOptimizer = require('./performance-optimizer');
+const MemoryManager = require('./memory-manager');
 
 // Vibe Logger初期化（グローバル） - 動的import後に初期化
 global.vibeLogger = null;
@@ -23,6 +25,8 @@ class MultiGrepReplacerApp {
     this.initializationTracker = 'app-initialization';
     this.fileSearchEngine = new FileSearchEngine();
     this.replacementEngine = new ReplacementEngine();
+    this.performanceOptimizer = null; // 初期化後に設定
+    this.memoryManager = null; // 初期化後に設定
 
     // Vibe Logger初期化（非同期処理のため、initializeメソッドで行う）
   }
@@ -81,12 +85,87 @@ class MultiGrepReplacerApp {
       this.setupIpcHandlers();
       await DebugLogger.endPerformance('setup-ipc-handlers');
 
+      // パフォーマンス最適化エンジン初期化
+      DebugLogger.startPerformance('setup-performance-optimizers');
+      await this.initializePerformanceOptimizers();
+      await DebugLogger.endPerformance('setup-performance-optimizers');
+
       await DebugLogger.info('Application initialized successfully');
     } catch (error) {
       await DebugLogger.logError(error, {
         phase: 'initialization',
         component: 'MultiGrepReplacerApp',
       });
+      throw error;
+    }
+  }
+
+  /**
+   * パフォーマンス最適化エンジン初期化
+   */
+  async initializePerformanceOptimizers() {
+    try {
+      if (global.vibeLogger) {
+        await global.vibeLogger.info(
+          'performance_optimizers_init_start',
+          'Initializing performance optimization engines',
+          {
+            context: {
+              timestamp: new Date().toISOString(),
+            },
+            humanNote: 'パフォーマンス最適化エンジンの初期化開始',
+            aiTodo: '最適化エンジンの効果測定と改善提案',
+          }
+        );
+      }
+
+      // パフォーマンス最適化エンジン初期化
+      this.performanceOptimizer = new PerformanceOptimizer(DebugLogger);
+      await DebugLogger.info('Performance Optimizer initialized');
+
+      // メモリ管理エンジン初期化
+      this.memoryManager = new MemoryManager(DebugLogger);
+      await DebugLogger.info('Memory Manager initialized');
+
+      if (global.vibeLogger) {
+        await global.vibeLogger.info(
+          'performance_optimizers_init_complete',
+          'Performance optimization engines initialized successfully',
+          {
+            context: {
+              optimizerTargets: this.performanceOptimizer.getPerformanceStats().targets,
+              memoryThresholds: {
+                warning: `${Math.round(
+                  this.memoryManager.MEMORY_WARNING_THRESHOLD / 1024 / 1024
+                )}MB`,
+                critical: `${Math.round(
+                  this.memoryManager.MEMORY_CRITICAL_THRESHOLD / 1024 / 1024
+                )}MB`,
+              },
+            },
+            humanNote: 'パフォーマンス最適化エンジンの初期化完了',
+          }
+        );
+      }
+
+      await DebugLogger.info('Performance optimization engines initialized successfully');
+    } catch (error) {
+      await DebugLogger.logError(error, {
+        phase: 'performance-optimization-init',
+        component: 'MultiGrepReplacerApp',
+      });
+
+      if (global.vibeLogger) {
+        await global.vibeLogger.error(
+          'performance_optimizers_init_error',
+          'Failed to initialize performance optimization engines',
+          {
+            context: { error: error.message, stack: error.stack },
+            aiTodo: 'パフォーマンス最適化エンジン初期化エラーの分析と修正',
+          }
+        );
+      }
+
       throw error;
     }
   }
@@ -924,6 +1003,88 @@ class MultiGrepReplacerApp {
           operation: 'execute-replacement',
           component: 'IPC-Handler',
           config,
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        return { success: false, error: error.message };
+      }
+    });
+
+    // パフォーマンス最適化 API
+    ipcMain.handle('get-performance-stats', async () => {
+      const operationId = 'ipc-get-performance-stats';
+      DebugLogger.startPerformance(operationId);
+
+      try {
+        const stats = {
+          optimizer: this.performanceOptimizer
+            ? this.performanceOptimizer.getPerformanceStats()
+            : null,
+          memory: this.memoryManager ? this.memoryManager.getStats() : null,
+        };
+
+        await DebugLogger.endPerformance(operationId, { success: true });
+        return { success: true, stats };
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'get-performance-stats',
+          component: 'IPC-Handler',
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('optimize-memory', async () => {
+      const operationId = 'ipc-optimize-memory';
+      DebugLogger.startPerformance(operationId);
+
+      try {
+        if (!this.memoryManager) {
+          throw new Error('Memory Manager not initialized');
+        }
+
+        await DebugLogger.debug('Manual memory optimization requested');
+        await this.memoryManager.performPeriodicCleanup();
+
+        const stats = this.memoryManager.getStats();
+        await DebugLogger.endPerformance(operationId, { success: true });
+        return { success: true, stats };
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'optimize-memory',
+          component: 'IPC-Handler',
+        });
+        await DebugLogger.endPerformance(operationId, { success: false });
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('optimize-file-processing', async (event, files, processor) => {
+      const operationId = 'ipc-optimize-file-processing';
+      DebugLogger.startPerformance(operationId);
+
+      try {
+        if (!this.performanceOptimizer) {
+          throw new Error('Performance Optimizer not initialized');
+        }
+
+        await DebugLogger.debug('File processing optimization requested', {
+          fileCount: files.length,
+        });
+
+        const result = await this.performanceOptimizer.optimizeFileProcessing(files, processor);
+
+        await DebugLogger.endPerformance(operationId, {
+          success: true,
+          processingTime: result.metrics.processingTime,
+          strategy: result.metrics.strategy,
+        });
+
+        return { success: true, result };
+      } catch (error) {
+        await DebugLogger.logError(error, {
+          operation: 'optimize-file-processing',
+          component: 'IPC-Handler',
         });
         await DebugLogger.endPerformance(operationId, { success: false });
         return { success: false, error: error.message };
