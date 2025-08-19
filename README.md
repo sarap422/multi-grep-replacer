@@ -6,7 +6,8 @@
 
 [![Release](https://img.shields.io/github/release/multi-grep-replacer/multi-grep-replacer.svg)](https://github.com/sarap422/multi-grep-replacer/releases)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)]()
+[![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)]()
+[![Electron](https://img.shields.io/badge/electron-25.9.8-blue)]()
 
 </div>
 
