@@ -66,7 +66,8 @@ class TemplateManager {
           { from: 'var ', to: 'const ', enabled: true },
           { from: 'http://', to: 'https://', enabled: true },
         ],
-        extensions: '.html,.css,.js,.jsx,.tsx,.vue,.php',
+        extensions:
+          '.html,.shtml,.css,.scss,.js,.jsx,.tsx,.vue,.php.html,.shtml,.css,.scss,.js,.jsx,.tsx,.vue,.php',
         category: 'development',
       },
       {
