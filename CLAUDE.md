@@ -493,7 +493,7 @@ tail -n 50 logs/multi-grep-replacer/vibe_*.log
 **Git commit実行**：
 ```bash
 git add .
-git commit -m "feat: [Task X.X] - [実装内容の要約]"
+git commit -m "feat: Task X.X: [実装内容の要約]"
 git push origin main
 ```
 
