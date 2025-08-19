@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "app_info": {
+    "name": "Web Development Template",
+    "version": "1.0.0",
+    "created_at": "2025-08-18T10:00:00Z",
+    "description": "Common web development replacements for modernizing codebases",
+    "author": "Multi Grep Replacer Team",
+    "tags": ["web-development", "modernization", "javascript", "html", "css"]
+  },
+  "replacements": [
+    {
+      "id": "bootstrap_button_update",
+      "from": "btn-default",
+      "to": "btn-secondary",
+      "enabled": true,
+      "description": "Update Bootstrap 3 default button to Bootstrap 4+ secondary",
+      "case_sensitive": true,
+      "whole_word": false
+    },
+    {
+      "id": "var_to_const",
+      "from": "var ",
+      "to": "const ",
+      "enabled": true,
+      "description": "Modernize JavaScript variables from var to const",
+      "case_sensitive": true,
+      "whole_word": false
+    },
+    {
+      "id": "var_to_let",
+      "from": "var ",
+      "to": "let ",
+      "enabled": false,
+      "description": "Alternative: Modernize JavaScript variables from var to let",
+      "case_sensitive": true,
+      "whole_word": false
+    },
+    {
+      "id": "http_to_https",
+      "from": "http://",
+      "to": "https://",
+      "enabled": true,
+      "description": "Force HTTPS URLs for security",
+      "case_sensitive": true,
+      "whole_word": false
+    },
+    {
+      "id": "jquery_ready",
+      "from": "$(document).ready(function() {",
+      "to": "document.addEventListener('DOMContentLoaded', function() {",
+      "enabled": true,
+      "description": "Replace jQuery document ready with vanilla JavaScript",
+      "case_sensitive": true,
+      "whole_word": false
+    },
+    {
+      "id": "jquery_click",
+      "from": ".click(function(",
+      "to": ".addEventListener('click', function(",
+      "enabled": true,
+      "description": "Replace jQuery click events with vanilla JavaScript",
+      "case_sensitive": true,
+      "whole_word": false
+    },
+    {
+      "id": "old_doctype",
+      "from": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">",
+      "to": "<!DOCTYPE html>",
+      "enabled": true,
+      "description": "Modernize DOCTYPE to HTML5",
+      "case_sensitive": false,
+      "whole_word": false
+    },
+    {
+      "id": "charset_update",
+      "from": "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />",
+      "to": "<meta charset=\"UTF-8\">",
+      "enabled": true,
+      "description": "Simplify charset declaration",
+      "case_sensitive": false,
+      "whole_word": false
+    }
+  ],
+  "target_settings": {
+    "file_extensions": [".html", ".htm", ".css", ".scss", ".sass", ".js", ".jsx", ".ts", ".tsx", ".php", ".vue"],
+    "exclude_patterns": [
+      "node_modules/**",
+      ".git/**",
+      "dist/**",
+      "build/**",
+      "public/**",
+      "*.min.js",
+      "*.min.css",
+      "vendor/**",
+      "bower_components/**"
+    ],
+    "include_subdirectories": true,
+    "max_file_size": 10485760,
+    "encoding": "utf-8"
+  },
+  "replacement_settings": {
+    "case_sensitive": true,
+    "use_regex": false,
+    "backup_enabled": false,
+    "preserve_file_permissions": true,
+    "dry_run": false
+  },
+  "ui_settings": {
+    "theme": "auto",
+    "window": {
+      "width": 800,
+      "height": 700,
+      "resizable": true,
+      "center": true
+    },
+    "remember_last_folder": true,
+    "auto_save_config": false,
+    "show_file_count_preview": true,
+    "confirm_before_execution": true
+  },
+  "advanced_settings": {
+    "max_concurrent_files": 10,
+    "progress_update_interval": 100,
+    "log_level": "info",
+    "enable_crash_reporting": false
+  }
+}
