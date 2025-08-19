@@ -279,10 +279,6 @@ A: No. Please use version control or create manual backups.
    - Error messages
    - Steps to reproduce
 
-### Contributing
-
-We welcome contributions! See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
-
 ---
 
 *Last updated: 2025-08-18 | Version 1.0.0*

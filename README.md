@@ -214,32 +214,6 @@ Save complex replacement sets as reusable configurations:
 }
 ```
 
-### Command Line Usage (Coming Soon)
-
-```bash
-# Future CLI interface
-multi-grep-replacer --config=bootstrap-migration.json --target=/my-project --dry-run
-```
-
-### API Integration (Roadmap)
-
-```javascript
-// Future programmatic API
-const replacer = new MultiGrepReplacer();
-await replacer.loadConfig('config.json');
-const results = await replacer.execute('/target/path');
-```
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Here's how you can help:
-
-### Quick Contributions
-
-- 🐛 **Report bugs** via [GitHub Issues](https://github.com/sarap422/multi-grep-replacer/issues)
-- 📖 **Improve documentation** with pull requests
-- 🌐 **Add translations** for your language
-
 ### Development
 
 1. **Fork** the repository
@@ -270,26 +244,6 @@ npm run build
 
 See the [Developer Guide](docs/developer-guide.md) for detailed setup instructions.
 
-## 🛣️ Roadmap
-
-### Version 1.1 (Q4 2025)
-- 🔍 **Regular Expression Support** - Full regex find-and-replace
-- 📋 **Command Line Interface** - Scriptable operations
-- 🔄 **Auto-update System** - Seamless updates
-- 🧩 **Plugin Architecture** - Extensible functionality
-
-### Version 1.2 (Q1 2026)
-- 🌐 **Real-time Collaboration** - Team-based replacements
-- ☁️ **Cloud Sync** - Configuration synchronization
-- 🤖 **AI-Powered Suggestions** - Smart replacement recommendations
-- 📱 **Mobile Companion** - iOS/Android apps
-
-### Version 2.0 (Q2 2026)
-- 🚀 **Performance Engine 2.0** - GPU acceleration
-- 🎯 **Advanced Pattern Matching** - Semantic search
-- 🔗 **Git Integration** - Version control awareness
-- 📊 **Analytics Dashboard** - Usage insights
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -300,32 +254,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - 📖 **Documentation**: Check our comprehensive [guides](docs/)
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/sarap422/multi-grep-replacer/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/sarap422/multi-grep-replacer/discussions)
-- 📧 **Email**: support@multigrepreplacer.com
 
-### Community
-
-- 🌟 **Star this repo** if you find it useful
-- 🐦 **Follow updates** on [Twitter](https://twitter.com/multigrepreplacer)
-- 👥 **Join our Discord** for real-time chat
-- 📺 **YouTube Channel** for tutorials and tips
-
-## 🏆 Recognition
-
-- ⭐ **Featured** on Awesome Electron
-- 🥇 **Winner** - Best Developer Tool 2025
-- 📈 **10,000+ downloads** in the first month
-- 🌟 **4.9/5 stars** average rating
-
----
-
-<div align="center">
-
-**Made with ❤️ by the Multi Grep Replacer Team**
-
-[🌟 Star on GitHub](https://github.com/sarap422/multi-grep-replacer) • 
-[📥 Download Latest](https://github.com/sarap422/multi-grep-replacer/releases) • 
-[📖 Read Docs](docs/user-guide.md) • 
-[🤝 Contribute](CONTRIBUTING.md)
-
-</div>
