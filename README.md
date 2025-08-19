@@ -328,6 +328,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [📖 Read Docs](docs/user-guide.md) • 
 [🤝 Contribute](CONTRIBUTING.md)
 
-*Transforming text processing, one replacement at a time.*
-
 </div>

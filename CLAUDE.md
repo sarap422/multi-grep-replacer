@@ -62,7 +62,7 @@ cat logs/performance-metrics.json
 
 # 設定ファイル確認
 cat config/default.json
-ls config/samples/
+ls config/sample-configs/
 ```
 
 ### Git・バージョン管理

@@ -645,7 +645,7 @@ class UIController {
     }
 
     const presets = {
-      web: '.html,.css,.js,.jsx,.tsx,.vue,.php',
+      web: '.html,.shtml,.css,.scss,.js,.jsx,.tsx,.vue,.php',
       docs: '.md,.txt,.doc,.docx,.pdf',
       code: '.js,.ts,.jsx,.tsx,.css,.scss,.html,.php,.py,.java,.cpp,.c',
       all: '',
@@ -1194,7 +1194,7 @@ class UIController {
   getDefaultConfig() {
     return {
       selectedFolder: '',
-      fileExtensions: '.html,.css,.js,.php,.md,.json',
+      fileExtensions: '.html,.css,.js,.jsx,.tsx,.vue,.php',
       replacementRules: [],
     };
   }

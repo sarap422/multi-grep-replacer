@@ -6,10 +6,10 @@
   "author": {
     "name": "Multi Grep Replacer Team",
     "email": "team@multigrepreplacer.com",
-    "url": "https://github.com/multi-grep-replacer/multi-grep-replacer"
+    "url": "https://github.com/sarap422/multi-grep-replacer"
   },
   "license": "MIT",
-  "homepage": "https://github.com/multi-grep-replacer/multi-grep-replacer",
+  "homepage": "https://github.com/sarap422/multi-grep-replacer",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --enable-logging",

@@ -417,7 +417,7 @@ class ConfigManager {
    */
   static async setupSampleConfigs() {
     try {
-      const samplesDir = path.join(__dirname, '../../config/samples');
+      const samplesDir = path.join(__dirname, '../../config/sample-configs');
       const userSamplesDir = path.join(this.USER_CONFIG_DIR, 'samples');
 
       await fs.mkdir(userSamplesDir, { recursive: true });
