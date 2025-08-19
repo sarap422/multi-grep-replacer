@@ -2,16 +2,11 @@
 
 <div align="center">
 
-![Multi Grep Replacer Logo](docs/images/logo.png)
-
 **A powerful desktop application for performing multiple find-and-replace operations across files**
 
-[![Build Status](https://github.com/multi-grep-replacer/multi-grep-replacer/workflows/CI/badge.svg)](https://github.com/multi-grep-replacer/multi-grep-replacer/actions)
-[![Release](https://img.shields.io/github/release/multi-grep-replacer/multi-grep-replacer.svg)](https://github.com/multi-grep-replacer/multi-grep-replacer/releases)
+[![Release](https://img.shields.io/github/release/multi-grep-replacer/multi-grep-replacer.svg)](https://github.com/sarap422/multi-grep-replacer/releases)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)]()
-
-[Download](#download) • [Documentation](#documentation) • [Features](#features) • [Contributing](#contributing)
 
 </div>
 
@@ -59,9 +54,9 @@ Multi Grep Replacer is a modern, high-performance desktop application that allow
 
 | Platform | Download | Size | Architecture |
 |----------|----------|------|-------------|
-| **macOS** | [MultiGrepReplacer-1.0.0.dmg](https://github.com/multi-grep-replacer/multi-grep-replacer/releases/download/v1.0.0/MultiGrepReplacer-1.0.0.dmg) | ~150MB | Universal (Intel + Apple Silicon) |
-| **Windows** | [MultiGrepReplacer-Setup-1.0.0.exe](https://github.com/multi-grep-replacer/multi-grep-replacer/releases/download/v1.0.0/MultiGrepReplacer-Setup-1.0.0.exe) | ~140MB | x64 |
-| **Linux** | [MultiGrepReplacer-1.0.0.AppImage](https://github.com/multi-grep-replacer/multi-grep-replacer/releases/download/v1.0.0/MultiGrepReplacer-1.0.0.AppImage) | ~145MB | x64 |
+| **macOS** | [MultiGrepReplacer-1.0.0.dmg](https://github.com/sarap422/multi-grep-replacer/releases/download/v1.0.0/MultiGrepReplacer-1.0.0.dmg) | ~150MB | Universal (Intel + Apple Silicon) |
+| **Windows** | <strike>MultiGrepReplacer-Setup-1.0.0.exe</strike> | - | x64 |
+| **Linux** | <strike>MultiGrepReplacer-1.0.0.AppImage</strike>  | - | x64 |
 
 ### System Requirements
 
@@ -94,8 +89,6 @@ Multi Grep Replacer is a modern, high-performance desktop application that allow
 
 ### First Use
 
-![Main Interface](docs/images/main-window.png)
-
 1. **Select Target Folder**: Click "Browse..." to choose your project directory
 2. **Set File Filters**: Enter file extensions like `.html,.css,.js` (or leave empty for all files)
 3. **Add Replacement Rules**: 
@@ -105,8 +98,6 @@ Multi Grep Replacer is a modern, high-performance desktop application that allow
 4. **Execute**: Click "🚀 Execute Replacement" to start processing
 
 ### Example: CSS Class Renaming
-
-![Example Usage](docs/images/example-css-rename.png)
 
 ```
 Target Folder: /my-project
@@ -160,7 +151,7 @@ Result: All instances across all HTML, CSS, and SCSS files updated instantly!
 ### Configuration
 
 - ⚙️ **[Configuration Format](docs/api-reference.md#configuration-file-specification)** - JSON schema and examples
-- 📋 **[Sample Configurations](config/samples/)** - Ready-to-use templates
+- 📋 **[Sample Configurations](config/sample-configs/)** - Ready-to-use templates
 
 ## 🎯 Use Cases
 
@@ -245,15 +236,14 @@ We welcome contributions from the community! Here's how you can help:
 
 ### Quick Contributions
 
-- 🐛 **Report bugs** via [GitHub Issues](https://github.com/multi-grep-replacer/multi-grep-replacer/issues)
-- 💡 **Suggest features** through [GitHub Discussions](https://github.com/multi-grep-replacer/multi-grep-replacer/discussions)
+- 🐛 **Report bugs** via [GitHub Issues](https://github.com/sarap422/multi-grep-replacer/issues)
 - 📖 **Improve documentation** with pull requests
 - 🌐 **Add translations** for your language
 
 ### Development
 
 1. **Fork** the repository
-2. **Clone** your fork: `git clone https://github.com/yourusername/multi-grep-replacer.git`
+2. **Clone** your fork: `git clone https://github.com/sarap422/multi-grep-replacer.git`
 3. **Install** dependencies: `npm install`
 4. **Start** development: `npm start`
 5. **Make** your changes
@@ -264,7 +254,7 @@ We welcome contributions from the community! Here's how you can help:
 
 ```bash
 # Clone and setup
-git clone https://github.com/multi-grep-replacer/multi-grep-replacer.git
+git clone https://github.com/sarap422/multi-grep-replacer.git
 cd multi-grep-replacer
 npm install
 
@@ -309,8 +299,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### Getting Help
 
 - 📖 **Documentation**: Check our comprehensive [guides](docs/)
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/multi-grep-replacer/multi-grep-replacer/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/multi-grep-replacer/multi-grep-replacer/discussions)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/sarap422/multi-grep-replacer/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/sarap422/multi-grep-replacer/discussions)
 - 📧 **Email**: support@multigrepreplacer.com
 
 ### Community
@@ -333,8 +323,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ by the Multi Grep Replacer Team**
 
-[🌟 Star on GitHub](https://github.com/multi-grep-replacer/multi-grep-replacer) • 
-[📥 Download Latest](https://github.com/multi-grep-replacer/multi-grep-replacer/releases) • 
+[🌟 Star on GitHub](https://github.com/sarap422/multi-grep-replacer) • 
+[📥 Download Latest](https://github.com/sarap422/multi-grep-replacer/releases) • 
 [📖 Read Docs](docs/user-guide.md) • 
 [🤝 Contribute](CONTRIBUTING.md)
 
