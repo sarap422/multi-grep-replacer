@@ -4,7 +4,7 @@
 
 **A powerful desktop application for performing multiple find-and-replace operations across files**
 
-[![Release](https://img.shields.io/github/release/multi-grep-replacer/multi-grep-replacer.svg)](https://github.com/sarap422/multi-grep-replacer/releases)
+[![Release](https://img.shields.io/github/v/release/sarap422/multi-grep-replacer)](https://github.com/sarap422/multi-grep-replacer/releases)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)]()
 [![Electron](https://img.shields.io/badge/electron-25.9.8-blue)]()
