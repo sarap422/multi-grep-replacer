@@ -2,6 +2,8 @@
 
 <div align="center">
 
+![メインウィンドウ](images/main-window.png)
+
 **A powerful desktop application for performing multiple find-and-replace operations across files**
 
 [![Release](https://img.shields.io/github/v/release/sarap422/multi-grep-replacer)](https://github.com/sarap422/multi-grep-replacer/releases)
