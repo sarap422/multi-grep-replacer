@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![メインウィンドウ](images/main-window.png)
+![メインウィンドウ](docs/images/main-window.png)
 
 **A powerful desktop application for performing multiple find-and-replace operations across files**
 
