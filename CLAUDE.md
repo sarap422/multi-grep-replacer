@@ -70,7 +70,7 @@ ls config/sample-configs/
 # 開発ブランチ管理
 git status
 git add .
-git commit -m "feat: [Task X.X] 実装内容"
+git commit -m "feat: Task X.X: [実装内容の要約]"
 git push origin feature/task-x-x
 
 # 進捗確認

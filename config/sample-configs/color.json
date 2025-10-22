@@ -1,0 +1,258 @@
+{
+  "app_info": {
+    "name": "Multi Grep Replacer Configuration",
+    "version": "1.0.0",
+    "created_at": "2025-09-30T02:35:35.241Z",
+    "description": "User configuration",
+    "author": "User",
+    "saved_at": "2025-09-30T02:35:57.486Z",
+    "schema_version": "1.0.0"
+  },
+  "target_folder": "/Volumes/CT1000P3/pCloud(CT1000P3)/(WORKS)/CODE-PLUS/wp-content/gp(4vnA)/magique_maquillage",
+  "replacements": [
+    {
+      "id": "rule-1",
+      "from": "assort-dp",
+      "to": "primary-deep",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-2",
+      "from": "assort-pl",
+      "to": "primary-pale",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-3",
+      "from": "assort",
+      "to": "primary",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-4",
+      "from": "c-blue",
+      "to": "c-bluey",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-5",
+      "from": "c-blueyy",
+      "to": "c-bluey",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-6",
+      "from": "rgba(0, 0, 0, 0.35)",
+      "to": "hsla(223, 6%, 0%, 0.35)",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-7",
+      "from": "var(--c-gray-500)",
+      "to": "var(--c-text-500, hsl(223, 6%, 53%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-8",
+      "from": "var(--c-error)",
+      "to": "var(--c-error, hsl(352, 99%, 43%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-9",
+      "from": "var(--c-error, hsl(12, 99%, 43%))",
+      "to": "var(--c-error, hsl(352, 99%, 43%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-10",
+      "from": "var(--c-gray-75, hsl(223, 6%, 96%))",
+      "to": "var(--c-text-75, hsl(223, 6%, 96%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-11",
+      "from": "var(--c-gray-150, hsl(223, 6%, 89%))",
+      "to": "var(--c-text-150, hsl(223, 6%, 89%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-12",
+      "from": "var(--c-gray-250, hsl(223, 6%, 79%))",
+      "to": "var(--c-text-250, hsl(223, 6%, 79%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-13",
+      "from": "var(--c-gray-700, hsl(223, 0%, 34%))",
+      "to": "var(--c-text-700, hsl(223, 6%, 33%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-14",
+      "from": "var(--c-text-600, #666)",
+      "to": "var(--c-text-600, hsl(223, 6%, 43%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-15",
+      "from": "var(--c-text-600, hsl(0, 0%, 69%))",
+      "to": "var(--c-text-400, hsl(223, 6%, 63%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-16",
+      "from": "var(--c-text, #2E2E2E)",
+      "to": "var(--c-text, hsl(223, 6%, 13%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-17",
+      "from": "var(--c-chalk, hsl(223, 6%, 99%))",
+      "to": "var(--c-base-25, hsl(223, 6%, 99%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-18",
+      "from": "var(--c-baryte, hsl(223, 6%, 98%))",
+      "to": "var(--c-base-50, hsl(223, 6%, 98%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-19",
+      "from": "var(--c-whitesmoke, hsl(223, 6%, 96%))",
+      "to": "var(--c-base-75, hsl(223, 6%, 96%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-20",
+      "from": "var(--c-smoke, hsl(223, 6%, 93%))",
+      "to": "var(--c-base-100, hsl(223, 6%, 93%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-21",
+      "from": "var(--c-plaster, hsl(223, 6%, 90%))",
+      "to": "var(--c-base-150, hsl(223, 6%, 89%)) ",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-22",
+      "from": "var(--c-gypsum, hsl(223, 6%, 89%))",
+      "to": "var(--c-base-150, hsl(223, 6%, 89%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-23",
+      "from": "var(--c-gainsboro, hsl(223, 6%, 84%))",
+      "to": "var(--c-text-200, hsl(223, 6%, 84%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-24",
+      "from": "var(--c-lightgray, hsl(223, 6%, 80%))",
+      "to": "var(--c-text-250, hsl(223, 6%, 79%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-25",
+      "from": "var(--c-silver, hsl(223, 6%, 75%))",
+      "to": "var(--c-text-300, hsl(223, 6%, 74%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-26",
+      "from": "var(--c-darkgray, hsl(223, 6%, 66%))",
+      "to": "var(--c-text-350, hsl(223, 6%, 68%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-27",
+      "from": "var(--c-gray, hsl(223, 6%, 50%))",
+      "to": "var(--c-text-500, hsl(223, 6%, 53%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-28",
+      "from": "var(--c-dimgray, hsl(223, 6%, 41%))",
+      "to": "var(--c-text-600, hsl(223, 6%, 43%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-29",
+      "from": "var(--c-graphite, hsl(223, 6%, 33%))",
+      "to": "var(--c-text-700, hsl(223, 6%, 33%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-30",
+      "from": "var(--c-charcoal, hsl(223, 6%, 23%))",
+      "to": "var(--c-text-800, hsl(223, 6%, 23%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-31",
+      "from": "var(--c-soot, hsl(223, 6%, 15%))",
+      "to": "var(--c-text, hsl(223, 6%, 13%))",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-32",
+      "from": "var(--c-text-900, hsl(223, 6%, 13%))",
+      "to": "var(--c-text, hsl(223, 6%, 13%))",
+      "enabled": true,
+      "description": ""
+    }
+  ],
+  "target_settings": {
+    "file_extensions": [],
+    "exclude_patterns": [
+      "node_modules/**",
+      ".git/**",
+      "dist/**",
+      "build/**"
+    ],
+    "include_subdirectories": true,
+    "max_file_size": 104857600,
+    "encoding": "utf-8"
+  },
+  "replacement_settings": {
+    "case_sensitive": true,
+    "use_regex": false,
+    "backup_enabled": false
+  },
+  "ui_settings": {
+    "theme": "auto"
+  }
+}

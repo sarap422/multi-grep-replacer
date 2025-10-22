@@ -2,102 +2,74 @@
   "app_info": {
     "name": "Multi Grep Replacer Configuration",
     "version": "1.0.0",
-    "created_at": "2025-08-21T03:13:07.672Z",
+    "created_at": "2025-08-26T04:46:21.127Z",
     "description": "User configuration",
     "author": "User",
-    "saved_at": "2025-08-21T03:13:12.616Z",
+    "saved_at": "2025-08-26T04:46:25.839Z",
     "schema_version": "1.0.0"
   },
-  "target_folder": "/Volumes/CT1000P3/pCloud(CT1000P3)/(github)/multi-grep-replacer/tests",
+  "target_folder": "/Volumes/CT1000P3/pCloud(CT1000P3)/(WORKS)/CODE-PLUS/wp-content/wp-New-Dungeon/NEW",
   "replacements": [
     {
       "id": "rule-1",
-      "from": "Conpornent",
-      "to": "Component",
+      "from": "<fieldset class=\"header__leftfield",
+      "to": "<figure class=\"header__leftfield",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-2",
-      "from": "is-plain",
-      "to": "is-solided",
+      "from": "<fieldset class=\"header__centfield",
+      "to": "<figure class=\"header__centfield",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-3",
-      "from": "is-ghost",
-      "to": "is-ghosted",
+      "from": "<fieldset class=\"header__rightfield",
+      "to": "<figure class=\"header__rightfield",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-4",
-      "from": "is-outline",
-      "to": "is-outlined",
+      "from": "<fieldset class=\"section__leftfield",
+      "to": "<figure class=\"section__leftfield",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-5",
-      "from": "is-outlinedd",
-      "to": "is-outlined",
+      "from": "<fieldset class=\"section__centfield",
+      "to": "<figure class=\"section__centfield",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-6",
-      "from": "（plain）",
-      "to": "（solided）",
+      "from": "<fieldset class=\"section__rightfield",
+      "to": "<figure class=\"section__rightfield",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-7",
-      "from": "（ghost）",
-      "to": "（ghosted）",
+      "from": "</fieldset><!-- ///.leftfield -->",
+      "to": "</figure><!-- ///.leftfield -->",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-8",
-      "from": "（ghosteded）",
-      "to": "（ghosted）",
+      "from": "</fieldset><!-- ///.centfield -->",
+      "to": "</figure><!-- ///.centfield -->",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-9",
-      "from": "（outline）",
-      "to": "（outlined）",
-      "enabled": true,
-      "description": ""
-    },
-    {
-      "id": "rule-10",
-      "from": "（outlinedd）",
-      "to": "（outlined）",
-      "enabled": true,
-      "description": ""
-    },
-    {
-      "id": "rule-11",
-      "from": "bd-outline",
-      "to": "bd-bounds",
-      "enabled": true,
-      "description": ""
-    },
-    {
-      "id": "rule-12",
-      "from": "bdi-outline",
-      "to": "bdi-bounds",
-      "enabled": true,
-      "description": ""
-    },
-    {
-      "id": "rule-13",
-      "from": "bdm-outline",
-      "to": "bdm-bounds",
+      "from": "</fieldset><!-- ///.rightfield -->",
+      "to": "</figure><!-- ///.rightfield -->",
       "enabled": true,
       "description": ""
     }

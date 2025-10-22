@@ -1,0 +1,48 @@
+{
+  "app_info": {
+    "name": "Multi Grep Replacer Configuration",
+    "version": "1.0.0",
+    "created_at": "2025-09-17T01:04:35.559Z",
+    "description": "User configuration",
+    "author": "User",
+    "saved_at": "2025-09-17T01:04:39.193Z",
+    "schema_version": "1.0.0"
+  },
+  "target_folder": "/Volumes/CT1000P3/pCloud(CT1000P3)/(WORKS)/CODE-PLUS/wp-content/gp(4vnA)/magique_maquillage",
+  "replacements": [
+    {
+      "id": "rule-1",
+      "from": "old-class",
+      "to": "new-class",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-2",
+      "from": "oldVariable",
+      "to": "newVariable",
+      "enabled": true,
+      "description": ""
+    }
+  ],
+  "target_settings": {
+    "file_extensions": [],
+    "exclude_patterns": [
+      "node_modules/**",
+      ".git/**",
+      "dist/**",
+      "build/**"
+    ],
+    "include_subdirectories": true,
+    "max_file_size": 104857600,
+    "encoding": "utf-8"
+  },
+  "replacement_settings": {
+    "case_sensitive": true,
+    "use_regex": false,
+    "backup_enabled": false
+  },
+  "ui_settings": {
+    "theme": "auto"
+  }
+}

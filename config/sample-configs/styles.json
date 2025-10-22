@@ -1,0 +1,69 @@
+{
+  "app_info": {
+    "name": "Multi Grep Replacer Configuration",
+    "version": "1.0.0",
+    "created_at": "2025-10-07T06:05:09.309Z",
+    "description": "User configuration",
+    "author": "User",
+    "saved_at": "2025-10-07T06:05:13.611Z",
+    "schema_version": "1.0.0"
+  },
+  "target_folder": "/Volumes/CT1000P3/pCloud(CT1000P3)/(Web-Supplier)/(HTML-CSS-JS)",
+  "replacements": [
+    {
+      "id": "rule-3",
+      "from": "style-primer",
+      "to": "style-foundations",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-4",
+      "from": "style-component",
+      "to": "style-components",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-5",
+      "from": "style-componentss",
+      "to": "style-components",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-6",
+      "from": "style-utility",
+      "to": "style-utilities",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "rule-7",
+      "from": "editor-primer",
+      "to": "editor-cosmetics",
+      "enabled": true,
+      "description": ""
+    }
+  ],
+  "target_settings": {
+    "file_extensions": [],
+    "exclude_patterns": [
+      "node_modules/**",
+      ".git/**",
+      "dist/**",
+      "build/**"
+    ],
+    "include_subdirectories": true,
+    "max_file_size": 104857600,
+    "encoding": "utf-8"
+  },
+  "replacement_settings": {
+    "case_sensitive": true,
+    "use_regex": false,
+    "backup_enabled": false
+  },
+  "ui_settings": {
+    "theme": "auto"
+  }
+}

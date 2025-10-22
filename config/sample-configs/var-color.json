@@ -2,102 +2,74 @@
   "app_info": {
     "name": "Multi Grep Replacer Configuration",
     "version": "1.0.0",
-    "created_at": "2025-08-21T03:13:07.672Z",
+    "created_at": "2025-08-26T04:08:28.320Z",
     "description": "User configuration",
     "author": "User",
-    "saved_at": "2025-08-21T03:13:12.616Z",
+    "saved_at": "2025-08-26T04:08:35.708Z",
     "schema_version": "1.0.0"
   },
-  "target_folder": "/Volumes/CT1000P3/pCloud(CT1000P3)/(github)/multi-grep-replacer/tests",
+  "target_folder": "/Volumes/CT1000P3/pCloud(CT1000P3)/(WORKS)/CODE-PLUS/wp-content/wp-New-Dungeon/NEW",
   "replacements": [
     {
       "id": "rule-1",
-      "from": "Conpornent",
-      "to": "Component",
+      "from": "var(--c-gray-75, hsl(223, 6%, 96%))",
+      "to": "var(--c-text-75, hsl(223, 6%, 96%))",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-2",
-      "from": "is-plain",
-      "to": "is-solided",
+      "from": "var(--c-gray-150, hsl(223, 6%, 89%))",
+      "to": "var(--c-text-150, hsl(223, 6%, 89%))",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-3",
-      "from": "is-ghost",
-      "to": "is-ghosted",
+      "from": "var(--c-gray-250, hsl(223, 6%, 79%))",
+      "to": "var(--c-text-250, hsl(223, 6%, 79%))",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-4",
-      "from": "is-outline",
-      "to": "is-outlined",
+      "from": "var(--c-silver, hsl(223, 6%, 75%))",
+      "to": "var(--c-text-300, hsl(223, 6%, 74%))",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-5",
-      "from": "is-outlinedd",
-      "to": "is-outlined",
+      "from": "var(--c-darkgray, hsl(223, 6%, 66%))",
+      "to": "var(--c-text-400, hsl(223, 6%, 63%))",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-6",
-      "from": "（plain）",
-      "to": "（solided）",
+      "from": "var(--c-gray-500)",
+      "to": "var(--c-text-500, hsl(223, 6%, 53%))",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-7",
-      "from": "（ghost）",
-      "to": "（ghosted）",
+      "from": "var(--c-text, #2E2E2E)",
+      "to": "var(--c-text, hsl(223, 6%, 13%))",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-8",
-      "from": "（ghosteded）",
-      "to": "（ghosted）",
+      "from": "var(--c-text-600, hsl(0, 0%, 69%))",
+      "to": "var(--c-text-400, hsl(223, 6%, 63%))",
       "enabled": true,
       "description": ""
     },
     {
       "id": "rule-9",
-      "from": "（outline）",
-      "to": "（outlined）",
-      "enabled": true,
-      "description": ""
-    },
-    {
-      "id": "rule-10",
-      "from": "（outlinedd）",
-      "to": "（outlined）",
-      "enabled": true,
-      "description": ""
-    },
-    {
-      "id": "rule-11",
-      "from": "bd-outline",
-      "to": "bd-bounds",
-      "enabled": true,
-      "description": ""
-    },
-    {
-      "id": "rule-12",
-      "from": "bdi-outline",
-      "to": "bdi-bounds",
-      "enabled": true,
-      "description": ""
-    },
-    {
-      "id": "rule-13",
-      "from": "bdm-outline",
-      "to": "bdm-bounds",
+      "from": "var(--c-text-400, hsl(223, 6%, 69%))",
+      "to": "var(--c-text-400, hsl(223, 6%, 63%))",
       "enabled": true,
       "description": ""
     }
